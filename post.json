@@ -1,0 +1,133 @@
+[
+  {
+    "id": 1,
+    "type": "2",
+    "user": {
+      "id": 1,
+      "username": "utilisateur1",
+      "avatar": "https://picsum.photos/400"
+    },
+    "content": {
+      "text": "Lorem Ipsum is simply dummy text...",
+      "media": [
+        "https://picsum.photos/1850/1300",
+        "https://picsum.photos/1800/1400",
+        "https://picsum.photos/1500/1200",
+        "https://picsum.photos/800/1300"
+      ]
+    },
+    "createdAt": "2023-07-04T10:30:00",
+    "statPost": {
+      "likes": 10,
+      "comments": 5,
+      "shares": 3
+    }
+  },
+  {
+    "id": 56,
+    "type": "3",
+    "user": {
+      "id": 15,
+      "username": "utilisateur6",
+      "avatar": "https://picsum.photos/296"
+    },
+    "content": {
+      "text": "Quelle est votre couleur préférée ?",
+      "media": ["https://picsum.photos/1850/1300"],
+      "survey": {
+        "options": [
+          {
+            "id": 1,
+            "label": "Bleu",
+            "votes": 0
+          },
+          {
+            "id": 2,
+            "label": "Rouge",
+            "votes": 0
+          },
+          {
+            "id": 3,
+            "label": "Vert",
+            "votes": 0
+          }
+        ],
+        "totalVotes": 0
+      }
+    },
+    "createdAt": "2023-07-09T13:09:00Z",
+    "statPost": {
+      "likes": 18,
+      "comments": 4,
+      "shares": 20
+    }
+  },
+  {
+    "id": 2,
+    "type": "1",
+    "user": {
+      "id": 2,
+      "username": "utilisateur2  efefe f e efe fe f",
+      "avatar": "https://picsum.photos/240"
+    },
+    "content": { "text": "Another post...", "media": [] },
+
+    "createdAt": "2023-07-05T14:45:00",
+    "statPost": {
+      "likes": 15,
+      "comments": 2,
+      "shares": 1
+    }
+  },
+  {
+    "id": 3,
+    "type": "2",
+    "user": {
+      "id": 3,
+      "username": "utilisateur3",
+      "avatar": "https://picsum.photos/200"
+    },
+    "content": { "text": "Another post...", "media": ["https://picsum.photos/1500/1800"] },
+    "createdAt": "2023-07-06T09:20:00",
+    "statPost": {
+      "likes": 8,
+      "comments": 4,
+      "shares": 2
+    }
+  },
+  {
+    "id": 4,
+    "type": "1",
+    "user": {
+      "id": 4,
+      "username": "utilisateur4",
+      "avatar": "https://picsum.photos/200"
+    },
+    "content": { "text": "Another post...", "media": [] },
+    "createdAt": "2023-07-07T17:00:00",
+    "statPost": {
+      "likes": 20,
+      "comments": 3,
+      "shares": 5
+    }
+  },
+  {
+    "id": 5,
+    "type": "2",
+    "user": {
+      "id": 5,
+      "username": "utilisateur5",
+      "avatar": "https://picsum.photos/210"
+    },
+    "content": {
+      "text": "Some more Lorem Ipsum...",
+      "media": ["https://picsum.photos/2000/1500", "https://picsum.photos/1020/1500", "https://picsum.photos/1050/1500"]
+    },
+    "createdAt": "2023-07-08T12:10:00",
+    "statPost": {
+      "likes": 12,
+      "comments": 7,
+      "shares": 4
+    }
+  }
+]

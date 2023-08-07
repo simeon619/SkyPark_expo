@@ -1,0 +1,230 @@
+[
+  {
+    "id": "1 ",
+    "pic": "https://picsum.photos/580/300",
+    "banner": "https://picsum.photos/1580/3500",
+    "name": "Amateur Sportif",
+    "info": {
+      "numberUser": 785,
+      "lastActivity": "2023-07-04T10:30:00",
+      "statut": "open"
+    },
+    "users": [
+      {
+        "id": "1",
+        "name": "Jhon",
+        "pic": "https://picsum.photos/570/300"
+      },
+      {
+        "id": "2",
+        "name": "Drnyan",
+        "pic": "https://picsum.photos/570/310"
+      },
+      {
+        "id": "3",
+        "name": "salomon",
+        "pic": "https://picsum.photos/580/310"
+      },
+      {
+        "id": "4",
+        "name": "Jhon",
+        "pic": "https://picsum.photos/470/410"
+      },
+      {
+        "id": "5",
+        "name": "Drnyan",
+        "pic": "https://picsum.photos/670/310"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "pic": "https://picsum.photos/600/400",
+    "banner": "https://picsum.photos/1200/800",
+    "name": "Club de Danse",
+    "info": {
+      "numberUser": 542,
+      "lastActivity": "2023-07-09T18:45:00",
+      "statut": "open"
+    },
+    "users": [
+      {
+        "id": "1",
+        "name": "Alice",
+        "pic": "https://picsum.photos/500/300"
+      },
+      {
+        "id": "2",
+        "name": "Bob",
+        "pic": "https://picsum.photos/510/310"
+      },
+      {
+        "id": "3",
+        "name": "Carol",
+        "pic": "https://picsum.photos/520/320"
+      },
+      {
+        "id": "4",
+        "name": "Dave",
+        "pic": "https://picsum.photos/530/330"
+      },
+      {
+        "id": "5",
+        "name": "Eve",
+        "pic": "https://picsum.photos/540/340"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "pic": "https://picsum.photos/700/500",
+    "banner": "https://picsum.photos/1400/1000",
+    "name": "Photography Club",
+    "info": {
+      "numberUser": 245,
+      "lastActivity": "2023-07-08T14:15:00",
+      "statut": "open"
+    },
+    "users": [
+      {
+        "id": "1",
+        "name": "Michael",
+        "pic": "https://picsum.photos/600/400"
+      },
+      {
+        "id": "2",
+        "name": "Sarah",
+        "pic": "https://picsum.photos/610/410"
+      },
+      {
+        "id": "3",
+        "name": "Emily",
+        "pic": "https://picsum.photos/620/420"
+      },
+      {
+        "id": "4",
+        "name": "Daniel",
+        "pic": "https://picsum.photos/630/430"
+      },
+      {
+        "id": "5",
+        "name": "Olivia",
+        "pic": "https://picsum.photos/640/440"
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "pic": "https://picsum.photos/800/600",
+    "banner": "https://picsum.photos/1600/1200",
+    "name": "Chess Club",
+    "info": {
+      "numberUser": 98,
+      "lastActivity": "2023-07-06T20:00:00",
+      "statut": "closed"
+    },
+    "users": [
+      {
+        "id": "1",
+        "name": "Alexander",
+        "pic": "https://picsum.photos/700/500"
+      },
+      {
+        "id": "2",
+        "name": "Sophia",
+        "pic": "https://picsum.photos/710/510"
+      },
+      {
+        "id": "3",
+        "name": "James",
+        "pic": "https://picsum.photos/720/520"
+      },
+      {
+        "id": "4",
+        "name": "Isabella",
+        "pic": "https://picsum.photos/730/530"
+      },
+      {
+        "id": "5",
+        "name": "William",
+        "pic": "https://picsum.photos/740/540"
+      }
+    ]
+  },
+  {
+    "id": "5",
+    "pic": "https://picsum.photos/900/700",
+    "banner": "https://picsum.photos/1800/1400",
+    "name": "Book Club",
+    "info": {
+      "numberUser": 163,
+      "lastActivity": "2023-07-10T16:30:00",
+      "statut": "open"
+    },
+    "users": [
+      {
+        "id": "1",
+        "name": "Liam",
+        "pic": "https://picsum.photos/800/600"
+      },
+      {
+        "id": "2",
+        "name": "Emma",
+        "pic": "https://picsum.photos/810/610"
+      },
+      {
+        "id": "3",
+        "name": "Noah",
+        "pic": "https://picsum.photos/820/620"
+      },
+      {
+        "id": "4",
+        "name": "Ava",
+        "pic": "https://picsum.photos/830/630"
+      },
+      {
+        "id": "5",
+        "name": "Benjamin",
+        "pic": "https://picsum.photos/840/640"
+      }
+    ]
+  },
+  {
+    "id": "6",
+    "pic": "https://picsum.photos/1000/800",
+    "banner": "https://picsum.photos/2000/1600",
+    "name": "Yoga Group",
+    "info": {
+      "numberUser": 312,
+      "lastActivity": "2023-07-07T09:45:00",
+      "statut": "open"
+    },
+    "users": [
+      {
+        "id": "1",
+        "name": "Mia",
+        "pic": "https://picsum.photos/900/700"
+      },
+      {
+        "id": "2",
+        "name": "Ethan",
+        "pic": "https://picsum.photos/910/710"
+      },
+      {
+        "id": "3",
+        "name": "Harper",
+        "pic": "https://picsum.photos/920/720"
+      },
+      {
+        "id": "4",
+        "name": "Jacob",
+        "pic": "https://picsum.photos/930/730"
+      },
+      {
+        "id": "5",
+        "name": "Charlotte",
+        "pic": "https://picsum.photos/940/740"
+      }
+    ]
+  }
+]

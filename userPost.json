@@ -1,0 +1,116 @@
+[
+  {
+    "id": 1,
+    "type": "2",
+    "user": {
+      "id": 1,
+      "username": "Andy",
+      "avatar": "https://picsum.photos/200"
+    },
+    "content": {
+      "text": "Lorem Ipsum is simply dummy text...",
+      "media": [
+        "https://picsum.photos/1850/1300",
+        "https://picsum.photos/1800/1400",
+        "https://picsum.photos/1500/1200",
+        "https://picsum.photos/800/1300"
+      ]
+    },
+    "createdAt": "2023-07-04T10:30:00",
+    "statPost": {
+      "likes": 10,
+      "comments": 5,
+      "shares": 3
+    }
+  },
+  {
+    "id": 56,
+    "type": "4",
+    "user": {
+      "id": 15,
+      "username": "Andy",
+      "avatar": "https://picsum.photos/200"
+    },
+    "content": {
+      "groupJoin": {
+        "name": "Fortnite",
+        "banner": "https://picsum.photos/1850/1800",
+        "pic": "https://picsum.photos/180"
+      }
+    },
+    "createdAt": "2023-07-09T13:09:00Z",
+    "statPost": {
+      "likes": 18,
+      "comments": 4,
+      "shares": 20
+    }
+  },
+  {
+    "id": 2,
+    "type": "1",
+    "user": {
+      "id": 2,
+      "username": "Andy",
+      "avatar": "https://picsum.photos/200"
+    },
+    "content": { "text": "Another post...", "media": [] },
+
+    "createdAt": "2023-07-05T14:45:00",
+    "statPost": {
+      "likes": 15,
+      "comments": 2,
+      "shares": 1
+    }
+  },
+  {
+    "id": 3,
+    "type": "2",
+    "user": {
+      "id": 3,
+      "username": "Andy",
+      "avatar": "https://picsum.photos/200"
+    },
+    "content": { "text": "Another post...", "media": ["https://picsum.photos/1500/1800"] },
+    "createdAt": "2023-07-06T09:20:00",
+    "statPost": {
+      "likes": 8,
+      "comments": 4,
+      "shares": 2
+    }
+  },
+  {
+    "id": 4,
+    "type": "1",
+    "user": {
+      "id": 4,
+      "username": "Andy",
+      "avatar": "https://picsum.photos/200"
+    },
+    "content": { "text": "Another post...", "media": [] },
+    "createdAt": "2023-07-07T17:00:00",
+    "statPost": {
+      "likes": 20,
+      "comments": 3,
+      "shares": 5
+    }
+  },
+  {
+    "id": 5,
+    "type": "2",
+    "user": {
+      "id": 5,
+      "username": "Andy",
+      "avatar": "https://picsum.photos/200"
+    },
+    "content": {
+      "text": "Some more Lorem Ipsum...",
+      "media": ["https://picsum.photos/2000/1500", "https://picsum.photos/1020/1500", "https://picsum.photos/1050/1500"]
+    },
+    "createdAt": "2023-07-08T12:10:00",
+    "statPost": {
+      "likes": 12,
+      "comments": 7,
+      "shares": 4
+    }
+  }
+]
