@@ -85,7 +85,7 @@ export const Controller = {
   app: {
     userList: {
       send: {
-        quarterId: '',
+        // quarterId: '',
       },
       receive: {} as AccountInterface[],
     },

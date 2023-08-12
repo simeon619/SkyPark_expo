@@ -3,10 +3,8 @@ import { moderateScale } from '../../../Utilis/metrics';
 import { HOST } from '../../../constants/Value';
 import useToggleStore from '../../../managementState/client/preference';
 
-const ImageProfile = ({ imgProfile, size }: { imgProfile: string | undefined; size: number }) => {
+const ImageProfile = ({ size, image }: { size: number; image: string | undefined }) => {
   const { primaryColourLight } = useToggleStore((state) => state);
-
-  console.log({ imgProfile });
 
   return (
     <Image
@@ -18,7 +16,8 @@ const ImageProfile = ({ imgProfile, size }: { imgProfile: string | undefined; si
         borderColor: primaryColourLight,
         borderWidth: 2,
       }}
-      source={!!imgProfile ? { uri: HOST + imgProfile } : require('../../../assets/icon/user.png')}
+      source={!!image ? { uri: HOST + image } : require('../../../assets/icon/user.png')}
+      cachePolicy={'none'}
       contentFit="cover"
       transition={250}
     />

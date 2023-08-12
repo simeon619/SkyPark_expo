@@ -11,6 +11,11 @@ import { View } from '../../components/Themed';
 import Colors from '../../constants/Colors';
 import useToggleStore, { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
 import user from '../../user.json';
+import { useListUserStore } from '../../managementState/server/Listuser';
+import { HOST } from '../../constants/Value';
+import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
+import { useMessageStore } from '../../managementState/server/Discussion';
+import { AccountInterface, ProfileInterface } from '../../managementState/server/Descriptions';
 
 const Chat = () => {
   const [conversations, setConversations] = useState<typeof user>([]);
@@ -35,10 +40,33 @@ const Chat = () => {
     []
   );
 
+  const { listAccount, setListAccount } = useListUserStore((state) => state);
+
+  const { setFocusedUser } = useMessageStore((state) => state);
+
+  useEffect(() => {
+    setListAccount();
+  }, []);
+
+  const handleCurrentConversation = ({
+    account,
+    profile,
+  }: {
+    account: AccountInterface | undefined;
+    profile: ProfileInterface | undefined;
+  }) => {
+    if (account && profile) {
+      setFocusedUser({ account, profile });
+      router.push('/modal/discussion');
+    } else {
+      console.error('erreur');
+    }
+  };
+
   return (
     <FlatList
       style={{ flex: 1 }}
-      data={conversations}
+      data={listAccount}
       keyExtractor={(item, index) => index.toString()}
       contentContainerStyle={{
         flexGrow: 1,
@@ -48,9 +76,7 @@ const Chat = () => {
       renderItem={({ item: conversation, index }) => (
         <TouchableOpacity
           disabled={ctxMenu}
-          onPress={() => {
-            router.push('/modal/discussion');
-          }}
+          onPress={() => handleCurrentConversation({ account: conversation?.account, profile: conversation?.profile })}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -59,14 +85,16 @@ const Chat = () => {
             borderBottomWidth: 1,
           }}
         >
-          <Image
-            source={{ uri: conversation.pic_user }}
+          {/* <Image
+            source={ { uri: HOST +  conversation?.profile.imgProfile[0].url }}
             style={{
               width: moderateScale(45),
               aspectRatio: 1,
               borderRadius: 25,
             }}
-          />
+          /> */}
+
+          <ImageProfile image={conversation?.profile.imgProfile[0]?.url} size={moderateScale(55)} />
 
           <View
             style={{
@@ -76,11 +104,11 @@ const Chat = () => {
               justifyContent: 'space-between',
             }}
           >
-            <TextRegular style={{ fontSize: moderateScale(16) }}>{conversation.name}</TextRegular>
-            <TextRegularItalic style={{ color: 'gray' }} numberOfLines={1}>
+            <TextRegular style={{ fontSize: moderateScale(16) }}>{conversation?.account.name}</TextRegular>
+            {/* <TextRegularItalic style={{ color: 'gray' }} numberOfLines={1}>
               {conversation.last_message.Owner && whatIconStatus(conversation.last_message.status)}
               {conversation.last_message.text}
-            </TextRegularItalic>
+            </TextRegularItalic> */}
           </View>
           <View
             style={{
@@ -88,7 +116,7 @@ const Chat = () => {
               justifyContent: 'space-between',
             }}
           >
-            <TextMedium
+            {/* <TextMedium
               style={{
                 color: 'gray',
                 alignSelf: 'flex-start',
@@ -110,7 +138,7 @@ const Chat = () => {
               >
                 {Math.ceil(Math.random() * 2)}
               </TextMedium>
-            )}
+            )} */}
           </View>
         </TouchableOpacity>
       )}

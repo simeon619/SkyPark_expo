@@ -102,20 +102,25 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
-  const { isAuth } = useAuthStore((state) => state);
+  const { isAuth, account, fetchLogin } = useAuthStore((state) => state);
+
   // data.
-  console.log('🚀 ~ file: _layout.tsx:113 ~ useEffect ~ isAuth:', isAuth);
+  console.log('🚀 ~ file: _layout.tsx:113 ~ useEffect ~ isAuth:', isAuth, account);
   const navigationState = useRootNavigationState();
   const route = useRouter();
   useEffect(() => {
     if (!isAuth) {
       if (navigationState?.key) {
         route.replace('/register/Login');
-
-        // route.replace('/settings/CheckProfile');
       }
     }
   }, [navigationState?.key, isAuth]);
+
+  useEffect(() => {
+    if (account) {
+      fetchLogin({ email: account.email, password: account.password });
+    }
+  }, []);
 
   return (
     <>

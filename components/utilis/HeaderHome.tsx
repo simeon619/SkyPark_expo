@@ -15,7 +15,7 @@ import ImageProfile from './simpleComponent/ImageProfile';
 const HeaderHome = () => {
   const { width } = useWindowDimensions();
   const colorScheme = useColorScheme();
-  const { primaryColour } = useToggleStore((state) => state);
+  const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
   const { IconName, switchForm } = useTypeForm((state) => state);
 
   const { profile } = useAuthStore((state) => state);
@@ -85,7 +85,26 @@ const HeaderHome = () => {
             route.push('/profile/');
           }}
         >
-          <ImageProfile imgProfile={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 7} />
+          <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 10} />
+
+          {/* <Image
+            style={{
+              width: moderateScale(SMALL_PIC_USER + 10),
+              aspectRatio: 1,
+              marginHorizontal: moderateScale(5),
+              borderRadius: SMALL_PIC_USER / 2,
+              borderColor: primaryColourLight,
+              borderWidth: 2,
+            }}
+            source={
+              !!profile?.imgProfile[0]?.url
+                ? { uri: HOST + profile?.imgProfile[0]?.url }
+                : require('../../assets/icon/user.png')
+            }
+            cachePolicy={'none'}
+            contentFit="cover"
+            transition={250}
+          /> */}
         </TouchableOpacity>
       </View>
       <View

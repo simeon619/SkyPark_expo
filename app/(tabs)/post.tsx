@@ -65,7 +65,26 @@ const post = () => {
               route.push('/profile/');
             }}
           >
-            <ImageProfile imgProfile={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 10} />
+            <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 10} />
+
+            {/* <Image
+              style={{
+                width: moderateScale(SMALL_PIC_USER + 5),
+                aspectRatio: 1,
+                marginHorizontal: moderateScale(5),
+                borderRadius: SMALL_PIC_USER / 2,
+                // borderColor: primaryColourLight,
+                borderWidth: 2,
+              }}
+              source={
+                !!profile?.imgProfile[0]?.url
+                  ? { uri: HOST + profile?.imgProfile[0]?.url }
+                  : require('../../assets/icon/user.png')
+              }
+              cachePolicy={'none'}
+              contentFit="cover"
+              transition={250}
+            /> */}
           </TouchableOpacity>
 
           <TextInput

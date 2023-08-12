@@ -18,9 +18,8 @@ import useToggleStore from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
 
 const Profile = () => {
-  const { fetchDisconnect } = useAuthStore((state) => state);
-
-  const { profile, address, account } = useAuthStore((state) => state);
+  const { profile, address, account, fetchDisconnect } = useAuthStore((state) => state);
+  const { primaryColour, name, toggleState } = useToggleStore((state) => state);
 
   const { width } = useWindowDimensions();
   const colorScheme = useColorScheme();
@@ -84,8 +83,6 @@ const Profile = () => {
     });
   }, []);
 
-  const { primaryColour, name, toggleState } = useToggleStore((state) => state);
-
   return (
     <SafeAreaView
       style={{
@@ -141,8 +138,8 @@ const Profile = () => {
               zIndex: 5,
             }}
           >
-            <ImageProfile size={LARGE_PIC_USER - 5} imgProfile={profile?.imgProfile[0].url} />
-            <TextSemiBold>{account?.name}</TextSemiBold>
+            <ImageProfile size={LARGE_PIC_USER - 5} imgProfile={profile?.imgProfile[0]?.url} />
+            <TextSemiBold>{account?.name} r</TextSemiBold>
             <TextThinItalic>
               padiezd {address?.room} - Etage {address?.etage}
             </TextThinItalic>

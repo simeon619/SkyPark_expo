@@ -16,8 +16,9 @@ export const calculeDate = (times: any) => {
   return time;
 };
 export const formatMessageDate = (timestamp: number) => {
-  const messageDate = new Date(timestamp * 1000);
-  // console.log('🚀 ~ file: date.ts:24 ~ formatMessageDate ~ messageDate:', messageDate);
+  console.log('🚀 ~ file: date.ts:19 ~ formatMessageDate ~ timestamp:', timestamp);
+  const messageDate = new Date(timestamp);
+  console.log('🚀 ~ file: date.ts:24 ~ formatMessageDate ~ messageDate:', messageDate);
 
   let formattedDate;
 

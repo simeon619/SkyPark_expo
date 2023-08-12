@@ -9,7 +9,7 @@
     },
     "content": {
       "text": "Lorem Ipsum is simply dummy text...",
-      "media": [
+      "files": [
         "https://picsum.photos/1850/1300",
         "https://picsum.photos/1800/1400",
         "https://picsum.photos/1500/1200",
@@ -21,7 +21,8 @@
       "likes": 10,
       "comments": 5,
       "shares": 3
-    }
+    },
+    "comments": []
   },
   {
     "id": 56,

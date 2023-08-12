@@ -27,7 +27,7 @@ type authState = {
 type authAction = {
   fetchLogin: (Login: { email: string; password: string }) => Promise<void>;
   fetchDisconnect: () => Promise<void>;
-  fetchRegister: (Register: { email: string; password: string , code : string  }) => Promise<void>;
+  fetchRegister: (Register: { email: string; password: string; code: string }) => Promise<void>;
 };
 type StateSchema = authAction & authState;
 export const useAuthStore = create<StateSchema, any>(
@@ -61,11 +61,14 @@ export const useAuthStore = create<StateSchema, any>(
           error: undefined,
         }));
 
-        set(() => ({  
+        set(() => ({
           loading: false,
         }));
       },
+
       fetchLogin: async (LoginData) => {
+        console.log(LoginData);
+
         handleAuthAction(set, LoginData);
       },
 
@@ -76,23 +79,18 @@ export const useAuthStore = create<StateSchema, any>(
         //     error: "Code incorrect",
         //   }))
         // }
-      handleAuthAction(set, { email: RegisterData.email, password: RegisterData.password });
-      }
-
+        handleAuthAction(set, { email: RegisterData.email, password: RegisterData.password });
+      },
     }),
 
     {
       name: 'authUser',
       storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) =>
+        Object.fromEntries(Object.entries(state).filter(([key]) => !['loading', 'error'].includes(key))),
     }
   )
 );
-
-
-
-
-
-
 
 const handleAuthAction = async (
   set: (
@@ -112,6 +110,7 @@ const handleAuthAction = async (
 
   try {
     const res = await SQuery.service('login', 'user', AuthData);
+    console.log('🚀 ~ file: auth.ts:113 ~ res:', res);
 
     if (!res.response || !res?.response?.signup.id) throw new Error(JSON.stringify(res));
     const user = await SQuery.newInstance('user', { id: res?.response?.signup.id });
@@ -120,22 +119,22 @@ const handleAuthAction = async (
 
     if (!user) throw new Error('user not found');
     if (!account) throw new Error('account not found');
+
     let profile = await account.profile;
     let address = await account.address;
     let favorites = await account.favorites;
 
-    profile.when('refresh', (newData) => {
-      console.log({ newData });
+    let entreprise = await user.entreprise;
 
-    set((state) => ({ ...state, ...newData }));
-    });
+    SQuery.bind({ account, user, profile, address, favorites, entreprise }, set);
+
     let cache = SQuery.cacheFrom({
       account,
       user,
       profile,
       address,
       favorites,
-      // entreprise,
+      entreprise,
     });
 
     set(() => ({
@@ -143,7 +142,6 @@ const handleAuthAction = async (
       isAuth: true,
       loading: false,
     }));
-    SQuery.bind({ account, user, profile, address, favorites }, set);
   } catch (error) {
     set((state) => ({
       ...state,

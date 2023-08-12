@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { PrepareImageType } from '../../types/MediaType';
+import { PrepareImageType } from '../../../types/MediaType';
 
 /**
  * Picks multiple images from the image library.

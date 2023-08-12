@@ -7,7 +7,7 @@ import BottomSheet, {
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { ActivityIndicator, useColorScheme, useWindowDimensions } from 'react-native';
+import { useColorScheme, useWindowDimensions } from 'react-native';
 import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import Animated, { interpolateColor, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
@@ -164,23 +164,19 @@ export const BottomSheetComponent = ({
             borderRadius: 20,
             marginTop: verticalScale(25),
           }}
-          disabled={loading}
+          // disabled={loading}
           onPress={() => {
             fetchLogin({ email: getValues('email'), password: getValues('password') });
           }}
         >
-          {loading ? (
-            <ActivityIndicator size="small" color={Colors[colorScheme ?? 'light'].primaryColour} />
-          ) : (
-            <TextRegular
-              style={{
-                fontSize: moderateScale(16),
-                color: Colors[colorScheme ?? 'light'].overLay,
-              }}
-            >
-              Connexion
-            </TextRegular>
-          )}
+          <TextRegular
+            style={{
+              fontSize: moderateScale(16),
+              color: Colors[colorScheme ?? 'light'].overLay,
+            }}
+          >
+            Connexion
+          </TextRegular>
         </TouchableWithoutFeedback>
 
         <TouchableOpacity

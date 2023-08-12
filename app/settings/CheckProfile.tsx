@@ -7,7 +7,7 @@ import React from 'react';
 import { Text, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { pickImage } from '../../Utilis/functions/pickImage';
+import { pickImage } from '../../Utilis/functions/media/media';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import { TextExtraLight, TextLight, TextRegular } from '../../components/StyledText';
 import { ScrollView, View } from '../../components/Themed';
@@ -22,6 +22,7 @@ const CheckProfile = () => {
   const colorScheme = useColorScheme();
 
   const { profile, account, address } = useAuthStore((state) => state);
+  console.log('🚀 ~ file: CheckProfile.tsx:24 ~ CheckProfile ~ profile:', profile?.imgProfile[0]);
   const { setProfile } = usePatchUser();
   // const [image, setImage] = useState<string[]>([]);
   const router = useRouter();
@@ -136,7 +137,25 @@ const CheckProfile = () => {
             }
           }}
         >
-          <ImageProfile imgProfile={profile?.imgProfile[0]?.url} size={LARGE_PIC_USER + 5} />
+          <ImageProfile image={profile?.imgProfile[0]?.url} size={LARGE_PIC_USER + 5} />
+          {/* <Image
+            style={{
+              width: moderateScale(LARGE_PIC_USER + 5),
+              aspectRatio: 1,
+              marginHorizontal: moderateScale(5),
+              borderRadius: LARGE_PIC_USER / 2,
+              // borderColor: primaryColourLight,
+              borderWidth: 2,
+            }}
+            source={
+              !!profile?.imgProfile[0]?.url
+                ? { uri: HOST + profile?.imgProfile[0]?.url }
+                : require('../../assets/icon/user.png')
+            }
+            cachePolicy={'none'}
+            contentFit="cover"
+            transition={250}
+          /> */}
         </TouchableWithoutFeedback>
         <TextLight
           style={{

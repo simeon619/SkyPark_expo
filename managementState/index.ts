@@ -4,14 +4,17 @@ import { HOST } from '../constants/Value';
 import createSQueryFrom from '../lib/SQueryClient';
 import { CacheValues, Controller, Descriptions } from './server/Descriptions';
 
-const socket = io(HOST, {
+const socket = io('http://192.168.1.5:3500', {
   extraHeaders: {},
 });
+
+console.log('🚀 ~ file: index.ts:15 ~ socket:', HOST);
 
 export const SQuery = createSQueryFrom(Descriptions, CacheValues, Controller, {
   socket: socket,
   async getCookie() {
     const cookie = await getMyStringValue('@cookie');
+    console.log('🚀 ~ file: index.ts:15 ~ getCookie ~ cookie:', cookie);
     if (cookie)
       socket.io.opts.extraHeaders = {
         ...socket.io.opts.extraHeaders,

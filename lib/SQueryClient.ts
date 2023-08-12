@@ -188,11 +188,13 @@ export function createSQueryFrom<
   C extends { [key in keyof D]: C[key] },
   Ctrl extends ControllerType,
 >(Descriptions: D, CacheValues: C, Controller: Ctrl, init: InitInterface) {
-  init.socket.on('storeCookie', (cookie: string, cb) => {
-    init.setCookie(cookie);
-    cb(cookie);
-  });
+  init.socket.on('storeCookie', async (cookie: string, cb) => {
+    console.log('🚀 ~ file: SQueryClient.ts:192 ~ init.socket.on ~ cookie:', cookie);
 
+    await init.setCookie(cookie);
+    cb(init.getCookie());
+  });
+  init.getCookie();
   type ModelType<K extends keyof D> = D[K];
   type SortType<K extends keyof D> = {
     [key in keyof D[K]]?: 1 | -1;

@@ -1,19 +1,5 @@
 [
   {
-    "name": "Jean Edouard",
-    "pic_user": "https://picsum.photos/200/300?random=1",
-    "last_message": {
-      "date": 1588163172,
-      "text": "Bonjour, comment ça va aujourd'hui ? Je suis content de te parler !",
-      "Owner": true,
-      "status": {
-        "send": null,
-        "received": null,
-        "seen": null
-      }
-    }
-  },
-  {
     "name": "Alice",
     "pic_user": "https://picsum.photos/200/300?random=2",
     "last_message": {
