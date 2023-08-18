@@ -11,24 +11,18 @@ import useToggleStore, { useTypeForm } from '../../managementState/client/prefer
 import ImageRatio from '../ImgRatio';
 import { TextLight, TextRegular } from '../StyledText';
 import { ScrollView, View } from '../Themed';
-type imagePrepareShema =
-  | {
-      buffer: string;
-      fileName: string;
-      encoding: 'base64';
-      type: string;
-      size: number;
-      uri: string;
-    }
-  | undefined;
-const DefaultForm = () => {
+import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
+import { useAuthStore } from '../../managementState/server/auth';
+import { FileType } from '../../lib/SQueryClient';
+
+const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<React.SetStateAction<string>> }) => {
   const colorScheme = useColorScheme();
   //   const isExpanded = useSharedValue(true);
   interface ImageItem {
     uri: string;
   }
   const [images, setImages] = useState<ImageItem[]>();
-  const [prepareImage, setPrepareImage] = useState<imagePrepareShema[]>();
+  const [prepareImage, setPrepareImage] = useState<FileType[]>();
   const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
   const { width } = useWindowDimensions();
   const { IconName } = useTypeForm((state) => state);
@@ -38,6 +32,9 @@ const DefaultForm = () => {
       opacity: withTiming(IconName !== 'Post' ? 1 : 1),
     };
   }, [IconName]);
+
+  const { publishPost } = useQuarterPostStore((state) => state);
+  const { account } = useAuthStore((state) => state);
 
   const data = [
     { label: 'Post---Neighborhodd', value: '2' },
@@ -76,10 +73,10 @@ const DefaultForm = () => {
           let fileName = asset.uri?.split('/').pop();
           let ext = fileName?.split('.').pop();
           let type = asset.type === 'image' ? `image/${ext}` : `video/${ext}`;
-          let uri = asset.uri;
+          let uri: string = asset.uri;
 
           if (base64 && fileName) {
-            const preparedImage: imagePrepareShema = {
+            const preparedImage: FileType = {
               buffer: base64,
               encoding: 'base64',
               fileName,
@@ -87,8 +84,9 @@ const DefaultForm = () => {
               type,
               uri,
             };
+
             setPrepareImage((prevPrepareImage) => {
-              if (prevPrepareImage) {
+              if (prevPrepareImage && prevPrepareImage.length > 1) {
                 return [preparedImage, ...prevPrepareImage];
               }
               return [preparedImage];
@@ -110,6 +108,19 @@ const DefaultForm = () => {
     });
   }
   const router = useRouter();
+  async function handlePost() {
+    let type = prepareImage?.length === 0 ? '1' : '2';
+
+    publishPost({ accountId: account?._id, type: type, files: prepareImage, value: text });
+
+    console.log(type);
+
+    setPrepareImage([]);
+    setImages([]);
+    setText('');
+    router.back();
+  }
+
   return (
     <>
       <Animated.View
@@ -260,6 +271,9 @@ const DefaultForm = () => {
         </View>
 
         <TouchableOpacity
+          onPress={() => {
+            handlePost();
+          }}
           style={{
             backgroundColor: primaryColourLight,
             paddingHorizontal: horizontalScale(10),

@@ -21,6 +21,7 @@ const post = () => {
   const { blurSurvey } = useBlurSurvey((state) => state);
   const { IconName } = useTypeForm((state) => state);
   const refInput = React.useRef<TextInput>(null);
+  const [text, setText] = useState('');
 
   const { profile } = useAuthStore((state) => state);
 
@@ -66,25 +67,6 @@ const post = () => {
             }}
           >
             <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 10} />
-
-            {/* <Image
-              style={{
-                width: moderateScale(SMALL_PIC_USER + 5),
-                aspectRatio: 1,
-                marginHorizontal: moderateScale(5),
-                borderRadius: SMALL_PIC_USER / 2,
-                // borderColor: primaryColourLight,
-                borderWidth: 2,
-              }}
-              source={
-                !!profile?.imgProfile[0]?.url
-                  ? { uri: HOST + profile?.imgProfile[0]?.url }
-                  : require('../../assets/icon/user.png')
-              }
-              cachePolicy={'none'}
-              contentFit="cover"
-              transition={250}
-            /> */}
           </TouchableOpacity>
 
           <TextInput
@@ -94,6 +76,8 @@ const post = () => {
               setHeightInput(e.nativeEvent.contentSize.height);
             }}
             ref={refInput}
+            value={text}
+            onChangeText={setText}
             textAlignVertical="bottom"
             placeholder={formTextPlaceholder(IconName)}
             style={{
@@ -110,7 +94,7 @@ const post = () => {
             }}
           />
         </View>
-        <DefaultForm />
+        <DefaultForm text={text} setText={setText} />
         <SurveyForm />
       </View>
       {/* <TimePickerSurvey /> */}

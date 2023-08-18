@@ -16,9 +16,7 @@ export const calculeDate = (times: any) => {
   return time;
 };
 export const formatMessageDate = (timestamp: number) => {
-  console.log('🚀 ~ file: date.ts:19 ~ formatMessageDate ~ timestamp:', timestamp);
   const messageDate = new Date(timestamp);
-  console.log('🚀 ~ file: date.ts:24 ~ formatMessageDate ~ messageDate:', messageDate);
 
   let formattedDate;
 
@@ -34,7 +32,7 @@ export const formatMessageDate = (timestamp: number) => {
 
   return formattedDate;
 };
-export const formatPostDate = (timestamp: Date | string) => {
+export const formatPostDate = (timestamp: Date | number) => {
   const currentDate = new Date();
   const messageDate = new Date(timestamp);
 

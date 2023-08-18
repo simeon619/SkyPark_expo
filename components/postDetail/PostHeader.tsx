@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, useColorScheme } from 'react-native';
+import { useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { formatPostDate } from '../../Utilis/date';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
@@ -8,22 +8,15 @@ import Colors from '../../constants/Colors';
 import { SMALL_PIC_USER } from '../../constants/Value';
 import { TextLight, TextRegular } from '../StyledText';
 import { View } from '../Themed';
-import {
-  AccountInterface,
-  MessageInterface,
-  PostInterface,
-  ProfileInterface,
-} from '../../managementState/server/Descriptions';
+import { AccountInterface, PostInterface, ProfileInterface } from '../../managementState/server/Descriptions';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
 import { useRouter } from 'expo-router';
 
 const PostHeader = ({
   data,
   user,
-  message,
 }: {
   data: PostInterface;
-  message: MessageInterface | undefined;
   user:
     | {
         account: AccountInterface;
@@ -32,7 +25,6 @@ const PostHeader = ({
     | undefined;
 }) => {
   const colorScheme = useColorScheme();
-  const route = useRouter();
   const nameUser = user?.account.name || 'user' + Math.ceil(Math.random() * 80000000);
   const typePost = (type: string) => {
     if (type === '1') {
@@ -54,25 +46,18 @@ const PostHeader = ({
     //   );
     // }
   };
+  const router = useRouter();
 
-  function handleGoToDetail(): void {
-    // router.push({ pathname: 'pageModal/ViewerImage', params: { uri, caption } })
-    const dataPost = JSON.stringify(data);
-    const infoUser = JSON.stringify(user);
-    const messageUser = JSON.stringify(message);
-    //@ts-ignore
-    route.push({ pathname: 'pageModal/detailPost', params: { dataPost, infoUser, messageUser } });
-  }
-  // function handleGoToDetail(): void {
-  //   route.push(`/pageModal/detailPost`);
-  // }
   return (
     <View
       style={{
-        flex: 1,
+        // flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: verticalScale(5),
+        position: 'sticky',
+        borderBottomColor: '#0002',
+        borderBottomWidth: 1,
       }}
     >
       <View
@@ -83,8 +68,11 @@ const PostHeader = ({
           columnGap: horizontalScale(7),
         }}
       >
+        <TouchableOpacity style={{ marginLeft: horizontalScale(1) }} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={Colors[colorScheme ?? 'light'].greyDark} />
+        </TouchableOpacity>
         <ImageProfile size={SMALL_PIC_USER + 10} image={user?.profile.imgProfile[0]?.url} />
-        <Pressable onPress={handleGoToDetail} style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -119,11 +107,11 @@ const PostHeader = ({
           >
             {formatPostDate(data.__createdAt)}
           </TextRegular>
-        </Pressable>
+        </View>
       </View>
-      <TouchableOpacity style={{ marginLeft: horizontalScale(1) }}>
+      {/* <TouchableOpacity style={{ marginLeft: horizontalScale(1) }}>
         <Ionicons name="ellipsis-vertical" size={24} color={Colors[colorScheme ?? 'light'].greyDark} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

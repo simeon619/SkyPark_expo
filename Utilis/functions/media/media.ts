@@ -45,7 +45,7 @@ export const pickImage = async ({
         encoding: 'base64' as const,
         fileName: fileName || 'NaN',
         size: fileSize || 10,
-        type: fileType || 'image',
+        type: fileType,
       };
     });
   } catch (error) {

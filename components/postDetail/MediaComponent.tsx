@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import {
   DimensionValue,
   Image,
+  ImageLoadEventData,
   ImageProgressEventDataIOS,
   NativeSyntheticEvent,
   useWindowDimensions,
@@ -11,52 +12,27 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { horizontalScale, verticalScale } from '../../Utilis/metrics';
 import { TextLight } from '../StyledText';
 import { View } from '../Themed';
-import ShadowImage from './ShadowImage';
+
 import { UrlData } from '../../lib/SQueryClient';
 import { HOST } from '../../constants/Value';
+import ShadowImage from '../utilis/ShadowImage';
 
 const GAP_MEDIA = 10;
 const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
   if (!media) {
     return null;
   }
-  const router = useRouter();
+
   const numberMedia = media?.length;
-
-  const ImageComponent = ({ uri, width, height }: { uri: string; width: DimensionValue; height: DimensionValue }) => {
-    return (
-      <TouchableWithoutFeedback
-        //@ts-ignore
-        onPress={() => router.push({ pathname: 'pageModal/ViewerImage', params: { uri, caption } })}
-      >
-        <Image
-          style={{ width, height }}
-          source={{ uri }}
-          onProgress={handleImageLoad}
-
-          // priority={'high'}
-          // transition={0}
-          // allowDownscaling={true}
-          // cachePolicy={'disk'}
-        />
-        <TextLight></TextLight>
-      </TouchableWithoutFeedback>
-    );
-  };
 
   const handleImageLoad = (event: NativeSyntheticEvent<ImageProgressEventDataIOS>) => {
     console.log(event);
   };
 
-  const { height } = useWindowDimensions();
   return (
-    <View style={{ flex: 1, alignItems: 'center' }}>
+    <View style={{ alignItems: 'center' }}>
       {numberMedia === 1 && (
-        <ShadowImage
-          ratioHeight={1}
-          ratioWidth={100}
-          children={<ImageComponent uri={HOST + media[0].url} width={'100%'} height={'100%'} />}
-        />
+        <ImageComponent uri={HOST + media[0].url} width={'100%'} height={'100%'} caption={caption} />
       )}
       {numberMedia === 2 && (
         <View style={{ flexDirection: 'row', columnGap: horizontalScale(GAP_MEDIA) }}>
@@ -65,7 +41,9 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
               key={index}
               ratioHeight={1}
               ratioWidth={48.5}
-              children={<ImageComponent uri={HOST + media[index].url} width={'100%'} height={'100%'} />}
+              children={
+                <ImageComponent uri={HOST + media[index].url} width={'100%'} height={'100%'} caption={caption} />
+              }
             />
           ))}
         </View>
@@ -81,7 +59,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
           <ShadowImage
             ratioHeight={1.4}
             ratioWidth={100}
-            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} />}
+            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} caption={caption} />}
           />
           <View
             style={{
@@ -95,7 +73,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
                 key={index}
                 ratioHeight={2}
                 ratioWidth={48.5}
-                children={<ImageComponent uri={media[index].url} width={'100%'} height={'100%'} />}
+                children={<ImageComponent uri={media[index].url} width={'100%'} height={'100%'} caption={caption} />}
               />
             ))}
           </View>
@@ -107,7 +85,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
           <ShadowImage
             ratioHeight={1.4}
             ratioWidth={100}
-            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} />}
+            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} caption={caption} />}
           />
           <View
             style={{
@@ -121,7 +99,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
                 key={index}
                 ratioHeight={2.5}
                 ratioWidth={31.5}
-                children={<ImageComponent uri={media[index].url} width={'100%'} height={'100%'} />}
+                children={<ImageComponent uri={media[index].url} width={'100%'} height={'100%'} caption={caption} />}
               />
             ))}
           </View>
@@ -130,4 +108,42 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
     </View>
   );
 };
+
+const ImageComponent = ({
+  uri,
+  width,
+  height,
+  caption,
+}: {
+  uri: string;
+  width: DimensionValue;
+  height: DimensionValue;
+  caption: string | undefined;
+}) => {
+  const { height: heights } = useWindowDimensions();
+  const [aspectRatio, setAspectRatio] = useState(2 / 3);
+  const router = useRouter();
+  const handleImageLoad = (event: NativeSyntheticEvent<ImageLoadEventData>) => {
+    const { width, height } = event.nativeEvent.source;
+    const imageAspectRatio = width / (height || 1);
+    setAspectRatio(imageAspectRatio);
+  };
+  return (
+    <TouchableWithoutFeedback
+      //@ts-ignore
+      onPress={() => router.push({ pathname: 'pageModal/ViewerImage', params: { uri, caption } })}
+    >
+      <Image
+        onLoad={handleImageLoad}
+        style={{
+          width: '100%',
+          maxHeight: heights / 1.25,
+          aspectRatio: aspectRatio !== null ? aspectRatio : 2 / 3,
+        }}
+        source={{ uri }}
+      />
+    </TouchableWithoutFeedback>
+  );
+};
+
 export default memo(MediaComponent);

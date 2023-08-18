@@ -14,7 +14,7 @@ import {
 // import { QueryKeys } from '../../types/serverType';
 
 type authState = {
-  account: AccountInterface | undefined;
+  account: AccountInterface;
   user: UserInterface | undefined;
   profile: ProfileInterface | undefined;
   address: AddressInterface | undefined;
@@ -33,6 +33,7 @@ type StateSchema = authAction & authState;
 export const useAuthStore = create<StateSchema, any>(
   persist(
     (set) => ({
+      //@ts-ignore
       account: undefined,
       user: undefined,
       profile: undefined,

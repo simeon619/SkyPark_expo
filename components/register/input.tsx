@@ -2,8 +2,8 @@ import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import React, { memo, useCallback, useState } from 'react';
 import { Controller, FieldErrors, UseFormRegister } from 'react-hook-form';
-import { TouchableOpacity, View, useColorScheme } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { TouchableOpacity, View, useColorScheme, TextInput } from 'react-native';
+
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
 import { TextExtraLight } from '../StyledText';
@@ -142,7 +142,7 @@ export const InputBottomSheet = memo(
     );
   }
 );
-const regex = new RegExp(/[^\s\r\n]/g);
+// const regex = new RegExp(/[^\s\r\n]/g);
 export const InputTextMessage = memo(
   ({ placeholder, startRecording }: { placeholder: string; startRecording: () => void }) => {
     const colorScheme = useColorScheme();
@@ -160,8 +160,6 @@ export const InputTextMessage = memo(
       const newHeight = Math.min(Math.max(event.nativeEvent.contentSize.height, 30), verticalScale(110));
       heightAnim.value = withTiming(newHeight, { duration: 0 });
     }, []);
-
-    console.log('render----InputTextMessage', text);
 
     return (
       <View
@@ -191,7 +189,6 @@ export const InputTextMessage = memo(
             placeholder={placeholder}
             placeholderTextColor={Colors[colorScheme ?? 'light'].text}
             multiline={true}
-            scrollEnabled={true}
             onChangeText={setText}
             value={text}
             onContentSizeChange={handleContentSizeChange}
@@ -199,13 +196,10 @@ export const InputTextMessage = memo(
               fontSize: moderateScale(17),
               color: Colors[colorScheme ?? 'light'].text,
               fontFamily: 'Thin',
-              // marginHorizontal: horizontalScale(15),
               paddingVertical: verticalScale(2),
               paddingHorizontal: horizontalScale(20),
-              // width: '100%',
               flex: 5,
               marginLeft: horizontalScale(5),
-              // height: "100%",
             }}
           />
           <View
@@ -220,8 +214,8 @@ export const InputTextMessage = memo(
             <TouchableOpacity
               onPress={async () => {
                 if (!text) {
-                  let images = await pickImage({ numberImages: 4 });
-                  console.log(images);
+                  let images = await pickImage({ numberImages: 1 });
+                  sendMessage({ accountId: focusedUser?.account?._id, files: images });
                 }
               }}
               style={{}}

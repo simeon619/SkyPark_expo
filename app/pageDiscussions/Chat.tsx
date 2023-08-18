@@ -18,11 +18,15 @@ import { useMessageStore } from '../../managementState/server/Discussion';
 import { AccountInterface, ProfileInterface } from '../../managementState/server/Descriptions';
 
 const Chat = () => {
+  const router = useRouter();
+
+  const { listAccount, setListAccount } = useListUserStore((state) => state);
+
+  const { setFocusedUser } = useMessageStore((state) => state);
   const [conversations, setConversations] = useState<typeof user>([]);
   const colorScheme = useColorScheme();
   const { primaryColour } = useToggleStore((state) => state);
   const { ctxMenu } = useMenuDiscussionIsOpen((state) => state);
-  const router = useRouter();
   useEffect(() => {
     setConversations(() => user);
   }, []);
@@ -40,10 +44,6 @@ const Chat = () => {
     []
   );
 
-  const { listAccount, setListAccount } = useListUserStore((state) => state);
-
-  const { setFocusedUser } = useMessageStore((state) => state);
-
   useEffect(() => {
     setListAccount();
   }, []);
@@ -57,7 +57,7 @@ const Chat = () => {
   }) => {
     if (account && profile) {
       setFocusedUser({ account, profile });
-      router.push('/modal/discussion');
+      router.push('/pageModal/discussion');
     } else {
       console.error('erreur');
     }

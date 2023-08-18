@@ -1,18 +1,21 @@
 import React, { memo } from 'react';
-import { PostSchema } from '../../types/PostType';
 import { View } from '../Themed';
 import MediaComponent from '../utilis/MediaComponent';
 import TextComponent from '../utilis/TextComponent';
-import PostFooter from './PostFooter';
 import PostHeader from './PostHeader';
+import { PostInterface } from '../../managementState/server/Descriptions';
+import { useInfoUserPost, useMessagePost } from '../../Utilis/hook/getInfoPostUser';
 
-const PostMedia = ({ dataPost }: { dataPost: PostSchema }) => {
+const PostMedia = ({ dataPost }: { dataPost: PostInterface }) => {
+  const message = useMessagePost({ dataPost });
+  const infoUser = useInfoUserPost({ accountId: message?.account });
+
   return (
     <View style={{ flex: 1 }}>
-      <PostHeader date={dataPost.createdAt} user={dataPost.user} type={dataPost.type} content={dataPost.content} />
-      <TextComponent text={dataPost.content.text} />
-      <MediaComponent media={dataPost.content.media} />
-      <PostFooter stat={dataPost.statPost} />
+      <PostHeader data={dataPost} user={infoUser} message={message} />
+      <TextComponent message={message} data={dataPost} user={infoUser} />
+      <MediaComponent media={message?.files} caption={message?.text} />
+      {/* <PostFooter stat={dataPost.statPost} /> */}
     </View>
   );
 };

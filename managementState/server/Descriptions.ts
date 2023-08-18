@@ -1,4 +1,4 @@
-import { ControllerType, DescriptionsType, UrlData } from '../../lib/SQueryClient';
+import { UrlData, DescriptionsType, ControllerType } from '../../lib/SQueryClient';
 
 export const Controller = {
   messenger: {
@@ -85,7 +85,7 @@ export const Controller = {
   app: {
     userList: {
       send: {
-        // quarterId: '',
+        quarterId: '',
       },
       receive: {} as AccountInterface[],
     },
@@ -128,7 +128,7 @@ export const Controller = {
   server: {
     disconnection: {
       send: {},
-      receive: '',
+      receive: true,
     },
     currentClient: {
       send: {},
@@ -144,8 +144,73 @@ export const Controller = {
       },
     },
   },
+  profile: {
+    read: {
+      send: {
+        id: '',
+      },
+      receive: {} as ProfileInterface,
+    },
+  },
 } satisfies ControllerType;
 export const Descriptions = {
+  test: {
+    simpleArray: [
+      {
+        type: Number,
+      },
+    ],
+    fileArray: [
+      {
+        type: String,
+        file: {},
+      },
+    ],
+    bigint: {
+      type: String,
+    },
+    bool: {
+      type: Boolean,
+    },
+    str: {
+      type: String,
+    },
+    num: {
+      type: Number,
+    },
+    stringMap: {
+      type: Map,
+      of: '',
+    },
+    numberMap: {
+      type: Map,
+      of: 0,
+    },
+    ojectData: {
+      type: { salut: '', famille: '', nombreuse: 0 },
+    },
+    refArray_of_test: [
+      {
+        type: String,
+        ref: 'test' as const,
+        alien: true,
+      },
+    ],
+    ref_of_test: {
+      type: String,
+      ref: 'test' as const,
+      strictAlien: true as const,
+    },
+    // _id: {
+    //   type: String
+    // },
+    // __createdAt: {
+    //   type: Number
+    // },
+    // __updatedAt: {
+    //   type: Number
+    // },
+  },
   user: {
     account: {
       type: String,
@@ -172,17 +237,18 @@ export const Descriptions = {
     },
   },
   post: {
+    statPost: {
+      type: {
+        likes: Number,
+        comments: Number,
+        shares: Number,
+      },
+    },
     message: {
       type: String,
       ref: 'message' as const,
       required: true as const,
     },
-    like: [
-      {
-        type: String,
-        required: true as const,
-      },
-    ],
     comments: [
       {
         type: String,
@@ -198,6 +264,9 @@ export const Descriptions = {
     },
     __updatedAt: {
       type: Number,
+    },
+    type: {
+      type: String,
     },
   },
   message: {
@@ -785,9 +854,9 @@ export const CacheValues = {
   address: {
     _id: '',
     location: '',
-    room: '',
-    padiezd: '',
-    etage: '',
+    room: 0,
+    padiezd: 0,
+    etage: 0,
     description: '',
     city: '',
     __createdAt: 0,
@@ -839,9 +908,15 @@ export const CacheValues = {
   } as MessageInterface,
   post: {
     _id: '',
-    message: '',
+    message: {},
+    client: '',
+    type: '',
     comments: [],
-    like: [],
+    statPost: {
+      likes: 0,
+      comments: 0,
+      shares: 0,
+    },
     __createdAt: 0,
     __updatedAt: 0,
   } as PostInterface,
@@ -893,8 +968,39 @@ export const CacheValues = {
     __createdAt: 0,
     __updatedAt: 0,
   } as SupervisorInterface,
+  test: {
+    _id: '',
+    simpleArray: [],
+    fileArray: [],
+    bigint: '',
+    bool: false,
+    str: '',
+    num: 0,
+    stringMap: new Map<string, string>(),
+    numberMap: new Map<string, number>(),
+    ojectData: { salut: '', famille: '', nombreuse: 0 },
+    refArray_of_test: [],
+    ref_of_test: '',
+    __createdAt: 0,
+    __updatedAt: 0,
+  } as TestInterface,
 } satisfies CacheType;
-
+export interface TestInterface {
+  simpleArray?: number[];
+  fileArray?: UrlData[];
+  bigint?: String;
+  bool?: boolean;
+  str?: string;
+  num?: number;
+  stringMap?: Map<string, string>;
+  numberMap?: Map<string, number>;
+  ojectData?: { salut: string; famille: string; nombreuse: number };
+  refArray_of_test?: string[];
+  ref_of_test?: string;
+  _id: string;
+  __createdAt: number;
+  __updatedAt: number;
+}
 export interface MessageInterface {
   account: string;
   text: string;
@@ -927,9 +1033,15 @@ export interface AdminInterface {
 }
 export interface PostInterface {
   _id: string;
+  type: string;
+  client: string;
   message: string;
-  like: string[];
-  comments: string[];
+  statPost: {
+    likes: number;
+    comments: number;
+    shares: number;
+  };
+  comments: PostInterface[] | [];
   __createdAt: number;
   __updatedAt: number;
 }
@@ -978,9 +1090,9 @@ export interface ProfileInterface {
 export interface AddressInterface {
   _id: string;
   location: string;
-  room: string;
-  padiezd: string;
-  etage: string;
+  room: number;
+  padiezd: number;
+  etage: number;
   description: string;
   city: string;
   __createdAt: number;

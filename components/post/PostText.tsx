@@ -1,15 +1,19 @@
 import React from 'react';
-import { PostSchema } from '../../types/PostType';
-import TextComponent from '../utilis/TextComponent';
-import PostFooter from './PostFooter';
-import PostHeader from './PostHeader';
 
-const PostText = ({ dataPost }: { dataPost: PostSchema }) => {
+import TextComponent from '../utilis/TextComponent';
+import PostHeader from './PostHeader';
+import { PostInterface } from '../../managementState/server/Descriptions';
+import { useMessagePost, useInfoUserPost } from '../../Utilis/hook/getInfoPostUser';
+
+const PostText = ({ dataPost }: { dataPost: PostInterface }) => {
+  const message = useMessagePost({ dataPost });
+  const infoUser = useInfoUserPost({ accountId: message?.account });
+
   return (
     <>
-      <PostHeader date={dataPost.createdAt} user={dataPost.user} type={dataPost.type} />
-      <TextComponent text={dataPost.content.text} />
-      <PostFooter stat={dataPost.statPost} />
+      <PostHeader data={dataPost} user={infoUser} message={message} />
+      <TextComponent data={dataPost} message={message} user={infoUser} />
+      {/* <PostFooter stat={dataPost.statPost} /> */}
     </>
   );
 };

@@ -85,7 +85,7 @@ const HeaderHome = () => {
             route.push('/profile/');
           }}
         >
-          <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 10} />
+          <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 2} />
 
           {/* <Image
             style={{

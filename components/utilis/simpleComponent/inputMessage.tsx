@@ -2,7 +2,14 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { TextInput, TouchableOpacity, View as ViewNatif, useColorScheme } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
+  TouchableOpacity,
+  View as ViewNatif,
+  useColorScheme,
+} from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { horizontalScale, moderateScale, verticalScale } from '../../../Utilis/metrics';
@@ -27,6 +34,7 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
   const [heightInput, setHeightInput] = useState(40);
 
   const AnimatedViewInput = Animated.createAnimatedComponent(ViewNatif);
+  const { sendMessage, focusedUser } = useMessageStore((state) => state);
 
   const { bottom } = useSafeAreaInsets();
 
@@ -55,13 +63,21 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
 
   const sendAudio = useCallback(async (pathVoiceNote: string | null | undefined) => {
     if (pathVoiceNote) {
-      let name = pathVoiceNote.split('/').pop();
       // let base64 = await RNFS.readFile(uri, "base64");
-      const fileInfo: any = await FileSystem.getInfoAsync(pathVoiceNote, {
-        size: true,
-      });
+      // const fileInfo = await FileSystem.getInfoAsync(pathVoiceNote, {
+      //   size: true,
+      // });
       const base64 = await FileSystem.readAsStringAsync(pathVoiceNote, {
         encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const fileName = pathVoiceNote.split('/').pop() || '';
+      const ext = fileName?.split('.').pop();
+      const fileType = `audio/${ext}`;
+
+      await sendMessage({
+        accountId: focusedUser?.account?._id,
+        files: [{ buffer: base64, type: fileType, fileName, size: 10, encoding: 'base64' }],
       });
       console.log('audio send');
     }
@@ -103,7 +119,7 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
       const newRerecording = new Audio.Recording();
       setRecording(newRerecording);
 
-      await newRerecording.prepareToRecordAsync(Audio.RecordingOptionsPresets.highQuality);
+      await newRerecording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
 
       await newRerecording.startAsync();
 
@@ -172,75 +188,73 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
   return (
-    <>
-      <AnimatedViewInput style={viewInputStyle}>
-        {!(duration > 0) && <InputTextMessage startRecording={startRecording} placeholder="Ecrivez votre message" />}
-        {duration > 0 && (
+    <AnimatedViewInput style={viewInputStyle}>
+      {!(duration > 0) && <InputTextMessage startRecording={startRecording} placeholder="Ecrivez votre message" />}
+      {duration > 0 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginHorizontal: horizontalScale(20),
+          }}
+        >
+          <TouchableWithoutFeedback
+            onPress={() => {
+              (async () => {
+                await resetAudio();
+              })();
+            }}
+          >
+            <TextLight>Annuler</TextLight>
+          </TouchableWithoutFeedback>
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: horizontalScale(20),
+              gap: horizontalScale(5),
+              backgroundColor: '#0003',
+              paddingVertical: verticalScale(8),
+              borderRadius: horizontalScale(90),
+              flex: 1,
+              marginHorizontal: horizontalScale(10),
+              justifyContent: 'space-around',
             }}
           >
-            <TouchableWithoutFeedback
+            <MaterialIcons
+              name="fiber-manual-record"
+              size={20}
+              color={Math.floor(duration) % 2 === 0 ? '#f00' : '#f005'}
+            />
+            <TextLight>Enregistrement</TextLight>
+            <TextLight style={{ paddingHorizontal: horizontalScale(5) }}>{formatDuration(duration)}</TextLight>
+          </View>
+          {Boolean(pathVoiceNote) ? (
+            <Ionicons
+              name="send"
+              size={moderateScale(25)}
+              color={Colors[colorScheme ?? 'light'].messageColourLight}
               onPress={() => {
                 (async () => {
-                  await resetAudio();
+                  await sendAudio(pathVoiceNote);
                 })();
               }}
-            >
-              <TextLight>Annuler</TextLight>
-            </TouchableWithoutFeedback>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: horizontalScale(5),
-                backgroundColor: '#0003',
-                paddingVertical: verticalScale(8),
-                borderRadius: horizontalScale(90),
-                flex: 1,
-                marginHorizontal: horizontalScale(10),
-                justifyContent: 'space-around',
+            />
+          ) : (
+            <Ionicons
+              name="stop"
+              size={moderateScale(30)}
+              color={Colors[colorScheme ?? 'light'].messageColourLight}
+              onPress={() => {
+                (async () => {
+                  await stopRecording();
+                })();
               }}
-            >
-              <MaterialIcons
-                name="fiber-manual-record"
-                size={20}
-                color={Math.floor(duration) % 2 === 0 ? '#f00' : '#f005'}
-              />
-              <TextLight>Enregistrement</TextLight>
-              <TextLight style={{ paddingHorizontal: horizontalScale(5) }}>{formatDuration(duration)}</TextLight>
-            </View>
-            {Boolean(pathVoiceNote) ? (
-              <Ionicons
-                name="send"
-                size={moderateScale(25)}
-                color={Colors[colorScheme ?? 'light'].messageColourLight}
-                onPress={() => {
-                  (async () => {
-                    await sendAudio(pathVoiceNote);
-                  })();
-                }}
-              />
-            ) : (
-              <Ionicons
-                name="stop"
-                size={moderateScale(30)}
-                color={Colors[colorScheme ?? 'light'].messageColourLight}
-                onPress={() => {
-                  (async () => {
-                    await stopRecording();
-                  })();
-                }}
-              />
-            )}
-          </View>
-        )}
-      </AnimatedViewInput>
-    </>
+            />
+          )}
+        </View>
+      )}
+    </AnimatedViewInput>
   );
 });
 

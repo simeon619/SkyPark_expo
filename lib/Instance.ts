@@ -194,7 +194,7 @@ export async function createInstanceFrom({ modelPath, id, SQuery, _cache }: { mo
       },
       (res: any) => {
         if (res.error) {
-          console.error(`update ERROR , modelPath :${modelPath} , id:${_id}`, JSON.stringify(res.error));
+          console.error(`update ERROR , modelPath :${modelPath} , id:${_id}`, JSON.stringify(res));
           return;
         }
         cache = res.response;
@@ -242,7 +242,7 @@ export async function createInstanceFrom({ modelPath, id, SQuery, _cache }: { mo
     });
   };
 
-  const parts = (instance.__parentModel)?.split("_");
+  const parts = (cache.__parentModel)?.split("_");
   instance.$modelPath = modelPath;
   instance.$parentModelPath = parts?.[0];
   instance.$parentId = parts?.[1];

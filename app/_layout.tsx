@@ -128,20 +128,21 @@ function RootLayoutNav() {
         <KeyboardProvider>
           <MenuProvider>
             <MagicModalPortal />
-            <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+            <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" />
               <Stack.Screen
-                name="modal/ViewerImage"
-                options={{ animation: 'fade_from_bottom', presentation: 'card' }}
+                name="pageModal/ViewerImage"
+                options={{ animation: 'simple_push', presentation: 'modal' }}
               />
               <Stack.Screen name="profile/index" />
               <Stack.Screen name="register/Login" />
               <Stack.Screen name="register/Signup" />
-              <Stack.Screen name="modal/discussion" />
+              <Stack.Screen name="pageModal/discussion" />
               <Stack.Screen name="settings/CheckProfile" />
               <Stack.Screen name="groupActivity/index" />
               <Stack.Screen name="groupActivity/ItemGroup" />
               <Stack.Screen name="forum/index" />
+              <Stack.Screen name="pageModal/detailPost" options={{ presentation: 'modal', animation: 'simple_push' }} />
             </Stack>
           </MenuProvider>
         </KeyboardProvider>
