@@ -198,8 +198,6 @@ export function createSQueryFrom<
   });
   //init
 
-  // console.log('available cookies', await init.getCookie());
-
   type ModelType<K extends keyof D> = D[K];
   type SortType<K extends keyof D> = {
     [key in keyof D[K]]?: 1 | -1;
@@ -226,9 +224,10 @@ export function createSQueryFrom<
   type listenerSchema<T> = ((value: T, e?: EventInfo<T>) => void) & {
     uid?: string;
   };
-  type ModifiedData = {
+  type ModifiedData<K extends keyof D> = {
     added: string[];
     removed: string[];
+    arrayData: Promise<ArrayData<K> | undefined>;
   };
   type ArrayData<K extends keyof D> =
     | {
@@ -251,7 +250,7 @@ export function createSQueryFrom<
   type ArrayInstance<K extends keyof D> = {
     when: <e extends 'update' | 'refresh'>(
       event: e,
-      listener: listenerSchema<e extends 'update' ? ModifiedData : ArrayData<K>>,
+      listener: listenerSchema<e extends 'update' ? ModifiedData<K> : ArrayData<K>>,
       uid?: string
     ) => void;
     update: (options: Partial<ArrayUpdateOption<K>>) => Promise<ArrayData<K> | undefined>;

@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import React, { memo, useState } from 'react';
 import {
   DimensionValue,
@@ -10,12 +9,12 @@ import {
 } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { horizontalScale, verticalScale } from '../../Utilis/metrics';
-import { TextLight } from '../StyledText';
 import { View } from '../Themed';
 
 import { UrlData } from '../../lib/SQueryClient';
 import { HOST } from '../../constants/Value';
 import ShadowImage from '../utilis/ShadowImage';
+import { useNavigation } from '@react-navigation/native';
 
 const GAP_MEDIA = 10;
 const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
@@ -25,9 +24,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
 
   const numberMedia = media?.length;
 
-  const handleImageLoad = (event: NativeSyntheticEvent<ImageProgressEventDataIOS>) => {
-    console.log(event);
-  };
+  const handleImageLoad = (event: NativeSyntheticEvent<ImageProgressEventDataIOS>) => {};
 
   return (
     <View style={{ alignItems: 'center' }}>
@@ -121,8 +118,10 @@ const ImageComponent = ({
   caption: string | undefined;
 }) => {
   const { height: heights } = useWindowDimensions();
+  const navigation = useNavigation();
+
   const [aspectRatio, setAspectRatio] = useState(2 / 3);
-  const router = useRouter();
+
   const handleImageLoad = (event: NativeSyntheticEvent<ImageLoadEventData>) => {
     const { width, height } = event.nativeEvent.source;
     const imageAspectRatio = width / (height || 1);
@@ -130,8 +129,10 @@ const ImageComponent = ({
   };
   return (
     <TouchableWithoutFeedback
-      //@ts-ignore
-      onPress={() => router.push({ pathname: 'pageModal/ViewerImage', params: { uri, caption } })}
+      onPress={() => {
+        //@ts-ignore
+        navigation.navigate('ViewerImage', { uri, caption });
+      }}
     >
       <Image
         onLoad={handleImageLoad}

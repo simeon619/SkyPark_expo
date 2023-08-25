@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+
 import React from 'react';
 import { useColorScheme, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,15 +11,15 @@ import Colors from '../../constants/Colors';
 import { LARGE_PIC_USER } from '../../constants/Value';
 import useToggleStore from '../../managementState/client/preference';
 
-const ItemGroup = () => {
-  const item = useLocalSearchParams() as any as { pic: string; banner: string; name: string; id: string };
+const ItemGroup = ({ route, navigation }: { route: any; navigation: any }) => {
+  const item = route.params as any as { pic: string; banner: string; name: string; id: string };
 
   const colorScheme = useColorScheme();
   const { height } = useWindowDimensions();
   const { primaryColour } = useToggleStore((state) => state);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors[colorScheme ?? 'light'].background }}>
-      <HeaderHome />
+      <HeaderHome navigation={navigation} route={route} />
       <View style={{ height: 'auto' }}>
         <Image source={{ uri: item.banner }} style={{ width: '100%', height: height * 0.35 }} />
         <View

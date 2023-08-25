@@ -1,6 +1,5 @@
 import { AntDesign } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
@@ -14,8 +13,14 @@ import { ScrollView, View } from '../Themed';
 import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
 import { useAuthStore } from '../../managementState/server/auth';
 import { FileType } from '../../lib/SQueryClient';
+import { NavigationProps } from '../../types/navigation';
 
-const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<React.SetStateAction<string>> }) => {
+const DefaultForm = ({
+  text,
+  setText,
+  navigation,
+  route,
+}: { text: string; setText: React.Dispatch<React.SetStateAction<string>> } & NavigationProps) => {
   const colorScheme = useColorScheme();
   //   const isExpanded = useSharedValue(true);
   interface ImageItem {
@@ -95,7 +100,7 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
         });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
   function deleteImage(uri: string) {
@@ -107,18 +112,15 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
       return prevPrepareImage?.filter((image) => image?.uri !== uri);
     });
   }
-  const router = useRouter();
+
   async function handlePost() {
     let type = prepareImage?.length === 0 ? '1' : '2';
 
     publishPost({ accountId: account?._id, type: type, files: prepareImage, value: text });
-
-    console.log(type);
-
     setPrepareImage([]);
     setImages([]);
     setText('');
-    router.back();
+    navigation.goBack();
   }
 
   return (
@@ -182,8 +184,7 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
               return (
                 <Pressable
                   onPress={() => {
-                    //@ts-ignore
-                    router.push({ pathname: 'modal/ViewerImage', params: { uri: image.uri } });
+                    navigation.navigate('ViewerImage', { uri: image.uri, caption: '' });
                   }}
                   key={index}
                   style={{

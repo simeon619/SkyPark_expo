@@ -5,6 +5,7 @@ import TextComponent from '../utilis/TextComponent';
 import PostHeader from './PostHeader';
 import { PostInterface } from '../../managementState/server/Descriptions';
 import { useInfoUserPost, useMessagePost } from '../../Utilis/hook/getInfoPostUser';
+import PostFooter from './PostFooter';
 
 const PostMedia = ({ dataPost }: { dataPost: PostInterface }) => {
   const message = useMessagePost({ dataPost });
@@ -15,7 +16,7 @@ const PostMedia = ({ dataPost }: { dataPost: PostInterface }) => {
       <PostHeader data={dataPost} user={infoUser} message={message} />
       <TextComponent message={message} data={dataPost} user={infoUser} />
       <MediaComponent media={message?.files} caption={message?.text} />
-      {/* <PostFooter stat={dataPost.statPost} /> */}
+      <PostFooter stat={dataPost.statPost} />
     </View>
   );
 };

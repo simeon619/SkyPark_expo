@@ -28,13 +28,7 @@ const PostIndex = ({ DATA, loadData }: { DATA: ArrayData<PostInterface>; loadDat
     }
   };
 
-  const handleRefresh = () => {
-    loadData(1);
-  };
-
   const handleLoadMore = () => {
-    console.log('load more', DATA.hasNextPage);
-
     if (DATA.hasNextPage) {
       loadData(DATA.nextPage || 1);
     }
@@ -57,7 +51,7 @@ const PostIndex = ({ DATA, loadData }: { DATA: ArrayData<PostInterface>; loadDat
       data={DATA.items}
       renderItem={renderItem}
       keyExtractor={keyExtractor}
-      refreshControl={<RefreshControl refreshing={loadindGetData} onRefresh={handleRefresh} />}
+      refreshControl={<RefreshControl refreshing={loadindGetData} onRefresh={fetchData} />}
       scrollEventThrottle={500}
       onEndReached={handleLoadMore}
       maxToRenderPerBatch={5}
@@ -79,7 +73,7 @@ const renderItem = ({ item }: { item: PostInterface }) => {
     // case PostType.GROUP_JOIN:
     //   return <PostJoined dataPost={item} />;
     default:
-      return <TextMedium style={{ fontSize: moderateScale(40) }}>pas encore gerer</TextMedium>;
+      return <TextMedium style={{ fontSize: moderateScale(25), textAlign: 'center' }}>pas encore gerer</TextMedium>;
   }
 };
 

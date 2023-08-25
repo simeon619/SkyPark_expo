@@ -8,7 +8,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Image } from 'expo-image';
 import { iconsStat } from '../../Utilis/data';
 
-const PostFooter = ({ stat }: { stat: StatPostSchema }) => {
+const CommentFooter = ({ stat }: { stat: StatPostSchema }) => {
   const colorScheme = useColorScheme();
   return (
     <View
@@ -51,4 +51,4 @@ const PostFooter = ({ stat }: { stat: StatPostSchema }) => {
     </View>
   );
 };
-export default PostFooter;
+export default CommentFooter;

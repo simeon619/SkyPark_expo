@@ -10,7 +10,7 @@ import Colors from '../../constants/Colors';
 import useToggleStore from '../../managementState/client/preference';
 import MyActivity from '../PageUser/MyActivity';
 
-const user = () => {
+const UserTabScreen = () => {
   const { primaryColour } = useToggleStore((state) => state);
   const colorScheme = useColorScheme();
   const Tab = createMaterialTopTabNavigator();
@@ -61,4 +61,4 @@ const user = () => {
   );
 };
 
-export default React.memo(user);
+export default UserTabScreen;

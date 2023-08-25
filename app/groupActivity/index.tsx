@@ -11,7 +11,7 @@ import useToggleStore from '../../managementState/client/preference';
 import AllGroups from './page/allGroups';
 import MyGroups from './page/myGroups';
 
-const Index = () => {
+const GroupActivity = () => {
   const { primaryColour } = useToggleStore((state) => state);
   const colorScheme = useColorScheme();
   const Tab = createMaterialTopTabNavigator();
@@ -71,4 +71,4 @@ const Index = () => {
     </SafeAreaView>
   );
 };
-export default Index;
+export default GroupActivity;

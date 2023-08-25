@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, useColorScheme } from 'react-native';
-import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { formatPostDate } from '../../Utilis/date';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
@@ -17,7 +17,7 @@ import {
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 
-const PostHeader = ({
+const CommentHeader = ({
   data,
   user,
   message,
@@ -34,26 +34,6 @@ const PostHeader = ({
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const nameUser = user?.account.name || 'user' + Math.ceil(Math.random() * 80000000);
-  const typePost = (type: string) => {
-    if (type === '1') {
-      return 'a postez un avis';
-    }
-    if (type === '2') {
-      return 'a postez un media';
-    }
-    if (type === '3') {
-      return 'a postez un sondage';
-    }
-    // if (type === '4') {
-    //   content.groupJoin?.name;
-    //   return (
-    //     <TextLight>
-    //       <TextLight style={{ color: Colors[colorScheme ?? 'light'].greyDark }}>a rejoint le groupe </TextLight>{' '}
-    //       <TextMedium>{content.groupJoin?.name}</TextMedium>{' '}
-    //     </TextLight>
-    //   );
-    // }
-  };
 
   function handleGoToDetail(): void {
     const dataPost = JSON.stringify(data);
@@ -63,9 +43,10 @@ const PostHeader = ({
     // route.push('/(postDetails)/');
     //@ts-ignore
 
-    navigation.navigate('DetailPost', { dataPost, infoUser, messageUser, id: data._id });
+    // route.push({ pathname: `/postDetails/${data._id}`, params: { dataPost, infoUser, messageUser } });
+    navigation.push(`DetailPost`, { dataPost, infoUser, messageUser, id: data._id });
 
-    // console.log('🚀 ~ file: detailPost.tsx:50 ~ DetailPost ~ route:', state);
+    // navigation.
 
     // route.push(`/postDetails/${data._id}`);
   }
@@ -89,8 +70,8 @@ const PostHeader = ({
           columnGap: horizontalScale(7),
         }}
       >
-        <ImageProfile size={SMALL_PIC_USER + 10} image={user?.profile.imgProfile[0]?.url} />
-        <TouchableWithoutFeedback onPress={handleGoToDetail} style={{ flex: 1 }}>
+        <ImageProfile size={SMALL_PIC_USER + 5} image={user?.profile.imgProfile[0]?.url} />
+        <Pressable onPress={handleGoToDetail} style={{ flex: 1 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -112,8 +93,7 @@ const PostHeader = ({
                   style={{ color: Colors[colorScheme ?? 'light'].text, fontSize: moderateScale(15) }}
                 >
                   {nameUser.length > 20 ? `${nameUser.slice(0, 20)}...` : nameUser}
-                </TextLight>{' '}
-                {typePost(data.type)}
+                </TextLight>
               </TextLight>
             </View>
           </View>
@@ -125,7 +105,7 @@ const PostHeader = ({
           >
             {formatPostDate(data.__createdAt)}
           </TextRegular>
-        </TouchableWithoutFeedback>
+        </Pressable>
       </View>
       <TouchableOpacity style={{ marginLeft: horizontalScale(1) }}>
         <Ionicons name="ellipsis-vertical" size={24} color={Colors[colorScheme ?? 'light'].greyDark} />
@@ -133,4 +113,4 @@ const PostHeader = ({
     </View>
   );
 };
-export default PostHeader;
+export default CommentHeader;

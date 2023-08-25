@@ -26,7 +26,6 @@
 //         }));
 //       },
 //       removeAuth: () => {
-//         console.log('DECONNECTTTTTTTTTTTTTTT');
 //         set({
 //           userData: null,
 //           isAuth: false,

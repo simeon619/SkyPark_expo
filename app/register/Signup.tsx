@@ -37,10 +37,6 @@ const Signup = () => {
     handleSubmit,
   } = useForm<ValidationSchema>({ mode: 'onSubmit', resolver: zodResolver(schema) });
 
-  // handleSubmit(() => {
-  //   router.push('/settings/CheckProfile');
-  // });
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FCF3F3' }}>
       <ScrollView lightColor="#FCF3F3" darkColor="#FCF3F3" style={{ flex: 1, paddingHorizontal: horizontalScale(20) }}>

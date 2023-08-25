@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { AccountInterface, ProfileInterface, QuarterInterface, UserInterface } from './Descriptions';
 import { SQuery } from '..';
+import { useAuthStore } from './auth';
 const ENTREPRISE_ID = '64d60c4a6412118d1809846c';
 type ListUserSchema = {
   listAccount: (
@@ -31,28 +32,30 @@ export const useListUserStore = create<ListUserSchema, any>((set) => ({
   //   }));
   // },
   setListAccount: async () => {
-    const res = await SQuery.service('app', 'userList', {});
-    console.log('🚀 ~ file: Listuser.ts:35 ~ setListAccount: ~ res:', res);
+    const quarterId = useAuthStore.getState().quarter?._id;
+    if (!quarterId) return;
+    const res = await SQuery.service('app', 'childList', {
+      childModelPath: 'account',
+      parentModelPath: 'quarter',
+      parentId: quarterId,
+      pagging: {
+        page: 1,
+        limit: 100,
+        query: {},
+        select: '',
+        sort: {},
+      },
+    });
 
     if (res.error) res.error;
 
-    console.log(res.response, 'LISTUSER');
-
-    let users = res.response as any as UserInterface[];
-    if (users?.length === 0) return;
-
-    let listAccount = users?.map((user) => user.account);
-
-    let CollectedUser = await SQuery.collector({
-      $option: {},
-      account: listAccount,
-    });
+    let CollectedUser = res.response?.items || [];
 
     let Account = await Promise.all(
-      CollectedUser.account?.map(async (account) => {
-        const profile = await SQuery.newInstance('profile', { id: account.$cache.profile });
+      CollectedUser.map(async (account) => {
+        const profile = await SQuery.newInstance('profile', { id: account.profile });
         if (!profile) return;
-        return { account: account.$cache, profile: profile?.$cache };
+        return { account: account, profile: profile?.$cache };
       })
     );
 

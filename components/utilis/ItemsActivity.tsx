@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
 import React from 'react';
 import { useColorScheme } from 'react-native';
 import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
@@ -12,13 +11,12 @@ import useToggleStore from '../../managementState/client/preference';
 import { TextLight, TextMedium } from '../StyledText';
 import { View } from '../Themed';
 import ShadowImage from './ShadowImage';
+import { NavigationProps } from '../../types/navigation';
 
-const ItemsActivity = () => {
+const ItemsActivity = ({ navigation, route }: NavigationProps) => {
   const colorScheme = useColorScheme();
   const { primaryColour } = useToggleStore((state) => state);
-  const router = useRouter();
-  // router.push({ pathname: '', params: { uri: Groups[0].pic } })
-  // router.push("/groupActivity/item")
+
   return (
     <View style={{ paddingHorizontal: horizontalScale(10), marginTop: verticalScale(25) }}>
       {Groups.map((item, index) => {
@@ -70,12 +68,14 @@ const ItemsActivity = () => {
             >
               <TouchableWithoutFeedback
                 //@ts-ignore
-                onPress={() =>
-                  router.push({
-                    pathname: '/groupActivity/ItemGroup',
-                    params: { name: item.name, pic: item.pic, banner: item.banner, id: item.id },
-                  })
-                }
+                onPress={() => {
+                  navigation.navigate('ItemGroup', {
+                    name: item.name,
+                    pic: item.pic,
+                    banner: item.banner,
+                    id: item.id,
+                  });
+                }}
               >
                 <TextMedium style={{ fontSize: moderateScale(16), textAlign: 'center' }}>{item.name}</TextMedium>
               </TouchableWithoutFeedback>

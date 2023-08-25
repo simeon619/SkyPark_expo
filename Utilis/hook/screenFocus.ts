@@ -1,4 +1,4 @@
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import React from 'react';
 
 export function useRefreshOnFocus<T>(refetch: () => Promise<T>) {

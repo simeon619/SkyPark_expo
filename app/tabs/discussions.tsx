@@ -15,7 +15,7 @@ import useToggleStore, { useMenuDiscussionIsOpen } from '../../managementState/c
 import Call from '../pageDiscussions/Call';
 import Chat from '../pageDiscussions/Chat';
 import CieGestion from '../pageDiscussions/CieGestion';
-const message = () => {
+const DiscusionTabScreen = () => {
   const { primaryColour } = useToggleStore((state) => state);
   const { toggleValue } = useMenuDiscussionIsOpen((state) => state);
   const colorScheme = useColorScheme();
@@ -132,4 +132,4 @@ const message = () => {
   );
 };
 
-export default React.memo(message);
+export default DiscusionTabScreen;

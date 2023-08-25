@@ -1,18 +1,19 @@
+import { PrepareImageType } from './../../../types/MediaType';
 import * as ImagePicker from 'expo-image-picker';
-import { PrepareImageType } from '../../../types/MediaType';
 
 /**
- * Picks multiple images from the image library.
+ * Picks a specified number of images from the image library and returns an array of prepared images.
  *
- * @param {object} options - The options object.
+ * @param {Object} options - The options for picking the images.
  * @param {number} options.numberImages - The number of images to pick.
- * @return {Promise<PrepareImageType[] | undefined>} An array of prepared images, or undefined if no images were picked.
+ * @return {Promise<Array<{ PrepareImage: PrepareImageType; uri: string }> | undefined>} - The array of prepared images or undefined if no images were selected.
+ * @throws {Error} - If there is an error picking the images.
  */
 export const pickImage = async ({
   numberImages,
 }: {
   numberImages: number;
-}): Promise<PrepareImageType[] | undefined> => {
+}): Promise<{ PrepareImage: PrepareImageType; uri: string }[] | undefined> => {
   let images = [];
 
   try {
@@ -41,11 +42,14 @@ export const pickImage = async ({
       const fileType = type === 'image' ? `image/${ext}` : `video/${ext}`;
 
       return {
-        buffer: base64 || '',
-        encoding: 'base64' as const,
-        fileName: fileName || 'NaN',
-        size: fileSize || 10,
-        type: fileType,
+        PrepareImage: {
+          buffer: base64 || '',
+          encoding: 'base64' as const,
+          fileName: fileName || 'NaN',
+          size: fileSize || 10,
+          type: fileType,
+        },
+        uri,
       };
     });
   } catch (error) {
@@ -53,7 +57,7 @@ export const pickImage = async ({
   }
 
   let filtImage = images.some((image) => {
-    image.buffer === '';
+    image.PrepareImage.buffer === '';
   });
 
   if (!filtImage) return images;

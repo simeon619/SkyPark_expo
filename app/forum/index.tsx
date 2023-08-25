@@ -17,6 +17,7 @@ import Response from './pageOne.tsx/response';
 import Stars from './pageOne.tsx/stars';
 import All from './pageTwo.tsx/all';
 import WaitResponse from './pageTwo.tsx/waitResponse';
+import { NavigationStackProps } from '../../types/navigation';
 //@ts-ignore
 const SIZE_TEXT = 16;
 const Tabs_Forum = {
@@ -24,7 +25,7 @@ const Tabs_Forum = {
   two: 'Nouveau',
   three: 'Populaire',
 };
-const Index = () => {
+const Forum = ({ navigation, route }: NavigationStackProps) => {
   const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
   const colorScheme = useColorScheme();
   const { width } = useWindowDimensions();
@@ -105,7 +106,7 @@ const Index = () => {
   };
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <HeaderHome />
+      <HeaderHome navigation={navigation} route={route} />
       <View style={{ flex: 1, paddingHorizontal: horizontalScale(5) }}>
         <View>
           <View
@@ -232,4 +233,4 @@ const Index = () => {
     </SafeAreaView>
   );
 };
-export default Index;
+export default Forum;

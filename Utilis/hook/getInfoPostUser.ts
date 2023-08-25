@@ -15,8 +15,6 @@ export const useInfoUserPost = ({ accountId }: { accountId: string | undefined }
   useEffect(() => {
     const getData = async () => {
       const data = await getInfoAccount(accountId);
-      console.log({ data });
-
       setInfoUser(data);
     };
     getData();

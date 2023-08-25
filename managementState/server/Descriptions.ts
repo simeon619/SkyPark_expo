@@ -1,6 +1,30 @@
-import { UrlData, DescriptionsType, ControllerType } from '../../lib/SQueryClient';
+import { UrlData, DescriptionsType, ControllerType, FileType, ArrayData } from '../../lib/SQueryClient';
 
+const newPostData = {
+  message: {
+    text: '' as string | undefined,
+    files: [] as FileType[] | undefined,
+    account: '' as string | undefined,
+  },
+  theme: '' as string | undefined,
+  type: '' as string | undefined,
+};
+const send = {
+  like: false as boolean | undefined,
+  newPostData: {} as Partial<typeof newPostData> | undefined,
+  accountShared: '' as string | undefined,
+  postId: '' as string | undefined,
+};
 export const Controller = {
+  post: {
+    statPost: {
+      send: {} as Partial<typeof send> & { postId: string },
+      receive: {
+        post: {} as PostInterface,
+        newComment: {} as PostInterface | undefined,
+      },
+    },
+  },
   messenger: {
     createDiscussion: {
       send: {
@@ -83,11 +107,20 @@ export const Controller = {
     },
   },
   app: {
-    userList: {
+    childList: {
       send: {
-        quarterId: '',
+        parentId: '',
+        parentModelPath: '',
+        childModelPath: '',
+        pagging: {
+          page: 0,
+          limit: 0,
+          select: {},
+          sort: {},
+          query: {},
+        },
       },
-      receive: {} as AccountInterface[],
+      receive: {} as ArrayData<any>,
     },
     padiezdList: {
       send: {
@@ -142,14 +175,6 @@ export const Controller = {
           id: '',
         },
       },
-    },
-  },
-  profile: {
-    read: {
-      send: {
-        id: '',
-      },
-      receive: {} as ProfileInterface,
     },
   },
 } satisfies ControllerType;
@@ -235,8 +260,27 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   post: {
+    client: {
+      type: String, // modelPath user / manager / supervisor,
+    },
+    padiezd: {
+      type: String,
+      ref: 'padiezd' as const,
+      strictAlien: true,
+    },
+    theme: {
+      type: String,
+    },
     statPost: {
       type: {
         likes: Number,
@@ -248,6 +292,9 @@ export const Descriptions = {
       type: String,
       ref: 'message' as const,
       required: true as const,
+    },
+    type: {
+      type: String,
     },
     comments: [
       {
@@ -265,9 +312,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
-    type: {
-      type: String,
-    },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   message: {
     account: {
@@ -291,6 +343,13 @@ export const Descriptions = {
         ref: 'user' as const, /////
       },
     ],
+    status: {
+      type: {
+        send: Number,
+        received: Number,
+        seen: Number,
+      },
+    },
     _id: {
       type: String,
     },
@@ -300,6 +359,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   manager: {
     account: {
@@ -307,10 +374,6 @@ export const Descriptions = {
       ref: 'account' as const,
       required: true as const,
     },
-    managerProperty: {
-      type: String,
-    },
-
     messenger: {
       type: String,
       ref: 'messenger' as const,
@@ -329,6 +392,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   account: {
     name: {
@@ -375,6 +446,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   activity: {
     poster: {
@@ -411,6 +490,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   messenger: {
     listDiscussion: [
@@ -436,6 +523,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   address: {
     location: {
@@ -485,6 +580,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   building: {
     name: {
@@ -494,13 +597,6 @@ export const Descriptions = {
     city: {
       type: String,
     },
-    users: [
-      {
-        type: String,
-        ref: 'user' as const,
-        //strictAlien: true,
-      },
-    ],
     _id: {
       type: String,
     },
@@ -510,6 +606,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   discussion: {
     members: [
@@ -551,6 +655,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
 
   entreprise: {
@@ -603,6 +715,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   quarter: {
     name: {
@@ -619,7 +739,7 @@ export const Descriptions = {
         ref: 'building' as const,
       },
     ],
-    supervisor: [
+    supervisors: [
       {
         type: String,
         ref: 'supervisor' as const,
@@ -646,6 +766,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   admin: {
     app: {
@@ -673,6 +801,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   app: {
     entreprises: [
@@ -685,6 +821,23 @@ export const Descriptions = {
       {
         type: String,
         ref: 'admin' as const,
+      },
+    ],
+    _id: {
+      type: String,
+    },
+    __createdAt: {
+      type: Number,
+    },
+    __updatedAt: {
+      type: Number,
+    },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
       },
     ],
   },
@@ -711,21 +864,20 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   favorites: {
     folders: [
       {
         type: String,
         ref: 'folder' as const,
-        //impact: true,
-        //access: "public",
-        //: true,
-      },
-    ],
-    likeList: [
-      {
-        type: String,
-        ref: 'user' as const,
       },
     ],
     _id: {
@@ -737,6 +889,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   profile: {
     imgProfile: [
@@ -766,6 +926,14 @@ export const Descriptions = {
     __updatedAt: {
       type: Number,
     },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
   },
   padiezd: {
     number: {
@@ -806,6 +974,7 @@ export const CacheValues = {
     discussions: [],
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as MessengerInterface,
   entreprise: {
     _id: '',
@@ -820,6 +989,7 @@ export const CacheValues = {
     webPageUrl: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as EntrepriseInterface,
   account: {
     _id: '',
@@ -834,6 +1004,7 @@ export const CacheValues = {
     profile: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as AccountInterface,
   manager: {
     _id: '',
@@ -842,6 +1013,7 @@ export const CacheValues = {
     messenger: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as ManagerInterface,
   profile: {
     _id: '',
@@ -850,6 +1022,7 @@ export const CacheValues = {
     message: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as ProfileInterface,
   address: {
     _id: '',
@@ -861,6 +1034,7 @@ export const CacheValues = {
     city: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as AddressInterface,
   activity: {
     poster: '',
@@ -871,6 +1045,7 @@ export const CacheValues = {
     _id: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as ActivityInterface,
   building: {
     _id: '',
@@ -879,6 +1054,7 @@ export const CacheValues = {
     padiezdList: [],
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as BuildingInterface,
   discussion: {
     _id: '',
@@ -889,6 +1065,7 @@ export const CacheValues = {
     channel: [],
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as DiscussionInterface,
   favorites: {
     folders: [],
@@ -896,29 +1073,42 @@ export const CacheValues = {
     _id: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as FavoritesInterface,
   message: {
     _id: '',
     account: '',
     files: [],
     targets: [],
+    status: {
+      received: 0,
+      seen: 0,
+      send: 0,
+    },
     text: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as MessageInterface,
   post: {
     _id: '',
-    message: {},
-    client: '',
-    type: '',
+    message: '',
     comments: [],
+    client: '',
+    padiezd: '',
+    type: '',
+    theme: '',
     statPost: {
       likes: 0,
       comments: 0,
       shares: 0,
+      commentsCount: 0,
+      totalCommentsCount: 0,
+      isLiked: false,
     },
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as PostInterface,
   user: {
     _id: '',
@@ -927,6 +1117,7 @@ export const CacheValues = {
     entreprise: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as UserInterface,
   admin: {
     _id: '',
@@ -935,11 +1126,15 @@ export const CacheValues = {
     entreprise: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as AdminInterface,
   app: {
     _id: '',
+    entreprises: [],
+    admins: [],
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as AppInterface,
   padiezd: {
     _id: '',
@@ -948,17 +1143,19 @@ export const CacheValues = {
     channel: [],
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as PadiezdInterface,
   quarter: {
     _id: '',
     name: '',
     city: '',
     buildings: [],
-    supervisor: [],
+    supervisors: [],
     Thread: [],
     activities: [],
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as QuarterInterface,
   supervisor: {
     _id: '',
@@ -967,6 +1164,7 @@ export const CacheValues = {
     entreprise: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as SupervisorInterface,
   test: {
     _id: '',
@@ -983,6 +1181,7 @@ export const CacheValues = {
     ref_of_test: '',
     __createdAt: 0,
     __updatedAt: 0,
+    __parentList: [],
   } as TestInterface,
 } satisfies CacheType;
 export interface TestInterface {
@@ -1000,15 +1199,28 @@ export interface TestInterface {
   _id: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface MessageInterface {
   account: string;
   text: string;
   files: UrlData[];
   targets: string[];
+  status: {
+    send: number;
+    received: number;
+    seen: number;
+  };
   _id: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface SupervisorInterface {
   _id: string;
@@ -1017,11 +1229,21 @@ export interface SupervisorInterface {
   entreprise: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface AppInterface {
   _id: string;
+  entreprises: string[];
+  admins: string[];
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface AdminInterface {
   _id: string;
@@ -1030,27 +1252,43 @@ export interface AdminInterface {
   entreprise: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface PostInterface {
-  _id: string;
-  type: string;
   client: string;
+  padiezd: string;
+  theme: string;
+  type: string;
+  _id: string;
   message: string;
   statPost: {
     likes: number;
     comments: number;
     shares: number;
+    commentsCount: number;
+    totalCommentsCount: number;
+    isLiked: boolean;
   };
-  comments: PostInterface[] | [];
+  comments: string[];
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface FavoritesInterface {
   folders: string[];
-  likeList: string[];
   _id: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface DiscussionInterface {
   _id: string;
@@ -1071,12 +1309,20 @@ export interface ActivityInterface {
   _id: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface MessengerInterface {
   _id: string;
   discussions: string[];
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 
 export interface ProfileInterface {
@@ -1086,6 +1332,10 @@ export interface ProfileInterface {
   message: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface AddressInterface {
   _id: string;
@@ -1097,6 +1347,10 @@ export interface AddressInterface {
   city: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 
 export interface EntrepriseInterface {
@@ -1112,6 +1366,10 @@ export interface EntrepriseInterface {
   creationDate: number;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface ManagerInterface {
   _id: string;
@@ -1120,6 +1378,10 @@ export interface ManagerInterface {
   entreprise: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface BuildingInterface {
   _id: string;
@@ -1128,17 +1390,25 @@ export interface BuildingInterface {
   padiezdList: string[];
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface QuarterInterface {
   _id: string;
   name: string;
   city: string;
   buildings: string[];
-  supervisor: string[];
+  supervisors: string[];
   Thread: string[];
   activities: string[];
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface PadiezdInterface {
   _id: string;
@@ -1147,6 +1417,10 @@ export interface PadiezdInterface {
   channel: string[];
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface UserInterface {
   _id: string;
@@ -1155,6 +1429,10 @@ export interface UserInterface {
   entreprise: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export interface AccountInterface {
   _id: string;
@@ -1169,6 +1447,10 @@ export interface AccountInterface {
   profile: string;
   __createdAt: number;
   __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
 }
 export type ModelSchema<K extends keyof typeof Descriptions> = (typeof Descriptions)[K];
 

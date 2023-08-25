@@ -7,11 +7,9 @@ import { useQuarterPostStore } from '../../managementState/server/post/postQuart
 const Neighbor = () => {
   const { getListPost, listPost } = useQuarterPostStore((state) => state);
 
-  console.log({ listPost: listPost.items });
-
-  useEffect(() => {
-    getListPost(listPost.page || 1);
-  }, []);
+  // useEffect(() => {
+  //   getListPost(listPost.page || 1);
+  // }, []);
   return (
     <View style={{ flex: 1 }}>
       <PostIndex DATA={listPost} loadData={getListPost} />

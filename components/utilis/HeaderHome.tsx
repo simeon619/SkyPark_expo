@@ -1,9 +1,8 @@
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
 import React from 'react';
 import { TouchableOpacity, useColorScheme, useWindowDimensions, View } from 'react-native';
 import Colors from '../../constants/Colors';
-import { SMALL_PIC_USER } from '../../constants/Value';
+import { HOST, SMALL_PIC_USER } from '../../constants/Value';
 import useToggleStore, { useTypeForm } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
 import { icons } from '../../Utilis/data';
@@ -11,15 +10,17 @@ import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metr
 import { TextThin } from '../StyledText';
 import { ScrollView } from '../Themed';
 import ImageProfile from './simpleComponent/ImageProfile';
+import { NavigationStackProps } from '../../types/navigation';
+import Animated from 'react-native-reanimated';
 
-const HeaderHome = () => {
+const HeaderHome = ({ navigation, route }: NavigationStackProps) => {
   const { width } = useWindowDimensions();
   const colorScheme = useColorScheme();
   const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
   const { IconName, switchForm } = useTypeForm((state) => state);
 
   const { profile } = useAuthStore((state) => state);
-  const route = useRouter();
+
   return (
     <>
       <View
@@ -43,7 +44,6 @@ const HeaderHome = () => {
             transform: [{ rotate: '180deg' }],
             // backgroundColor: "red",
           }}
-          transition={200}
         />
         <View
           style={{
@@ -81,30 +81,10 @@ const HeaderHome = () => {
         </View>
         <TouchableOpacity
           onPress={() => {
-            //@ts-ignore
-            route.push('/profile/');
+            navigation.navigate('Profile');
           }}
         >
           <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 2} />
-
-          {/* <Image
-            style={{
-              width: moderateScale(SMALL_PIC_USER + 10),
-              aspectRatio: 1,
-              marginHorizontal: moderateScale(5),
-              borderRadius: SMALL_PIC_USER / 2,
-              borderColor: primaryColourLight,
-              borderWidth: 2,
-            }}
-            source={
-              !!profile?.imgProfile[0]?.url
-                ? { uri: HOST + profile?.imgProfile[0]?.url }
-                : require('../../assets/icon/user.png')
-            }
-            cachePolicy={'none'}
-            contentFit="cover"
-            transition={250}
-          /> */}
         </TouchableOpacity>
       </View>
       <View

@@ -3,6 +3,7 @@ import { AccountInterface, DiscussionInterface, MessageInterface, ProfileInterfa
 import { SQuery } from '..';
 import { ArrayData, FileType, UrlData } from '../../lib/SQueryClient';
 import { produce } from 'immer';
+import { mergeArrayData } from '../../Utilis/functions/fn';
 
 const LIMIT_MESSAGES = 20;
 
@@ -51,20 +52,15 @@ export const useMessageStore = create<MessageSchema, any>(
       set(({}) => ({ currentDiscussion: discussion.$cache }));
     },
     fetchMessages: async (data) => {
-      console.log('data de fetcMessages', data);
-
       const { discussion, page } = data;
 
       if (!discussion._id) {
-        console.error('Error fetching messages:', data);
         return;
       }
 
       if (!messageStorage[discussion._id]) {
         messageStorage[discussion._id] = {};
       }
-      console.log({ messageStorage });
-
       if (messageStorage[discussion._id][data.page]) {
         set((state) => {
           return produce(state, (draft) => {
@@ -74,13 +70,11 @@ export const useMessageStore = create<MessageSchema, any>(
 
             let mergesMessage = { ...newMessages, items: newItems };
 
-            draft.messages[discussion._id][page] = mergeMessageData(existingMessages, mergesMessage);
+            draft.messages[discussion._id][page] = mergeArrayData(existingMessages, mergesMessage);
           });
         });
       } else {
         try {
-          console.log({ discussion });
-
           const discussionInstance = await SQuery.newInstance('discussion', { id: discussion._id });
 
           const channel = await discussionInstance?.channel;
@@ -98,8 +92,6 @@ export const useMessageStore = create<MessageSchema, any>(
             messageStorage[discussion._id][page] = arrayData;
             set((state) => {
               let draftState = produce(state, (draft) => {
-                console.log({ draft: draft.messages });
-
                 if (!draft.messages) {
                   draft.messages = {};
                 }
@@ -108,7 +100,7 @@ export const useMessageStore = create<MessageSchema, any>(
                   //@ts-ignore
                   draft.messages[discussion._id][page] = { items: [] };
                 }
-                let newM = mergeMessageData(draft.messages[discussion._id][page], arrayData);
+                let newM = mergeArrayData(draft.messages[discussion._id][page], arrayData);
 
                 draft.messages[discussion._id][page] = newM;
               });
@@ -149,9 +141,10 @@ export const useMessageStore = create<MessageSchema, any>(
         const ArrayDiscussion = await discussion.channel;
 
         ArrayDiscussion?.when(
-          'refresh',
+          'update',
           async (obj) => {
             let messageId = obj?.added[0];
+
             if (!messageId) return;
 
             let messageInstance = await SQuery.newInstance('message', { id: messageId });
@@ -197,29 +190,3 @@ export const useMessageStore = create<MessageSchema, any>(
   //     }
   //   )
 );
-function mergeMessageData(existingData: ArrayData<MessageInterface>, newData: Partial<ArrayData<MessageInterface>>) {
-  console.log({ existingData, newData });
-  const uniqueIds = new Set(existingData?.items.map((item) => item._id));
-
-  newData?.items?.forEach((newItem) => {
-    if (!uniqueIds.has(newItem._id)) {
-      uniqueIds.add(newItem._id);
-      existingData?.items.push(newItem);
-    }
-  });
-
-  return {
-    items: existingData?.items || [],
-    hasNextPage: newData?.hasNextPage || false,
-    totalItems: newData?.totalItems || 0,
-    totalPages: newData?.totalPages || 0,
-    pagingCounter: newData?.pagingCounter || 0,
-    nextPage: newData?.nextPage || 0,
-    page: newData?.page || 0,
-    limit: newData?.limit || 0,
-    added: newData?.added || [],
-    removed: newData?.removed || [],
-    hasPrevPage: newData?.hasPrevPage || false,
-    prevPage: newData?.prevPage || 0,
-  };
-}

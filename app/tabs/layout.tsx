@@ -1,15 +1,22 @@
 import { Entypo } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
+
 import { BottomFabBar } from 'sim-bottom-tab';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { shadow, verticalScale } from '../../Utilis/metrics';
 import useToggleStore from '../../managementState/client/preference';
+import Home from '.';
+import DiscusionTabScreen from './discussions';
+import PostTabScreen from './post';
+import UserTabScreen from './user';
+import NotificationTabScreen from './notification';
 
 export default function TabLayout() {
   const { primaryColourLight } = useToggleStore((state) => state);
+
+  const Tab = createBottomTabNavigator();
   return (
-    <Tabs
-    
+    <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#fff',
         headerShown: false,
@@ -33,42 +40,48 @@ export default function TabLayout() {
         />
       )}
     >
-      <Tabs.Screen
-        name="index"
+      <Tab.Screen
+        //@ts-ignore
+        name="HomeTab"
         options={{
-          title: 'Tab One',
+          title: 'home',
           tabBarIcon: () => <Entypo name="home" size={20} />,
         }}
+        component={Home}
       />
-      <Tabs.Screen
-        name="discussions"
+      <Tab.Screen
+        name="DiscussionsTab"
         options={{
           title: 'discussions',
           tabBarIcon: () => <Entypo name="message" size={20} />,
         }}
+        component={DiscusionTabScreen}
       />
-      <Tabs.Screen
-        name="post"
+      <Tab.Screen
+        name="PostTab"
         options={{
           headerShown: false,
           headerTransparent: true,
           tabBarIcon: () => <Entypo name="plus" size={20} />,
         }}
+        component={PostTabScreen}
       />
-      <Tabs.Screen
-        name="user"
+      <Tab.Screen
+        name="UserTab"
         options={{
-          title: 'Tab Two',
+          title: 'user',
           tabBarIcon: () => <FontAwesome name="user" size={20} />,
         }}
+        component={UserTabScreen}
       />
-      <Tabs.Screen
-        name="notification"
+      <Tab.Screen
+        name="NotificationTab"
         options={{
-          title: 'Tab Two',
+          title: 'notification',
           tabBarIcon: () => <FontAwesome name="bell" size={20} />,
         }}
+        component={NotificationTabScreen}
       />
-    </Tabs>
+    </Tab.Navigator>
   );
 }

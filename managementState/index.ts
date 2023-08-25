@@ -8,7 +8,7 @@ const socket = io('http://192.168.1.5:3500', {
   extraHeaders: {},
 });
 
-console.log('🚀 ~ file: index.ts:15 ~ socket:', HOST);
+console.log('🚀 ~ file: index.ts:15 ~ process.env:', process.env);
 
 export const SQuery = createSQueryFrom(Descriptions, CacheValues, Controller, {
   socket: socket,

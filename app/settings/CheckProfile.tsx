@@ -1,7 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
-import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { Text, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
@@ -16,16 +15,16 @@ import Colors from '../../constants/Colors';
 import { LARGE_PIC_USER } from '../../constants/Value';
 import { useAuthStore } from '../../managementState/server/auth';
 import { usePatchUser } from '../../managementState/server/updateUser';
+import { NavigationStackProps } from '../../types/navigation';
 
-const CheckProfile = () => {
+const CheckProfile = ({ navigation, route }: NavigationStackProps) => {
   const { width, height } = useWindowDimensions();
   const colorScheme = useColorScheme();
 
   const { profile, account, address } = useAuthStore((state) => state);
-  console.log('🚀 ~ file: CheckProfile.tsx:24 ~ CheckProfile ~ profile:', profile?.imgProfile[0]);
   const { setProfile } = usePatchUser();
   // const [image, setImage] = useState<string[]>([]);
-  const router = useRouter();
+
   const icon = {
     email: require('../../assets/images/email.png'),
     building: require('../../assets/images/building.svg'),
@@ -101,7 +100,7 @@ const CheckProfile = () => {
   };
 
   function next(): void {
-    router.push('/(tabs)');
+    navigation.navigate('Bottomtabs');
   }
 
   return (
@@ -123,13 +122,16 @@ const CheckProfile = () => {
           onPress={async () => {
             try {
               let images = await pickImage({ numberImages: 1 });
+              let pre = images?.map((item) => {
+                return item.PrepareImage;
+              });
 
               if (images && images.length !== 0 && profile?._id) {
                 setProfile(
                   {
                     _id: profile?._id,
                   },
-                  { imgProfile: images }
+                  { imgProfile: pre }
                 );
               }
             } catch (error) {
@@ -138,24 +140,6 @@ const CheckProfile = () => {
           }}
         >
           <ImageProfile image={profile?.imgProfile[0]?.url} size={LARGE_PIC_USER + 5} />
-          {/* <Image
-            style={{
-              width: moderateScale(LARGE_PIC_USER + 5),
-              aspectRatio: 1,
-              marginHorizontal: moderateScale(5),
-              borderRadius: LARGE_PIC_USER / 2,
-              // borderColor: primaryColourLight,
-              borderWidth: 2,
-            }}
-            source={
-              !!profile?.imgProfile[0]?.url
-                ? { uri: HOST + profile?.imgProfile[0]?.url }
-                : require('../../assets/icon/user.png')
-            }
-            cachePolicy={'none'}
-            contentFit="cover"
-            transition={250}
-          /> */}
         </TouchableWithoutFeedback>
         <TextLight
           style={{

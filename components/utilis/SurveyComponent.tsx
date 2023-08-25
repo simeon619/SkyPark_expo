@@ -17,7 +17,6 @@ const SurveyComponent = ({
   dataSurvey: SurveySchema | undefined;
   question: string | undefined;
 }) => {
-  console.log('🚀 ~ file: SurveyComponent.tsx:14 ~ SurveyComponent ~ dataSurvey:', dataSurvey);
   if (!dataSurvey) return null;
 
   //ici on aura plus tard une liste venant du serveur qui renvera true ou false en fonction de si l'user a voté ou non
@@ -53,7 +52,6 @@ const SurveyComponent = ({
     >
       <TextComponent text={question} />
       {dataSurveyA.options.map((item, index) => {
-        console.log(item, dataSurveyA.totalVotes);
         let percentage = ((item.votes * 100) / dataSurveyA.totalVotes).toFixed(1);
         percentage = percentage === 'NaN' ? '0' : percentage;
         return (

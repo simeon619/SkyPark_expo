@@ -38,8 +38,6 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
 
   const { bottom } = useSafeAreaInsets();
 
-  console.log({ pathVoiceNote: Boolean(pathVoiceNote) });
-
   const viewInputStyle = useAnimatedStyle(
     () => ({
       transform: [{ translateY: telegram.value }],
@@ -79,11 +77,8 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
         accountId: focusedUser?.account?._id,
         files: [{ buffer: base64, type: fileType, fileName, size: 10, encoding: 'base64' }],
       });
-      console.log('audio send');
     }
     let status = await recording?.getStatusAsync();
-    console.log({ status });
-
     await resetAudio();
   }, []);
 
@@ -96,20 +91,14 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
       isRecording: false,
       isDoneRecording: false,
     });
-    console.log('reset audio');
-
     setPathVoiceNote(null);
     setRecording(undefined);
-    console.log('reset');
-
     setDuration(0);
   };
 
   async function startRecording() {
-    console.log('Recording...');
     setRecording(undefined);
     try {
-      console.log('Requesting permissions..');
       await Audio.requestPermissionsAsync();
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
@@ -161,23 +150,18 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
     //         isRecording: false,
     //         isDoneRecording: true,
     //       });
-    //       console.log(`recorderStop() error : ${error}`);
     //     } else if (
     //       error.message.includes('Cannot unload a Recording that has already been unloaded.') ||
     //       error.message.includes('Error: Cannot unload a Recording that has not been prepared.')
     //     ) {
-    //       console.log(`recorderStop() error : ${error}`);
     //     } else {
     //       console.error(`recorderStop(): ${error}`);
     //     }
     //   }
-    //   console.log('recorder stopped');
     //   // await recording.de;
     // } else {
-    //   console.log("🚀 ~ file: discussion.tsx:159 ~ stopRecording ~  '':", '');
     // }
     const uri = recording?.getURI();
-    console.log('Recording stopped and stored at', uri);
     setPathVoiceNote(uri);
   };
 

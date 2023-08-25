@@ -215,7 +215,11 @@ export const InputTextMessage = memo(
               onPress={async () => {
                 if (!text) {
                   let images = await pickImage({ numberImages: 1 });
-                  sendMessage({ accountId: focusedUser?.account?._id, files: images });
+
+                  let files = images?.map((image) => {
+                    return image.PrepareImage;
+                  });
+                  sendMessage({ accountId: focusedUser?.account?._id, files });
                 }
               }}
               style={{}}

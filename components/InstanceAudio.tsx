@@ -24,8 +24,6 @@ const InstanceAudio = ({ voiceUrl }: { voiceUrl: any }) => {
     setIsPlay((prev) => !prev);
   };
 
-  console.log({ voiceUrl });
-
   // let audioPath = useRef<string>("").current;
   useEffect(() => {
     const fetchAudio = async () => {
@@ -38,7 +36,6 @@ const InstanceAudio = ({ voiceUrl }: { voiceUrl: any }) => {
       });
 
       setAudioPath(path);
-      console.log('Write SUCCEFELY2');
     };
 
     fetchAudio();
@@ -47,7 +44,6 @@ const InstanceAudio = ({ voiceUrl }: { voiceUrl: any }) => {
       //     await sound.stopAsync();
       //     await sound.unloadAsync();
       //     setSound(undefined);
-      //     console.log("reset sound");
       //   }
       // setSound(undefined);
     };

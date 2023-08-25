@@ -12,8 +12,9 @@ import { moderateScale, verticalScale } from '../../Utilis/metrics';
 import { TextSemiBold } from '../../components/StyledText';
 import Colors from '../../constants/Colors';
 import { BottomSheetComponent } from '../../components/register/BottomSheet';
+import { NavigationStackProps } from '../../types/navigation';
 
-const Login = () => {
+const Login = ({ navigation, route }: NavigationStackProps) => {
   const colorScheme = useColorScheme();
 
   const { height, width } = useWindowDimensions();
@@ -149,6 +150,8 @@ const Login = () => {
         Topacity={Topacity}
         BtranslateY={BtranslateY}
         TtranslateY={TtranslateY}
+        navigation={navigation}
+        route={route}
       />
     </SafeAreaView>
   );

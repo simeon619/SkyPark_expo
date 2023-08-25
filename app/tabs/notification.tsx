@@ -14,7 +14,7 @@ import { TextLight, TextMedium } from '../../components/StyledText';
 import { View } from '../../components/Themed';
 import notif from '../../notif.json';
 
-const notification = () => {
+const NotificationTabScreen = () => {
   const { width } = useWindowDimensions();
   const [blur, setBlur] = useState(0);
   const setActionType = (action: string, stats: { like: number; share: number; comment: number }) => {
@@ -223,7 +223,13 @@ const notification = () => {
                       <TextLight>{setActionType(item.action, item.statPostTrigger)}</TextLight>
                     </TextLight>
                   </View>
-                  <TextLight> {formatPostDate(item.createdAt)}</TextLight>
+                  <TextLight>
+                    {' '}
+                    {
+                      //@ts-ignore
+                      formatPostDate(item.createdAt)
+                    }
+                  </TextLight>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
@@ -245,4 +251,4 @@ const notification = () => {
   );
 };
 
-export default React.memo(notification);
+export default NotificationTabScreen;

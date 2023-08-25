@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -16,10 +16,9 @@ import { HOST } from '../../constants/Value';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import { useMessageStore } from '../../managementState/server/Discussion';
 import { AccountInterface, ProfileInterface } from '../../managementState/server/Descriptions';
+import { NavigationProps } from '../../types/navigation';
 
-const Chat = () => {
-  const router = useRouter();
-
+const Chat = ({ route, navigation }: NavigationProps) => {
   const { listAccount, setListAccount } = useListUserStore((state) => state);
 
   const { setFocusedUser } = useMessageStore((state) => state);
@@ -57,7 +56,8 @@ const Chat = () => {
   }) => {
     if (account && profile) {
       setFocusedUser({ account, profile });
-      router.push('/pageModal/discussion');
+
+      navigation.navigate('Discussion');
     } else {
       console.error('erreur');
     }

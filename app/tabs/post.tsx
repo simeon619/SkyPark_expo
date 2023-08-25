@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { usePathname, useRouter } from 'expo-router';
+
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, useColorScheme, useWindowDimensions } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
@@ -13,11 +13,12 @@ import Colors from '../../constants/Colors';
 import { SMALL_PIC_USER, formTextPlaceholder } from '../../constants/Value';
 import { useBlurSurvey, useTypeForm } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
+import { NavigationTabProps } from '../../types/navigation';
 
-const post = () => {
+const PostTabScreen = ({ navigation, route }: any) => {
   const colorScheme = useColorScheme();
   const [heightInput, setHeightInput] = useState(40);
-  const route = useRouter();
+
   const { blurSurvey } = useBlurSurvey((state) => state);
   const { IconName } = useTypeForm((state) => state);
   const refInput = React.useRef<TextInput>(null);
@@ -25,12 +26,10 @@ const post = () => {
 
   const { profile } = useAuthStore((state) => state);
 
-  console.log('🚀 ~ file: post.tsx:29 ~ post: ~ profile:', profile?.imgProfile);
-
   const { width, height } = useWindowDimensions();
   useEffect(() => {
     refInput.current?.focus();
-  }, [usePathname()]);
+  }, []);
   return (
     <SafeAreaView
       style={{
@@ -63,7 +62,7 @@ const post = () => {
               alignSelf: 'center',
             }}
             onPress={() => {
-              route.push('/profile/');
+              // navigation.navigate('');
             }}
           >
             <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 10} />
@@ -94,7 +93,7 @@ const post = () => {
             }}
           />
         </View>
-        <DefaultForm text={text} setText={setText} />
+        <DefaultForm text={text} setText={setText} navigation={navigation} route={route} />
         <SurveyForm />
       </View>
       {/* <TimePickerSurvey /> */}
@@ -102,4 +101,4 @@ const post = () => {
   );
 };
 
-export default React.memo(post);
+export default PostTabScreen;

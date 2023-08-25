@@ -84,27 +84,26 @@ export const useTypeForm = create<stateForm, any>(
   )
 );
 
-//////////////////////////////////////////////////////////////// ViewerParamImages ********************************
-// type ImageSchemaForm = {
-//   images: {
-//     uri: string;
-//   }[];
-//   actualIndex: number;
-// };
+//////////////////////////////////////////////////////////////// renderind twice fix ********************************
+type PostInSchema = {
+  data: Set<string>;
+  checkPostIdIn: (value: string) => boolean;
+  clearPostIdIn: () => void;
+};
 
-// type ViewerParamImages = {
-//   data: ImageSchemaForm;
-//   setParmsImagesForm: (value: ImageSchemaForm) => void;
-// };
-
-// export const useViewerParamImages = create<ViewerParamImages>((set, get) => ({
-//   data: { actualIndex: 0, images: [] },
-//   setParmsImagesForm: (value: ImageSchemaForm) => {
-//     if (JSON.stringify(value) !== JSON.stringify(get().data)) {
-//       set(() => ({ data: value }));
-//     }
-//   },
-// }));
+export const usePostInSchema = create<PostInSchema>((set, get) => ({
+  data: new Set(''),
+  checkPostIdIn: (value) => {
+    if (get().data.has(value)) return true;
+    set((state) => ({ data: state.data.add(value) }));
+    return false;
+  },
+  clearPostIdIn: () => {
+    console.log('🚀 ~ file: postInSchema.ts:29 ~ usePostInSchema: ~ get.dataAVA', get().data);
+    get().data.clear();
+    console.log('🚀 ~ file: postInSchema.ts:29 ~ usePostInSchema: ~ get.dataAPR', get().data);
+  },
+}));
 
 //////////////////////////////////////////////////////// MENUinMessage/////////////////
 

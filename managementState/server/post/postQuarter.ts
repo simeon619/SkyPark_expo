@@ -1,8 +1,9 @@
 import { ArrayData, ArrayDataInit, FileType } from '../../../lib/SQueryClient';
-import { AccountInterface, PostInterface } from '../Descriptions';
+import { PostInterface } from '../Descriptions';
 import { create } from 'zustand';
 import { SQuery } from '../..';
 import { useAuthStore } from '../auth';
+import { mergeArrayData } from '../../../Utilis/functions/fn';
 
 type quarterPostSchema = {
   listPost: ArrayData<PostInterface>;
@@ -10,7 +11,6 @@ type quarterPostSchema = {
   loadingPublish: boolean;
 
   publishPost: (data: { value?: string; accountId: string | undefined; files?: FileType[]; type: string }) => void;
-
   getListPost: (page: number) => void;
 };
 
@@ -25,13 +25,11 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         loadindGetData: true,
       };
     });
-    const userId = useAuthStore.getState().user?._id;
+    const quarterId = useAuthStore.getState().quarter?._id;
 
-    if (!userId) return;
+    if (!quarterId) return;
 
-    const user = await SQuery.newInstance('user', { id: userId });
-
-    let quarter = await user?.extractor<'quarter'>('../../../');
+    const quarter = await SQuery.newInstance('quarter', { id: quarterId });
 
     const Thread = await quarter?.Thread;
 
@@ -44,36 +42,34 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         },
       },
     });
-    set((state) => {
-      return {
-        ...state,
-        //@ts-ignore
-        listPost: mergePostData(state.listPost, posts),
-        loadindGetData: false,
-      };
-    });
+
+    if (posts) {
+      set((state) => {
+        return {
+          listPost: mergeArrayData(state.listPost, posts),
+          loadindGetData: false,
+        };
+      });
+    }
   },
   publishPost: async (data) => {
-    set((state) => {
+    set(() => {
       return {
-        ...state,
         loadingPublish: true,
       };
     });
     const { value, accountId, files, type } = data;
 
     if (!accountId) return;
-    const userId = useAuthStore.getState().user?._id;
+    const quarterId = useAuthStore.getState().quarter?._id;
 
-    if (!userId) return;
+    if (!quarterId) return;
 
-    const user = await SQuery.newInstance('user', { id: userId });
-
-    let quarter = await user?.extractor<'quarter'>('../../../');
+    const quarter = await SQuery.newInstance('quarter', { id: quarterId });
 
     const Thread = await quarter?.Thread;
 
-    Thread?.update({
+    const t = await Thread?.update({
       addNew: [
         {
           message: {
@@ -86,6 +82,10 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
       ],
     });
 
+    Thread?.when('refresh', (obj) => {});
+
+    t?.added[0];
+
     set((state) => {
       return {
         ...state,
@@ -95,22 +95,12 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
   },
 }));
 
-// type accountPostSchema = {
-
-//   getInfoAccount: () => AccountInterface;
-// }
-
 export const getInfoAccount = async (accountId: string | undefined) => {
   if (!accountId) return;
   const account = await SQuery.newInstance('account', { id: accountId });
-  console.log('🚀 ~ file: postQuarter.ts:115 ~ getInfoAccount ~ accountId:', accountId);
-
   if (!account) return;
-
   const profile = await account?.profile;
-
   if (!profile) return;
-
   return {
     account: account.$cache,
     profile: profile.$cache,
@@ -119,36 +109,6 @@ export const getInfoAccount = async (accountId: string | undefined) => {
 
 export const getMessagePost = async ({ messageId }: { messageId: string }) => {
   const message = await SQuery.newInstance('message', { id: messageId });
-  console.log('🚀 ~ file: postQuarter.ts:115 ~ getInfoAccount ~ messageId:', messageId);
-
   if (!message) return;
-
   return message.$cache;
 };
-
-function mergePostData(existingData: ArrayData<PostInterface>, newData: ArrayData<PostInterface>) {
-  console.log({ existingData, newData });
-  const uniqueIds = new Set(existingData?.items.map((item) => item._id));
-
-  newData?.items?.forEach((newItem) => {
-    if (!uniqueIds.has(newItem._id)) {
-      uniqueIds.add(newItem._id);
-      existingData?.items.push(newItem);
-    }
-  });
-
-  return {
-    items: existingData?.items || [],
-    hasNextPage: newData?.hasNextPage || false,
-    totalItems: newData?.totalItems || 0,
-    totalPages: newData?.totalPages || 0,
-    pagingCounter: newData?.pagingCounter || 0,
-    nextPage: newData?.nextPage || 0,
-    page: newData?.page || 0,
-    limit: newData?.limit || 0,
-    added: newData?.added || [],
-    removed: newData?.removed || [],
-    hasPrevPage: newData?.hasPrevPage || false,
-    prevPage: newData?.prevPage || 0,
-  };
-}

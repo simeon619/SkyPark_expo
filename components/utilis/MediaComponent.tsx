@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import React, { memo } from 'react';
 import {
   DimensionValue,
@@ -14,20 +13,28 @@ import { View } from '../Themed';
 import ShadowImage from './ShadowImage';
 import { UrlData } from '../../lib/SQueryClient';
 import { HOST } from '../../constants/Value';
+import { NavigationProps } from '../../types/navigation';
 
 const GAP_MEDIA = 10;
-const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
+const MediaComponent = ({
+  media,
+  caption,
+  route,
+  navigation,
+}: { media: UrlData[] | undefined; caption: string | undefined } & NavigationProps) => {
   if (!media) {
     return null;
   }
-  const router = useRouter();
+
   const numberMedia = media?.length;
 
   const ImageComponent = ({ uri, width, height }: { uri: string; width: DimensionValue; height: DimensionValue }) => {
     return (
       <TouchableWithoutFeedback
         //@ts-ignore
-        onPress={() => router.push({ pathname: 'pageModal/ViewerImage', params: { uri, caption } })}
+        onPress={() => {
+          navigation.navigate('ViewerImage', { uri, caption });
+        }}
       >
         <Image
           style={{ width, height }}
@@ -44,9 +51,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
     );
   };
 
-  const handleImageLoad = (event: NativeSyntheticEvent<ImageProgressEventDataIOS>) => {
-    console.log(event);
-  };
+  const handleImageLoad = (event: NativeSyntheticEvent<ImageProgressEventDataIOS>) => {};
 
   const { height } = useWindowDimensions();
   return (

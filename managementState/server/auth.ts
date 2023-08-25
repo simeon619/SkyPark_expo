@@ -5,21 +5,27 @@ import { SQuery } from '..';
 import {
   AccountInterface,
   AddressInterface,
+  BuildingInterface,
   EntrepriseInterface,
   FavoritesInterface,
+  PadiezdInterface,
   ProfileInterface,
+  QuarterInterface,
   UserInterface,
 } from './Descriptions';
 
 // import { QueryKeys } from '../../types/serverType';
 
 type authState = {
-  account: AccountInterface;
+  account: AccountInterface | undefined;
   user: UserInterface | undefined;
   profile: ProfileInterface | undefined;
   address: AddressInterface | undefined;
   favorites: FavoritesInterface | undefined;
   entreprise: EntrepriseInterface | undefined;
+  quarter: QuarterInterface | undefined;
+  padiezd: PadiezdInterface | undefined;
+  building: BuildingInterface | undefined;
   isAuth: boolean;
   loading: boolean;
   error: string | undefined;
@@ -33,13 +39,15 @@ type StateSchema = authAction & authState;
 export const useAuthStore = create<StateSchema, any>(
   persist(
     (set) => ({
-      //@ts-ignore
       account: undefined,
       user: undefined,
       profile: undefined,
       address: undefined,
+      building: undefined,
       favorites: undefined,
       entreprise: undefined,
+      quarter: undefined,
+      padiezd: undefined,
       isAuth: false,
       loading: false,
       error: undefined,
@@ -54,7 +62,10 @@ export const useAuthStore = create<StateSchema, any>(
           account: undefined,
           user: undefined,
           profile: undefined,
+          padiezd: undefined,
+          quarter: undefined,
           address: undefined,
+          building: undefined,
           favorites: undefined,
           entreprise: undefined,
           isAuth: false,
@@ -68,18 +79,10 @@ export const useAuthStore = create<StateSchema, any>(
       },
 
       fetchLogin: async (LoginData) => {
-        console.log(LoginData);
-
         handleAuthAction(set, LoginData);
       },
 
       fetchRegister: async (RegisterData) => {
-        // if(RegisterData.code  !==  "4580") {
-        //   set(() => ({
-        //     loading: false,
-        //     error: "Code incorrect",
-        //   }))
-        // }
         handleAuthAction(set, { email: RegisterData.email, password: RegisterData.password });
       },
     }),
@@ -111,8 +114,6 @@ const handleAuthAction = async (
 
   try {
     const res = await SQuery.service('login', 'user', AuthData);
-    console.log('🚀 ~ file: auth.ts:113 ~ res:', res);
-
     if (!res.response || !res?.response?.signup.id) throw new Error(JSON.stringify(res));
     const user = await SQuery.newInstance('user', { id: res?.response?.signup.id });
 
@@ -127,7 +128,13 @@ const handleAuthAction = async (
 
     let entreprise = await user.entreprise;
 
-    SQuery.bind({ account, user, profile, address, favorites, entreprise }, set);
+    let padiezd = await user?.extractor<'padiezd'>('../');
+    let building = await user?.extractor<'building'>('../../');
+    let quarter = await user?.extractor<'quarter'>('../../../');
+
+    // quarter.
+
+    SQuery.bind({ account, user, profile, address, favorites, entreprise, quarter, padiezd, building }, set);
 
     let cache = SQuery.cacheFrom({
       account,
@@ -136,6 +143,9 @@ const handleAuthAction = async (
       address,
       favorites,
       entreprise,
+      quarter,
+      padiezd,
+      building,
     });
 
     set(() => ({

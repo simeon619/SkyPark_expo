@@ -3,13 +3,12 @@
     "name": "Alice",
     "pic_user": "https://picsum.photos/200/300?random=2",
     "last_message": {
-      "date": 1688202465,
       "text": "Salut ! J'espère que ta journée se passe bien. As-tu des projets intéressants ?",
       "Owner": false,
       "status": {
-        "send": null,
-        "received": null,
-        "seen": null
+        "send": 0,
+        "received": 0,
+        "seen": 0
       }
     }
   },
@@ -17,13 +16,13 @@
     "name": "John",
     "pic_user": "https://picsum.photos/200/300?random=3",
     "last_message": {
-      "date": 1688240819,
+      "localDate": 1688240819,
       "text": "Hey, ça fait longtemps qu'on ne s'est pas vus. Tu me manques ! Quand est-ce qu'on se revoit ?",
       "Owner": true,
       "status": {
         "send": 1688241834,
         "received": 1688242851,
-        "seen": null
+        "seen": 0
       }
     }
   },
@@ -31,13 +30,13 @@
     "name": "Emily",
     "pic_user": "https://picsum.photos/200/300?random=4",
     "last_message": {
-      "date": 1688279274,
+      "localDate": 1688279274,
       "text": "Coucou ! J'ai tellement de choses à te raconter. Malheureusement, je n'ai pas eu le temps de tout écrire.",
       "Owner": false,
       "status": {
         "send": 1688280289,
         "received": 1688281303,
-        "seen": null
+        "seen": 0
       }
     }
   },
@@ -45,13 +44,13 @@
     "name": "Michael",
     "pic_user": "https://picsum.photos/200/300?random=5",
     "last_message": {
-      "date": 1688317751,
+      "localDate": 1688317751,
       "text": "Salut ! Ça fait un moment qu'on ne s'est pas parlé. J'espère que tout va bien de ton côté. Prends soin de toi !",
       "Owner": true,
       "status": {
         "send": 1688318764,
-        "received": null,
-        "seen": null
+        "received": 0,
+        "seen": 0
       }
     }
   },
@@ -59,7 +58,7 @@
     "name": "Sophia",
     "pic_user": "https://picsum.photos/200/300?random=6",
     "last_message": {
-      "date": 1688356340,
+      "localDate": 1688356340,
       "text": "Tu me manques énormément ! J'ai hâte de te revoir et de passer du temps ensemble.",
       "Owner": false,
       "status": {
@@ -73,13 +72,13 @@
     "name": "Daniel",
     "pic_user": "https://picsum.photos/200/300?random=7",
     "last_message": {
-      "date": 1688395051,
+      "localDate": 1688395051,
       "text": "Salut mon ami ! Comment s'est passée ta journée ? J'espère que tout va bien pour toi.",
       "Owner": true,
       "status": {
         "send": 1688396066,
         "received": 1688397083,
-        "seen": null
+        "seen": 0
       }
     }
   },
@@ -87,7 +86,7 @@
     "name": "Olivia",
     "pic_user": "https://picsum.photos/200/300?random=8",
     "last_message": {
-      "date": 1688433884,
+      "localDate": 1688433884,
       "text": "Devine ce qui s'est passé aujourd'hui ? C'est tellement incroyable que tu dois absolument le savoir !",
       "Owner": false,
       "status": {
@@ -101,7 +100,7 @@
     "name": "William",
     "pic_user": "https://picsum.photos/200/300?random=9",
     "last_message": {
-      "date": 1688472837,
+      "localDate": 1688472837,
       "text": "On devrait se voir bientôt ! Ça fait trop longtemps qu'on n'a pas passé du temps ensemble. Qu'en dis-tu ?",
       "Owner": true,
       "status": {
@@ -115,13 +114,13 @@
     "name": "Emma",
     "pic_user": "https://picsum.photos/200/300?random=10",
     "last_message": {
-      "date": 1688511912,
+      "localDate": 1688511912,
       "text": "Au revoir pour l'instant ! J'espère te parler à nouveau très bientôt. Prends soin de toi en attendant !",
       "Owner": false,
       "status": {
         "send": 1688512927,
         "received": 1688513943,
-        "seen": null
+        "seen": 0
       }
     }
   }

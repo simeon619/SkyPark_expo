@@ -1,6 +1,5 @@
-//@ts-nocheck
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useState } from 'react';
 import { ImageBackground, Pressable, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
@@ -13,11 +12,12 @@ import { ScrollView, View } from '../../components/Themed';
 import MediaComponent from '../../components/utilis/MediaComponent';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import Colors from '../../constants/Colors';
-import { LARGE_PIC_USER } from '../../constants/Value';
+import { LARGE_PIC_USER, SMALL_PIC_USER } from '../../constants/Value';
 import useToggleStore from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
+import { NavigationStackProps } from '../../types/navigation';
 
-const Profile = () => {
+const Profile = ({ navigation, route }: NavigationStackProps) => {
   const { profile, address, account, fetchDisconnect } = useAuthStore((state) => state);
   const { primaryColour, name, toggleState } = useToggleStore((state) => state);
 
@@ -70,13 +70,15 @@ const Profile = () => {
       //  flexDirection: name === 'Neighbor' ? 'row' : 'row-reverse',
     };
   });
+
   const [mediaProfileState, setMediaProfileState] = useState(mediaProfile);
-  const router = useRouter();
-  const handleMediaProfilePress = useCallback((key) => {
+
+  const handleMediaProfilePress = useCallback((key: keyof typeof mediaProfile) => {
     setMediaProfileState((prevState) => {
       const newState = { ...prevState };
       Object.keys(newState).forEach((keyPrev) => {
-        newState[keyPrev].selected = false;
+        let key: keyof typeof mediaProfile = keyPrev as any;
+        newState[key].selected = false;
       });
       newState[key].selected = true;
       return newState;
@@ -138,8 +140,8 @@ const Profile = () => {
               zIndex: 5,
             }}
           >
-            <ImageProfile size={LARGE_PIC_USER - 5} imgProfile={profile?.imgProfile[0]?.url} />
-            <TextSemiBold>{account?.name} r</TextSemiBold>
+            <ImageProfile size={LARGE_PIC_USER - 5} image={profile?.imgProfile[0]?.url} />
+            <TextSemiBold>{account?.name} </TextSemiBold>
             <TextThinItalic>
               padiezd {address?.room} - Etage {address?.etage}
             </TextThinItalic>
@@ -235,17 +237,17 @@ const Profile = () => {
               key={index}
               onPress={() => {
                 if (index === 0) {
-                  router.push('/groupActivity');
+                  navigation.navigate('GroupActivity');
                 }
 
                 if (index === 1) {
-                  router.push('/forum');
+                  navigation.navigate('Forum');
                 }
                 if (index === 2) {
-                  router.push('/');
+                  // navigation.navigate('');
                 }
                 if (index === 3) {
-                  router.push('/');
+                  // navigation.navigate('HomeTab');
                 }
               }}
               style={[
@@ -284,36 +286,55 @@ const Profile = () => {
           ))}
         </View>
         <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center', marginBottom: verticalScale(10) }}>
-          {Object.keys(mediaProfileState).map((key, index) => (
-            <View key={index}>
-              <TouchableOpacity
-                onPress={() => handleMediaProfilePress(key)}
-                style={{ paddingHorizontal: horizontalScale(15) }}
-              >
-                <TextLight
-                  style={[
-                    {
-                      fontSize: moderateScale(17),
-                      textTransform: 'capitalize',
-                    },
-                    mediaProfileState[key]?.selected
-                      ? {
-                          borderBottomColor: primaryColour,
-                          borderBottomWidth: 2,
-                        }
-                      : { color: '#aaa' },
-                  ]}
+          {Object.keys(mediaProfileState).map((keyMedia, index) => {
+            let key = keyMedia as keyof typeof mediaProfileState;
+            return (
+              <View key={index}>
+                <TouchableOpacity
+                  onPress={() => handleMediaProfilePress(key)}
+                  style={{ paddingHorizontal: horizontalScale(15) }}
                 >
-                  {key}
-                </TextLight>
-              </TouchableOpacity>
-            </View>
-          ))}
+                  <TextLight
+                    style={[
+                      {
+                        fontSize: moderateScale(17),
+                        textTransform: 'capitalize',
+                      },
+                      mediaProfileState[key]?.selected
+                        ? {
+                            borderBottomColor: primaryColour,
+                            borderBottomWidth: 2,
+                          }
+                        : { color: '#aaa' },
+                    ]}
+                  >
+                    {key}
+                  </TextLight>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
         </View>
         <View style={{ flex: 1, paddingHorizontal: horizontalScale(20) }}>
-          {Object.keys(mediaProfileState).map((key, index) => {
+          {Object.keys(mediaProfileState).map((keyMedia, index) => {
+            let key = keyMedia as keyof typeof mediaProfileState;
+            let media = mediaProfileState[key].medias.map((media) => {
+              return {
+                url: media,
+                size: 1,
+                extension: 'jpg',
+                _id: index.toString(),
+              };
+            });
+
+            //   {
+            //     url: string;
+            //     size: number;
+            //     extension: string;
+            //     _id: string;
+            // }
             if (mediaProfileState[key].selected) {
-              return <MediaComponent media={mediaProfileState[key].medias} key={key} />;
+              return <MediaComponent media={media} key={key} caption="" navigation={navigation} route={route} />;
             }
           })}
         </View>

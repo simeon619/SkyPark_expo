@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { AndroidSoftInputModes, KeyboardController, KeyboardGestureArea } from 'react-native-keyboard-controller';
@@ -21,11 +21,13 @@ import { HOST } from '../../constants/Value';
 import InstanceAudio from '../../components/InstanceAudio';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { useFocusEffect } from '@react-navigation/native';
+import { useAuthStore } from '../../managementState/server/auth';
+import { NavigationStackProps } from '../../types/navigation';
 
-const discussion = () => {
+const discussion = ({ navigation, route }: NavigationStackProps) => {
   const colorSheme = useColorScheme();
   const { width, height } = useWindowDimensions();
-  const route = useRouter();
+
   const scrollViewRef = useRef<FlatList<any>>(null);
 
   const [messagesOfDisc, setMessagesOfDisc] = useState<MessageInterface[]>([]);
@@ -147,7 +149,7 @@ const discussion = () => {
             >
               <TouchableOpacity
                 onPress={() => {
-                  route.back();
+                  navigation.goBack();
                 }}
               >
                 <Ionicons name="arrow-back" size={28} color="black" style={{ paddingHorizontal: horizontalScale(7) }} />
@@ -238,11 +240,10 @@ const listFooterComponent = () => {
   return <View style={{ height: verticalScale(150) }} />;
 };
 
-const MessageItem = memo(({ item }: { item: any }) => {
-  const owner = Math.random() >= 0.5;
-  item = { ...item, owner };
+const MessageItem = memo(({ item }: { item: MessageInterface }) => {
+  const { account } = useAuthStore((state) => state);
 
-  console.log({ item });
+  let right = item?.account === account?._id;
 
   return (
     <TouchableWithoutFeedback
@@ -256,7 +257,7 @@ const MessageItem = memo(({ item }: { item: any }) => {
           flexDirection: 'column',
           elevation: 99,
         },
-        item?.owner
+        right
           ? {
               alignSelf: 'flex-end',
             }
@@ -275,7 +276,7 @@ const MessageItem = memo(({ item }: { item: any }) => {
         {item?.text ? (
           <View
             style={[
-              item?.owner
+              right
                 ? {
                     // borderTopLeftRadius: 10,
                     borderTopLeftRadius: moderateScale(25),
@@ -295,7 +296,7 @@ const MessageItem = memo(({ item }: { item: any }) => {
             <TextRegular
               style={{
                 fontSize: moderateScale(15),
-                color: item?.owner ? '#fef' : '#000',
+                color: right ? '#fef' : '#000',
                 padding: moderateScale(7),
               }}
             >
@@ -318,7 +319,7 @@ const MessageItem = memo(({ item }: { item: any }) => {
       <TextRegularItalic
         style={{
           color: 'grey',
-          textAlign: item?.owner ? 'right' : 'left',
+          textAlign: right ? 'right' : 'left',
           backgroundColor: '#0000',
           fontSize: moderateScale(12),
         }}

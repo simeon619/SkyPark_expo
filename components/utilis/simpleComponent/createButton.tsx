@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { TouchableOpacity, ViewStyle, useColorScheme } from 'react-native';
 
-import { useRouter } from 'expo-router';
 import { UseFormHandleSubmit } from 'react-hook-form';
 import { horizontalScale, moderateScale, verticalScale } from '../../../Utilis/metrics';
 import { ValidationSchema } from '../../../app/register/Signup';
@@ -21,19 +20,13 @@ const createButton = ({
   const colorScheme = useColorScheme();
 
   const { address, profile, user, loading, fetchRegister } = useAuthStore();
-  const router = useRouter();
-  const createUser = (data: any) => {
-    console.log({ data });
 
+  const createUser = (data: any) => {
     fetchRegister(data);
   };
 
   useEffect(() => {
-    console.log({ user: user?._id, address: address?._id, profile: profile?._id });
-
     if (user?._id && address?._id && profile?._id) {
-      //@ts-ignore
-      router.replace('/(tabs)/_layout');
     }
   });
 

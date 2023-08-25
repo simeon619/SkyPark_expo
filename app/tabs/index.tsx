@@ -13,8 +13,9 @@ import useToggleStore from '../../managementState/client/preference';
 import CieGestion from '../pagePost/CieGestion';
 import Neighbor from '../pagePost/Neighbor';
 import { useListUserStore } from '../../managementState/server/Listuser';
+import { NavigationStackProps } from '../../types/navigation';
 
-const home = () => {
+const Home = ({ navigation, route }: NavigationStackProps) => {
   const { primaryColour } = useToggleStore((state) => state);
 
   const colorScheme = useColorScheme();
@@ -28,7 +29,7 @@ const home = () => {
       }}
     >
       <StatusBar backgroundColor={primaryColour} style={'light'} />
-      <HeaderHome />
+      <HeaderHome navigation={navigation} route={route} />
       <View style={{ flex: 1, paddingHorizontal: horizontalScale(10) }}>
         <Tab.Navigator
           initialRouteName="Tous les voisins"
@@ -83,4 +84,4 @@ const home = () => {
   );
 };
 
-export default React.memo(home);
+export default Home;
