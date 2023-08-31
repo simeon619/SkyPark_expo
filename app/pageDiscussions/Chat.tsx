@@ -1,22 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { formatMessageDate } from '../../Utilis/date';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
-import { TextMedium, TextRegular, TextRegularItalic } from '../../components/StyledText';
+import { TextRegular } from '../../components/StyledText';
 import { View } from '../../components/Themed';
+import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import Colors from '../../constants/Colors';
 import useToggleStore, { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
-import user from '../../user.json';
-import { useListUserStore } from '../../managementState/server/Listuser';
-import { HOST } from '../../constants/Value';
-import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
-import { useMessageStore } from '../../managementState/server/Discussion';
 import { AccountInterface, ProfileInterface } from '../../managementState/server/Descriptions';
+import { useMessageStore } from '../../managementState/server/Discussion';
+import { useListUserStore } from '../../managementState/server/Listuser';
 import { NavigationProps } from '../../types/navigation';
+import user from '../../user.json';
 
 const Chat = ({ route, navigation }: NavigationProps) => {
   const { listAccount, setListAccount } = useListUserStore((state) => state);
@@ -146,4 +143,4 @@ const Chat = ({ route, navigation }: NavigationProps) => {
   );
 };
 
-export default React.memo(Chat);
+export default Chat;

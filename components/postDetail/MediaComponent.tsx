@@ -1,6 +1,5 @@
-import React, { memo, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  DimensionValue,
   Image,
   ImageLoadEventData,
   ImageProgressEventDataIOS,
@@ -11,10 +10,10 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { horizontalScale, verticalScale } from '../../Utilis/metrics';
 import { View } from '../Themed';
 
-import { UrlData } from '../../lib/SQueryClient';
-import { HOST } from '../../constants/Value';
-import ShadowImage from '../utilis/ShadowImage';
 import { useNavigation } from '@react-navigation/native';
+import { HOST } from '../../constants/Value';
+import { UrlData } from '../../lib/SQueryClient';
+import ShadowImage from '../utilis/ShadowImage';
 
 const GAP_MEDIA = 10;
 const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
@@ -23,14 +22,13 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
   }
 
   const numberMedia = media?.length;
+  console.log('🚀 ~ file: MediaComponent.tsx:26 ~ MediaComponent ~ numberMedia:', numberMedia);
 
   const handleImageLoad = (event: NativeSyntheticEvent<ImageProgressEventDataIOS>) => {};
 
   return (
     <View style={{ alignItems: 'center' }}>
-      {numberMedia === 1 && (
-        <ImageComponent uri={HOST + media[0].url} width={'100%'} height={'100%'} caption={caption} />
-      )}
+      {numberMedia === 1 && <ImageComponent uri={HOST + media[0].url} caption={caption} />}
       {numberMedia === 2 && (
         <View style={{ flexDirection: 'row', columnGap: horizontalScale(GAP_MEDIA) }}>
           {[0, 1].map((index) => (
@@ -38,9 +36,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
               key={index}
               ratioHeight={1}
               ratioWidth={48.5}
-              children={
-                <ImageComponent uri={HOST + media[index].url} width={'100%'} height={'100%'} caption={caption} />
-              }
+              children={<ImageComponent uri={HOST + media[index].url} caption={caption} />}
             />
           ))}
         </View>
@@ -56,7 +52,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
           <ShadowImage
             ratioHeight={1.4}
             ratioWidth={100}
-            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} caption={caption} />}
+            children={<ImageComponent uri={media[0].url} caption={caption} />}
           />
           <View
             style={{
@@ -70,7 +66,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
                 key={index}
                 ratioHeight={2}
                 ratioWidth={48.5}
-                children={<ImageComponent uri={media[index].url} width={'100%'} height={'100%'} caption={caption} />}
+                children={<ImageComponent uri={media[index].url} caption={caption} />}
               />
             ))}
           </View>
@@ -82,7 +78,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
           <ShadowImage
             ratioHeight={1.4}
             ratioWidth={100}
-            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} caption={caption} />}
+            children={<ImageComponent uri={media[0].url} caption={caption} />}
           />
           <View
             style={{
@@ -96,7 +92,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
                 key={index}
                 ratioHeight={2.5}
                 ratioWidth={31.5}
-                children={<ImageComponent uri={media[index].url} width={'100%'} height={'100%'} caption={caption} />}
+                children={<ImageComponent uri={media[index].url} caption={caption} />}
               />
             ))}
           </View>
@@ -106,29 +102,25 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
   );
 };
 
-const ImageComponent = ({
-  uri,
-  width,
-  height,
-  caption,
-}: {
-  uri: string;
-  width: DimensionValue;
-  height: DimensionValue;
-  caption: string | undefined;
-}) => {
+const ImageComponent = ({ uri, caption }: { uri: string; caption: string | undefined }) => {
   const { height: heights } = useWindowDimensions();
   const navigation = useNavigation();
-
-  const [aspectRatio, setAspectRatio] = useState(2 / 3);
+  // const [visible, setVisible] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState(0);
+  console.log('🚀 ~ file: MediaComponent.tsx:111 ~ ImageComponent ~ aspectRatio:', aspectRatio);
 
   const handleImageLoad = (event: NativeSyntheticEvent<ImageLoadEventData>) => {
     const { width, height } = event.nativeEvent.source;
     const imageAspectRatio = width / (height || 1);
     setAspectRatio(imageAspectRatio);
+    // setVisible(true);
+
+    // setAspectRatio(imageAspectRatio);
   };
+
   return (
     <TouchableWithoutFeedback
+      // style={{ width: '100%', height: 'auto' }}
       onPress={() => {
         //@ts-ignore
         navigation.navigate('ViewerImage', { uri, caption });
@@ -139,7 +131,7 @@ const ImageComponent = ({
         style={{
           width: '100%',
           maxHeight: heights / 1.25,
-          aspectRatio: aspectRatio !== null ? aspectRatio : 2 / 3,
+          aspectRatio: aspectRatio !== null ? aspectRatio : 0,
         }}
         source={{ uri }}
       />
@@ -147,4 +139,4 @@ const ImageComponent = ({
   );
 };
 
-export default memo(MediaComponent);
+export default MediaComponent;

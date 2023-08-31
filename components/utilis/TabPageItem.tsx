@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { moderateScale } from '../../Utilis/metrics';
 import { TextThin } from '../StyledText';
 import { View } from '../Themed';
@@ -21,7 +21,7 @@ const TabPageItem = ({ children, focused }: { children: any; focused: boolean })
         style={{
           fontSize: moderateScale(16),
           textAlign: 'left',
-          
+
           opacity: focused ? 1 : 0.4,
         }}
       >
@@ -31,4 +31,4 @@ const TabPageItem = ({ children, focused }: { children: any; focused: boolean })
   );
 };
 
-export default memo(TabPageItem);
+export default TabPageItem;

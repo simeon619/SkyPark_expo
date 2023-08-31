@@ -1,15 +1,53 @@
+import { useNavigation } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import React from 'react';
-import { Text, View } from '../Themed';
-import { StatPostSchema } from '../../types/PostType';
-import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
-import Colors from '../../constants/Colors';
 import { useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Image } from 'expo-image';
 import { iconsStat } from '../../Utilis/data';
+import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
+import Colors from '../../constants/Colors';
+import {
+  AccountInterface,
+  MessageInterface,
+  PostInterface,
+  ProfileInterface,
+} from '../../managementState/server/Descriptions';
+import { Text, View } from '../Themed';
 
-const PostFooter = ({ stat }: { stat: StatPostSchema }) => {
+const PostFooter = ({
+  data,
+  user,
+  message,
+}: {
+  data: PostInterface;
+  message: MessageInterface | undefined;
+  user:
+    | {
+        account: AccountInterface;
+        profile: ProfileInterface;
+      }
+    | undefined;
+}) => {
   const colorScheme = useColorScheme();
+  const navigation = useNavigation();
+
+  const actionComment = (actionName: string) => {
+    switch (actionName) {
+      case 'comments': {
+        const dataPost = JSON.stringify(data);
+        const infoUser = JSON.stringify(user);
+        const messageUser = JSON.stringify(message);
+
+        //@ts-ignore
+
+        navigation.navigate(`DetailPost`, { dataPost, infoUser, messageUser, id: data._id, commentable: true });
+      }
+      case 'shares':
+        return 'Share';
+      case 'likes':
+        return 'Like';
+    }
+  };
   return (
     <View
       style={{
@@ -29,6 +67,9 @@ const PostFooter = ({ stat }: { stat: StatPostSchema }) => {
         const { url, name }: { url: string; name: 'shares' | 'comments' | 'likes' } = icon;
         return (
           <TouchableOpacity
+            onPress={() => {
+              actionComment(name);
+            }}
             key={index}
             style={{ flexDirection: 'row', columnGap: horizontalScale(5), alignItems: 'center' }}
           >
@@ -43,7 +84,7 @@ const PostFooter = ({ stat }: { stat: StatPostSchema }) => {
                 paddingHorizontal: moderateScale(7),
               }}
             >
-              {stat[name]}
+              {data.statPost[name]}
             </Text>
           </TouchableOpacity>
         );

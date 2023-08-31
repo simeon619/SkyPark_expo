@@ -9,10 +9,10 @@ import PostHeader from './PostHeader';
 const PostSurvey = ({ dataPost }: { dataPost: PostSchema }) => {
   return (
     <View style={{ flex: 1 }}>
-      <PostHeader date={dataPost.createdAt} user={dataPost.user} type={dataPost.type} content={dataPost.content} />
+      {/* <PostHeader date={dataPost.createdAt} user={dataPost.user} type={dataPost.type} content={dataPost.content} />
       <SurveyComponent dataSurvey={dataPost.content.survey} question={dataPost.content.text} />
       <MediaComponent media={dataPost.content.media} />
-      <PostFooter stat={dataPost.statPost} />
+      <PostFooter stat={dataPost.statPost} /> */}
     </View>
   );
 };

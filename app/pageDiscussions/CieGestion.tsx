@@ -1,5 +1,5 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React from 'react';
+import { Text, View } from 'react-native';
 
 const CieGestion = () => {
   return (
@@ -9,4 +9,4 @@ const CieGestion = () => {
   );
 };
 
-export default React.memo(CieGestion);
+export default CieGestion;

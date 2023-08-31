@@ -21,40 +21,55 @@ import {
 import { DarkTheme, DefaultTheme, NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Font from 'expo-font';
+import * as Linking from 'expo-linking';
 import { useCallback, useEffect, useState } from 'react';
 import { View, useColorScheme } from 'react-native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { MagicModalPortal } from 'react-native-magic-modal';
 import { MenuProvider } from 'react-native-popup-menu';
-import * as Linking from 'expo-linking';
 import '../Utilis/hook/onlineRefresh';
 import { useAuthStore } from '../managementState/server/auth';
 
-import TabLayout from './tabs/layout';
+import { SplashScreen } from 'expo-router';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { openDatabase } from '../Utilis/functions/initDB';
+import { TextLight } from '../components/StyledText';
+import Forum from './forum';
+import GroupActivity from './groupActivity';
+import ItemGroup from './groupActivity/ItemGroup';
 import ViewerImage from './pageModal/ViewerImage';
+import DetailPost from './pageModal/detailPost';
+import discussion from './pageModal/discussion';
 import Profile from './profile';
 import Login from './register/Login';
 import Signup from './register/Signup';
-import discussion from './pageModal/discussion';
 import CheckProfile from './settings/CheckProfile';
-import ItemGroup from './groupActivity/ItemGroup';
-import Forum from './forum';
-import DetailPost from './pageModal/detailPost';
-import GroupActivity from './groupActivity';
-import { SplashScreen } from 'expo-router';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { TextLight } from '../components/StyledText';
+import TabLayout from './tabs/layout';
 
 const Stack = createStackNavigator();
 const prefix = Linking.createURL('/');
 export default function RootLayout() {
   // SplashScreen.preventAutoHideAsync();
   const [appIsReady, setAppIsReady] = useState(false);
+  const {  account, fetchLogin } = useAuthStore((state) => state);
 
+  useEffect(() => {
+  
+  }, []);
   useEffect(() => {
     async function prepare() {
       try {
         // load fonts, make any API calls you need to do here
+
+        if (account) {
+         await fetchLogin({ email: account.email, password: account.password });
+        }
+
+        const db = await openDatabase('dbName');
+        db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () => console.log('Foreign keys turned on'));
+
+
         await Font.loadAsync({
           SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
           ...{
@@ -101,7 +116,7 @@ export default function RootLayout() {
       // we hide the splash screen once we know the root view has already
       // performed layout.
       setTimeout(() => SplashScreen.hideAsync(), 2000);
-      // SplashScreen.hideAsync();
+      SplashScreen.hideAsync();
     }
   }, [appIsReady]);
 
@@ -117,29 +132,12 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { isAuth, account, fetchLogin } = useAuthStore((state) => state);
+  const { isAuth  } = useAuthStore((state) => state);
 
-  useEffect(() => {
-    if (account) {
-      fetchLogin({ email: account.email, password: account.password });
-    }
-  }, []);
-
-  // const config = {
-  //   screens: {
-  //     DetailPost: 'post/:id',
-  //   },
-  // };
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer
-        // linking={{
-        //   prefixes: [prefix, 'https://app.example.com'],
-        //   config,
-        // }}
-        fallback={<TextLight>Loading...</TextLight>}
-      >
+      <NavigationContainer fallback={<TextLight>Loading...</TextLight>}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <KeyboardProvider>
             <MenuProvider>

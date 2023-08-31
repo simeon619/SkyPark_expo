@@ -1,27 +1,20 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  TextInput,
-  TouchableOpacity,
-  View as ViewNatif,
-  useColorScheme,
-} from 'react-native';
-import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View as ViewNatif, useColorScheme } from 'react-native';
+import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { horizontalScale, moderateScale, verticalScale } from '../../../Utilis/metrics';
 import Colors from '../../../constants/Colors';
-import { View } from '../../Themed';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { TextLight } from '../../StyledText';
-import { InputTextMessage } from '../../register/input';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { useMessageStore } from '../../../managementState/server/Discussion';
+import { TextLight } from '../../StyledText';
+import { View } from '../../Themed';
+import { InputTextMessage } from '../../register/input';
 
-const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
+const InputMessage = ({ telegram }: { telegram: SharedValue<number> }) => {
   // let recording = new Audio.Recording();
 
   // const [text, setText] = useState('');
@@ -240,6 +233,6 @@ const InputMessage = memo(({ telegram }: { telegram: SharedValue<number> }) => {
       )}
     </AnimatedViewInput>
   );
-});
+};
 
 export default InputMessage;

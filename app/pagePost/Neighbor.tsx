@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { View } from '../../components/Themed';
 import PostIndex from '../../components/post/PostIndex';
@@ -17,4 +17,4 @@ const Neighbor = () => {
   );
 };
 
-export default React.memo(Neighbor);
+export default Neighbor;

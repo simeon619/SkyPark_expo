@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React from 'react';
 import {
   DimensionValue,
   Image,
@@ -8,31 +9,26 @@ import {
 } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { horizontalScale, verticalScale } from '../../Utilis/metrics';
+import { HOST } from '../../constants/Value';
+import { UrlData } from '../../lib/SQueryClient';
 import { TextLight } from '../StyledText';
 import { View } from '../Themed';
 import ShadowImage from './ShadowImage';
-import { UrlData } from '../../lib/SQueryClient';
-import { HOST } from '../../constants/Value';
-import { NavigationProps } from '../../types/navigation';
 
 const GAP_MEDIA = 10;
-const MediaComponent = ({
-  media,
-  caption,
-  route,
-  navigation,
-}: { media: UrlData[] | undefined; caption: string | undefined } & NavigationProps) => {
+const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
   if (!media) {
     return null;
   }
 
+  const navigation = useNavigation();
   const numberMedia = media?.length;
 
   const ImageComponent = ({ uri, width, height }: { uri: string; width: DimensionValue; height: DimensionValue }) => {
     return (
       <TouchableWithoutFeedback
-        //@ts-ignore
         onPress={() => {
+          //@ts-ignore
           navigation.navigate('ViewerImage', { uri, caption });
         }}
       >
@@ -135,4 +131,4 @@ const MediaComponent = ({
     </View>
   );
 };
-export default memo(MediaComponent);
+export default MediaComponent;

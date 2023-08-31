@@ -1,11 +1,11 @@
-import React, { memo } from 'react';
+import React from 'react';
+import { useInfoUserPost, useMessagePost } from '../../Utilis/hook/getInfoPostUser';
+import { PostInterface } from '../../managementState/server/Descriptions';
 import { View } from '../Themed';
 import MediaComponent from '../utilis/MediaComponent';
 import TextComponent from '../utilis/TextComponent';
-import PostHeader from './PostHeader';
-import { PostInterface } from '../../managementState/server/Descriptions';
-import { useInfoUserPost, useMessagePost } from '../../Utilis/hook/getInfoPostUser';
 import PostFooter from './PostFooter';
+import PostHeader from './PostHeader';
 
 const PostMedia = ({ dataPost }: { dataPost: PostInterface }) => {
   const message = useMessagePost({ dataPost });
@@ -16,8 +16,8 @@ const PostMedia = ({ dataPost }: { dataPost: PostInterface }) => {
       <PostHeader data={dataPost} user={infoUser} message={message} />
       <TextComponent message={message} data={dataPost} user={infoUser} />
       <MediaComponent media={message?.files} caption={message?.text} />
-      <PostFooter stat={dataPost.statPost} />
+      <PostFooter message={message} data={dataPost} user={infoUser} />
     </View>
   );
 };
-export default memo(PostMedia);
+export default PostMedia;

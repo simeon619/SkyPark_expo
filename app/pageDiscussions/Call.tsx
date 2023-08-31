@@ -1,5 +1,5 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React from 'react';
+import { Text, View } from 'react-native';
 
 const Call = () => {
   return (
@@ -9,4 +9,4 @@ const Call = () => {
   );
 };
 
-export default React.memo(Call);
+export default Call;

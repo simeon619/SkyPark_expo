@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { AccountInterface, DiscussionInterface, MessageInterface, ProfileInterface } from './Descriptions';
 import { SQuery } from '..';
-import { ArrayData, FileType, UrlData } from '../../lib/SQueryClient';
+import { ArrayData, FileType } from '../../lib/SQueryClient';
 import { produce } from 'immer';
 import { mergeArrayData } from '../../Utilis/functions/fn';
+
 
 const LIMIT_MESSAGES = 20;
 
@@ -17,9 +18,9 @@ interface MessageSchema {
   sendMessage: (data: { value?: string; accountId: string | undefined; files?: FileType[] }) => Promise<void>;
   fetchMessages: (data: { discussion: DiscussionInterface; page: number }) => Promise<void>;
   fetchDiscussion: (accountId: string | undefined) => Promise<void>;
-
   deleteCurrentChannel: () => void;
 }
+
 const DiscussionStorage: any = {};
 let messageStorage: Record<string, Record<string, ArrayData<MessageInterface>>> = {};
 

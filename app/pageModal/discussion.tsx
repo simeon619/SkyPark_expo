@@ -1,30 +1,30 @@
 import { Ionicons } from '@expo/vector-icons';
 
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { AndroidSoftInputModes, KeyboardController, KeyboardGestureArea } from 'react-native-keyboard-controller';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatMessageDate } from '../../Utilis/date';
 import { useTelegramTransitions } from '../../Utilis/hooksKeyboard';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
+import ImageRatio from '../../components/ImgRatio';
+import InstanceAudio from '../../components/InstanceAudio';
 import { TextRegular, TextRegularItalic } from '../../components/StyledText';
 import { View } from '../../components/Themed';
+import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import InputMessage from '../../components/utilis/simpleComponent/inputMessage';
 import Colors from '../../constants/Colors';
-import { useMessageStore } from '../../managementState/server/Discussion';
-import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
-import { MessageInterface } from '../../managementState/server/Descriptions';
-import { ArrayData } from '../../lib/SQueryClient';
-import ImageRatio from '../../components/ImgRatio';
 import { HOST } from '../../constants/Value';
-import InstanceAudio from '../../components/InstanceAudio';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import { useFocusEffect } from '@react-navigation/native';
+import { ArrayData } from '../../lib/SQueryClient';
+import { MessageInterface } from '../../managementState/server/Descriptions';
+import { useMessageStore } from '../../managementState/server/Discussion';
 import { useAuthStore } from '../../managementState/server/auth';
 import { NavigationStackProps } from '../../types/navigation';
 
-const discussion = ({ navigation, route }: NavigationStackProps) => {
+const Discussion = ({ navigation, route }: NavigationStackProps) => {
   const colorSheme = useColorScheme();
   const { width, height } = useWindowDimensions();
 
@@ -240,7 +240,7 @@ const listFooterComponent = () => {
   return <View style={{ height: verticalScale(150) }} />;
 };
 
-const MessageItem = memo(({ item }: { item: MessageInterface }) => {
+const MessageItem = ({ item }: { item: MessageInterface }) => {
   const { account } = useAuthStore((state) => state);
 
   let right = item?.account === account?._id;
@@ -328,6 +328,6 @@ const MessageItem = memo(({ item }: { item: MessageInterface }) => {
       </TextRegularItalic>
     </TouchableWithoutFeedback>
   );
-});
+};
 
-export default React.memo(discussion);
+export default Discussion;

@@ -13,7 +13,7 @@ const PostText = ({ dataPost }: { dataPost: PostInterface }) => {
     <>
       <PostHeader data={dataPost} user={infoUser} message={message} />
       <TextComponent data={dataPost} message={message} user={infoUser} />
-      <PostFooter stat={dataPost.statPost} />
+      <PostFooter data={dataPost} message={message} user={infoUser} />
     </>
   );
 };

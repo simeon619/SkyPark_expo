@@ -48,13 +48,18 @@ type userSchema = {
 const regex = new RegExp(/[^\s\r\n]/g);
 const DetailPost = ({ navigation, route }: NavigationStackProps) => {
   console.log('🚀 ~ file: detailPost.tsx:50 ~ DetailPost ~ route:', route);
-  const params = route.params as any as { dataPost: string; infoUser: string; messageUser: string; id: string };
+  const params = route.params as any as {
+    dataPost: string;
+    infoUser: string;
+    messageUser: string;
+    id: string;
+    commentable: boolean;
+  };
   const post = JSON.parse(params.dataPost as string) as PostInterface;
   const user = JSON.parse(params.infoUser as string) as userSchema;
   const message = JSON.parse(params.messageUser as string) as MessageInterface;
   const id = params.id;
-  const state = useNavigationState((s) => s);
-  console.log('🚀 ~ file: detailPost.tsx:57 ~ DetailPost ~ state:', state);
+  const commentable = params.commentable;
 
   const inputRef = useRef<TextInput>(null);
 
@@ -62,11 +67,9 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
   const { account } = useAuthStore((state) => state);
   const { primaryColour } = useToggleStore((state) => state);
 
-  const [isInputFocused, setInputFocused] = useState(false);
+  const [isInputFocused, setInputFocused] = useState(commentable);
   const [text, setText] = useState('');
   const [commentList, setCommentList] = useState<ArrayData<PostInterface>>({ ...ArrayDataInit, items: [] });
-  console.log('🚀 ~ file: detailPost.tsx:65 ~ DetailPost ~ ArrayDataInit:', ArrayDataInit);
-  console.log('🚀 ~ file: detailPost.tsx:65 ~ DetailPost ~ commentList:', commentList);
 
   const { height } = useWindowDimensions();
   const colorScheme = useColorScheme();
@@ -145,7 +148,7 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
         <PostHeader data={post} user={user} message={message} />
         <TextComponent message={message} />
         {post.type === '2' && <MediaComponent caption={message?.text} media={message?.files} />}
-        <PostFooter stat={post.statPost} />
+        <PostFooter data={post} user={user} message={message} />
       </>
     );
   }, []);
@@ -201,7 +204,17 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
         onEndReachedThreshold={0.6}
         ListFooterComponent={ListFooterComponent}
       />
-      <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: Colors[colorScheme ?? 'light'].background,
+          paddingHorizontal: horizontalScale(10),
+          ...shadow(10),
+        }}
+      >
         <View
           style={{
             flexDirection: 'row',
@@ -213,7 +226,7 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
           }}
         >
           <Pressable onPress={handleFocus}>
-            <TextLight style={{ fontSize: moderateScale(15), marginLeft: horizontalScale(10), flex: 1 }}>
+            <TextLight style={{ fontSize: moderateScale(15), flex: 1, marginVertical: verticalScale(5) }}>
               {isInputFocused ? 'En reponse a' : 'Répondre a'}{' '}
               <TextLight style={{ color: primaryColour }}>@{user.account.name}</TextLight>
             </TextLight>

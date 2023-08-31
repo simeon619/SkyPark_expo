@@ -72,10 +72,6 @@ export const useAuthStore = create<StateSchema, any>(
           loading: false,
           error: undefined,
         }));
-
-        set(() => ({
-          loading: false,
-        }));
       },
 
       fetchLogin: async (LoginData) => {
@@ -114,7 +110,25 @@ const handleAuthAction = async (
 
   try {
     const res = await SQuery.service('login', 'user', AuthData);
-    if (!res.response || !res?.response?.signup.id) throw new Error(JSON.stringify(res));
+    if (!res.response || !res?.response?.signup.id) {
+      set(() => ({
+        account: undefined,
+        user: undefined,
+        profile: undefined,
+        padiezd: undefined,
+        quarter: undefined,
+        address: undefined,
+        building: undefined,
+        favorites: undefined,
+        entreprise: undefined,
+        isAuth: false,
+        loading: false,
+        error: undefined,
+      }));
+
+      throw new Error(JSON.stringify(res));
+    }
+
     const user = await SQuery.newInstance('user', { id: res?.response?.signup.id });
 
     const account = await SQuery.newInstance('account', { id: res?.response?.login.id });

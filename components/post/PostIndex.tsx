@@ -1,15 +1,15 @@
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ActivityIndicator, useWindowDimensions } from 'react-native';
+import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { moderateScale } from '../../Utilis/metrics';
+import { ArrayData } from '../../lib/SQueryClient';
+import { PostInterface } from '../../managementState/server/Descriptions';
+import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
 import { PostType } from '../../types/PostType';
 import { TextMedium } from '../StyledText';
 import { View } from '../Themed';
 import PostMedia from './PostMedia';
 import PostText from './PostText';
-import { ArrayData } from '../../lib/SQueryClient';
-import { PostInterface } from '../../managementState/server/Descriptions';
-import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
-import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 
 const PostIndex = ({ DATA, loadData }: { DATA: ArrayData<PostInterface>; loadData: (page: number) => void }) => {
   const { loadindGetData } = useQuarterPostStore((state) => state);
@@ -78,4 +78,4 @@ const renderItem = ({ item }: { item: PostInterface }) => {
 };
 
 const keyExtractor = (item: PostInterface, index: number) => index.toString();
-export default memo(PostIndex);
+export default PostIndex;

@@ -1,12 +1,12 @@
+import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import ImageView from 'react-native-image-viewing';
-import { View } from '../../components/Themed';
-import { TextLight } from '../../components/StyledText';
-import { moderateScale } from '../../Utilis/metrics';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { moderateScale } from '../../Utilis/metrics';
+import { TextLight } from '../../components/StyledText';
+import { View } from '../../components/Themed';
 import { NavigationStackProps } from '../../types/navigation';
-import { useNavigation } from '@react-navigation/native';
 
 const FormViewerImage = ({ route }: NavigationStackProps) => {
   const params = route.params as any as { uri: string; caption: string };
@@ -50,4 +50,4 @@ const FormViewerImage = ({ route }: NavigationStackProps) => {
   );
 };
 
-export default React.memo(FormViewerImage);
+export default FormViewerImage;

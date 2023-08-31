@@ -1,10 +1,9 @@
 import { io } from 'socket.io-client';
 import { getMyStringValue, removeValue, setStringValue } from '../Utilis/functions/localStorage';
-import { HOST } from '../constants/Value';
 import createSQueryFrom from '../lib/SQueryClient';
 import { CacheValues, Controller, Descriptions } from './server/Descriptions';
 
-const socket = io('http://192.168.1.5:3500', {
+const socket = io('http://192.168.1.13:3500', {
   extraHeaders: {},
 });
 
