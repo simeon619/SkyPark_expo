@@ -1,60 +1,68 @@
-import { Ionicons } from '@expo/vector-icons';
-
-import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import { FlatList, useColorScheme } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
+
+import { UserSchema, getAllUsers } from '../../Utilis/models/Chat/userRepository';
 import { TextRegular } from '../../components/StyledText';
 import { View } from '../../components/Themed';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import Colors from '../../constants/Colors';
-import useToggleStore, { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
-import { AccountInterface, ProfileInterface } from '../../managementState/server/Descriptions';
+import { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
 import { useMessageStore } from '../../managementState/server/Discussion';
-import { useListUserStore } from '../../managementState/server/Listuser';
-import { NavigationProps } from '../../types/navigation';
-import user from '../../user.json';
 
-const Chat = ({ route, navigation }: NavigationProps) => {
-  const { listAccount, setListAccount } = useListUserStore((state) => state);
+const Chat = () => {
+  // const { listAccount, setListAccount } = useListUserStore((state) => state);
 
   const { setFocusedUser } = useMessageStore((state) => state);
-  const [conversations, setConversations] = useState<typeof user>([]);
   const colorScheme = useColorScheme();
-  const { primaryColour } = useToggleStore((state) => state);
   const { ctxMenu } = useMenuDiscussionIsOpen((state) => state);
+
+  const [users, setUsers] = useState<UserSchema[]>([]);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [hasMoreUsers, setHasMoreUsers] = useState(true);
+  const navigation = useNavigation();
+  const itemsPerPage = 10;
+
+  // const whatIconStatus = useCallback(
+  //   ({ send, received, seen }: { send: number | null; received: number | null; seen: number | null }) => {
+  //     if (received && seen) {
+  //       return <Ionicons name="checkmark-done-outline" size={18} color="blue" />;
+  //     } else if (received) {
+  //       return <Ionicons name="checkmark-done-outline" size={18} color="grey" />;
+  //     } else if (send) {
+  //       return <Ionicons name="checkmark-outline" size={18} color="grey" />;
+  //     } else return <Ionicons name="remove-circle-outline" size={16} color="grey" />;
+  //   },
+  //   []
+  // );
+
   useEffect(() => {
-    setConversations(() => user);
-  }, []);
+    fetchUsers();
+  }, [pageNumber]);
+  const fetchUsers = async () => {
+    if (!hasMoreUsers) {
+      return;
+    }
 
-  const whatIconStatus = useCallback(
-    ({ send, received, seen }: { send: number | null; received: number | null; seen: number | null }) => {
-      if (received && seen) {
-        return <Ionicons name="checkmark-done-outline" size={18} color="blue" />;
-      } else if (received) {
-        return <Ionicons name="checkmark-done-outline" size={18} color="grey" />;
-      } else if (send) {
-        return <Ionicons name="checkmark-outline" size={18} color="grey" />;
-      } else return <Ionicons name="remove-circle-outline" size={16} color="grey" />;
-    },
-    []
-  );
+    const newUsers = await getAllUsers(pageNumber, itemsPerPage);
+    if (newUsers.length === 0) {
+      setHasMoreUsers(false);
+      return;
+    }
 
-  useEffect(() => {
-    setListAccount();
-  }, []);
+    setUsers([...users, ...newUsers]);
+  };
 
-  const handleCurrentConversation = ({
-    account,
-    profile,
-  }: {
-    account: AccountInterface | undefined;
-    profile: ProfileInterface | undefined;
-  }) => {
-    if (account && profile) {
-      setFocusedUser({ account, profile });
+  const loadMoreUsers = () => {
+    setPageNumber(pageNumber + 1);
+  };
 
-      navigation.navigate('Discussion');
+  const handleCurrentConversation = (InfoUserConv: UserSchema) => {
+    if (InfoUserConv) {
+      //@ts-ignore
+      navigation.navigate('Discussion', { data: InfoUserConv });
     } else {
       console.error('erreur');
     }
@@ -63,17 +71,19 @@ const Chat = ({ route, navigation }: NavigationProps) => {
   return (
     <FlatList
       style={{ flex: 1 }}
-      data={listAccount}
-      keyExtractor={(item, index) => index.toString()}
+      data={users}
+      keyExtractor={(item) => item.ID_Utilisateur}
+      onEndReached={loadMoreUsers}
+      onEndReachedThreshold={0.5}
       contentContainerStyle={{
         flexGrow: 1,
         paddingBottom: verticalScale(50),
         backgroundColor: Colors[colorScheme ?? 'light'].background,
       }}
-      renderItem={({ item: conversation, index }) => (
+      renderItem={({ item: conversation }) => (
         <TouchableOpacity
           disabled={ctxMenu}
-          onPress={() => handleCurrentConversation({ account: conversation?.account, profile: conversation?.profile })}
+          onPress={() => handleCurrentConversation(conversation)}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -82,16 +92,7 @@ const Chat = ({ route, navigation }: NavigationProps) => {
             borderBottomWidth: 1,
           }}
         >
-          {/* <Image
-            source={ { uri: HOST +  conversation?.profile.imgProfile[0].url }}
-            style={{
-              width: moderateScale(45),
-              aspectRatio: 1,
-              borderRadius: 25,
-            }}
-          /> */}
-
-          <ImageProfile image={conversation?.profile.imgProfile[0]?.url} size={moderateScale(55)} />
+          <ImageProfile image={conversation?.Url_Pic} size={moderateScale(55)} />
 
           <View
             style={{
@@ -101,7 +102,7 @@ const Chat = ({ route, navigation }: NavigationProps) => {
               justifyContent: 'space-between',
             }}
           >
-            <TextRegular style={{ fontSize: moderateScale(16) }}>{conversation?.account.name}</TextRegular>
+            <TextRegular style={{ fontSize: moderateScale(16) }}>{conversation?.Nom_Utilisateur}</TextRegular>
             {/* <TextRegularItalic style={{ color: 'gray' }} numberOfLines={1}>
               {conversation.last_message.Owner && whatIconStatus(conversation.last_message.status)}
               {conversation.last_message.text}

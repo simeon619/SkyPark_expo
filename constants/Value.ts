@@ -8,6 +8,7 @@ export const LARGE_PIC_USER = 80;
 export const SMALL_PIC_USER = 35;
 
 export const HOST = 'http://192.168.1.13:3500';
+export const DB_NAME = 'dbName';
 export const LIMIT_TRANSACTION = 20;
 
 export const formTextPlaceholder = (str: IconName) => {

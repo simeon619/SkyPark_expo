@@ -32,9 +32,9 @@ import { useAuthStore } from '../managementState/server/auth';
 
 import { SplashScreen } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
-import { openDatabase } from '../Utilis/functions/initDB';
+import { createTable, openDatabase } from '../Utilis/models/Conversations/database';
 import { TextLight } from '../components/StyledText';
+import { DB_NAME } from '../constants/Value';
 import Forum from './forum';
 import GroupActivity from './groupActivity';
 import ItemGroup from './groupActivity/ItemGroup';
@@ -52,24 +52,15 @@ const prefix = Linking.createURL('/');
 export default function RootLayout() {
   // SplashScreen.preventAutoHideAsync();
   const [appIsReady, setAppIsReady] = useState(false);
-  const {  account, fetchLogin } = useAuthStore((state) => state);
+  const { account, fetchLogin } = useAuthStore((state) => state);
 
-  useEffect(() => {
-  
-  }, []);
   useEffect(() => {
     async function prepare() {
       try {
         // load fonts, make any API calls you need to do here
-
         if (account) {
-         await fetchLogin({ email: account.email, password: account.password });
+          await fetchLogin({ email: account.email, password: account.password });
         }
-
-        const db = await openDatabase('dbName');
-        db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () => console.log('Foreign keys turned on'));
-
-
         await Font.loadAsync({
           SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
           ...{
@@ -132,8 +123,17 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { isAuth  } = useAuthStore((state) => state);
+  const { isAuth } = useAuthStore((state) => state);
 
+  useEffect(() => {
+    const deleteDb = async () => {
+      const db = await openDatabase(DB_NAME);
+      await createTable(db);
+      // dropAllTables(db);
+    };
+
+    deleteDb();
+  }, []);
 
   return (
     <SafeAreaProvider>
@@ -183,7 +183,7 @@ function RootLayoutNav() {
                 ) : (
                   <>
                     <Stack.Screen name="Login" component={Login} />
-                    <Stack.Screen name="CheckProfile" component={CheckProfile} />
+                    {/* <Stack.Screen name="CheckProfile" component={CheckProfile} /> */}
                     <Stack.Screen
                       name="Signup"
                       component={Signup}

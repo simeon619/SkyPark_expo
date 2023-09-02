@@ -1,10 +1,10 @@
-import { create } from 'zustand';
-import { AccountInterface, DiscussionInterface, MessageInterface, ProfileInterface } from './Descriptions';
-import { SQuery } from '..';
-import { ArrayData, FileType } from '../../lib/SQueryClient';
 import { produce } from 'immer';
-import { mergeArrayData } from '../../Utilis/functions/fn';
+import { create } from 'zustand';
+import { SQuery } from '..';
 
+import { getChannel, getDiscussionId, mergeArrayData } from '../../Utilis/functions/utlisSquery';
+import { ArrayData, FileType } from '../../lib/SQueryClient';
+import { AccountInterface, DiscussionInterface, MessageInterface, ProfileInterface } from './Descriptions';
 
 const LIMIT_MESSAGES = 20;
 
@@ -21,8 +21,8 @@ interface MessageSchema {
   deleteCurrentChannel: () => void;
 }
 
-const DiscussionStorage: any = {};
-let messageStorage: Record<string, Record<string, ArrayData<MessageInterface>>> = {};
+// const DiscussionStorage: any = {};
+// let messageStorage: Record<string, Record<string, ArrayData<MessageInterface>>> = {};
 
 export const useMessageStore = create<MessageSchema, any>(
   //   persist(
@@ -59,58 +59,40 @@ export const useMessageStore = create<MessageSchema, any>(
         return;
       }
 
-      if (!messageStorage[discussion._id]) {
-        messageStorage[discussion._id] = {};
-      }
-      if (messageStorage[discussion._id][data.page]) {
-        set((state) => {
-          return produce(state, (draft) => {
-            const existingMessages = draft.messages[discussion._id][page];
-            let newMessages = messageStorage[discussion._id][page];
-            const newItems = newMessages?.items || [];
+      try {
+        const discussionInstance = await SQuery.newInstance('discussion', { id: discussion._id });
 
-            let mergesMessage = { ...newMessages, items: newItems };
-
-            draft.messages[discussion._id][page] = mergeArrayData(existingMessages, mergesMessage);
-          });
-        });
-      } else {
-        try {
-          const discussionInstance = await SQuery.newInstance('discussion', { id: discussion._id });
-
-          const channel = await discussionInstance?.channel;
-          const arrayData = await channel?.update({
-            paging: {
-              limit: LIMIT_MESSAGES,
-              page: data.page,
-              sort: {
-                __createdAt: -1,
-              },
+        const channel = await discussionInstance?.channel;
+        const arrayData = await channel?.update({
+          paging: {
+            limit: LIMIT_MESSAGES,
+            page: data.page,
+            sort: {
+              __createdAt: -1,
             },
-          });
+          },
+        });
 
-          if (arrayData) {
-            messageStorage[discussion._id][page] = arrayData;
-            set((state) => {
-              let draftState = produce(state, (draft) => {
-                if (!draft.messages) {
-                  draft.messages = {};
-                }
-                if (!draft.messages[discussion._id]) {
-                  draft.messages[discussion._id] = {};
-                  //@ts-ignore
-                  draft.messages[discussion._id][page] = { items: [] };
-                }
-                let newM = mergeArrayData(draft.messages[discussion._id][page], arrayData);
+        if (arrayData) {
+          set((state) => {
+            let draftState = produce(state, (draft) => {
+              if (!draft.messages) {
+                draft.messages = {};
+              }
+              if (!draft.messages[discussion._id]) {
+                draft.messages[discussion._id] = {};
+                //@ts-ignore
+                draft.messages[discussion._id][page] = { items: [] };
+              }
+              let newM = mergeArrayData(draft.messages[discussion._id][page], arrayData);
 
-                draft.messages[discussion._id][page] = newM;
-              });
-              return draftState;
+              draft.messages[discussion._id][page] = newM;
             });
-          }
-        } catch (error) {
-          console.error('Error fetching messages:', error);
+            return draftState;
+          });
         }
+      } catch (error) {
+        console.error('Error fetching messages:', error);
       }
     },
 
@@ -122,28 +104,13 @@ export const useMessageStore = create<MessageSchema, any>(
       }
 
       try {
-        let discussionId = '';
-        if (!DiscussionStorage[accountId]) {
-          const res = await SQuery.service('messenger', 'createDiscussion', {
-            receiverAccountId: accountId,
-          });
+        let discussionId = await getDiscussionId(accountId);
 
-          if (!res.response?.id) return;
-          discussionId = res.response.id;
-        } else {
-          discussionId = DiscussionStorage[accountId];
-        }
-        DiscussionStorage[accountId] = discussionId;
+        let channel = await getChannel(discussionId);
 
-        const discussion = await SQuery.newInstance('discussion', { id: discussionId });
-
-        if (!discussion) return;
-
-        const ArrayDiscussion = await discussion.channel;
-
-        ArrayDiscussion?.when(
+        channel?.when(
           'update',
-          async (obj) => {
+          async (obj: any) => {
             let messageId = obj?.added[0];
 
             if (!messageId) return;
@@ -154,23 +121,21 @@ export const useMessageStore = create<MessageSchema, any>(
 
             let newMessage = messageInstance.$cache;
 
-            messageStorage[discussionId]['1']?.items.unshift(newMessage);
-
-            set((state) => {
-              return produce(state, (draftState) => {
-                const newLastPageMessages = draftState.messages[discussionId]['1']?.items || [];
-                const updatedItems = [newMessage, ...newLastPageMessages];
-                //@ts-ignore
-                draftState.messages[discussionId]['1'] = {
-                  ...draftState.messages[discussionId]['1'],
-                  items: updatedItems,
-                };
-              });
-            });
+            // set((state) => {
+            //   return produce(state, (draftState) => {
+            //     const newLastPageMessages = draftState.messages[discussionId]['1']?.items || [];
+            //     const updatedItems = [newMessage, ...newLastPageMessages];
+            //     //@ts-ignore
+            //     draftState.messages[discussionId]['1'] = {
+            //       ...draftState.messages[discussionId]['1'],
+            //       items: updatedItems,
+            //     };
+            //   });
+            // });
           },
           'sendMessage:Discussion'
         );
-        await ArrayDiscussion?.update({
+        await channel?.update({
           addNew: [
             {
               account: accountId,

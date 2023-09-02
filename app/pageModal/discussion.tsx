@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatMessageDate } from '../../Utilis/date';
 import { useTelegramTransitions } from '../../Utilis/hooksKeyboard';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
+import { UserSchema } from '../../Utilis/models/Conversations/userRepository';
 import ImageRatio from '../../components/ImgRatio';
 import InstanceAudio from '../../components/InstanceAudio';
 import { TextRegular, TextRegularItalic } from '../../components/StyledText';
@@ -26,6 +27,9 @@ import { NavigationStackProps } from '../../types/navigation';
 
 const Discussion = ({ navigation, route }: NavigationStackProps) => {
   const colorSheme = useColorScheme();
+
+  const user = route.params as any as { data: UserSchema };
+
   const { width, height } = useWindowDimensions();
 
   const scrollViewRef = useRef<FlatList<any>>(null);
@@ -155,10 +159,10 @@ const Discussion = ({ navigation, route }: NavigationStackProps) => {
                 <Ionicons name="arrow-back" size={28} color="black" style={{ paddingHorizontal: horizontalScale(7) }} />
               </TouchableOpacity>
 
-              <ImageProfile size={moderateScale(50)} image={focusedUser?.profile.imgProfile[0]?.url} />
+              <ImageProfile size={moderateScale(50)} image={user.data.Url_Pic} />
               <View>
                 <TextRegular style={{ fontSize: moderateScale(15) }} numberOfLines={1}>
-                  {focusedUser?.account.name}
+                  {user.data.Nom_Utilisateur}
                 </TextRegular>
                 <TextRegular
                   numberOfLines={1}

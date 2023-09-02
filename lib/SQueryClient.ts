@@ -1,8 +1,7 @@
-import { Socket, io } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 
 import { createModelFrom } from './Model';
 import EventEmiter, { EventInfo } from './event/eventEmiter';
-import { createInstanceFrom } from './Instance';
 
 /*
 
@@ -180,6 +179,7 @@ export type FileType = {
 //     })
 //   })
 // }
+
 interface InitInterface {
   socket: Socket;
   setCookie: (cookies: string) => Promise<void>;
@@ -229,6 +229,20 @@ export function createSQueryFrom<
     removed: string[];
     arrayData: Promise<ArrayData<K> | undefined>;
   };
+
+  type ArrayInstance<K extends keyof D> = {
+    when: <e extends 'update' | 'refresh'>(
+      event: e,
+      listener: listenerSchema<e extends 'update' ? ModifiedData<K> : ArrayData<K>>,
+      uid?: string
+    ) => void;
+    update: (options: Partial<ArrayUpdateOption<K>>) => Promise<ArrayData<K> | undefined>;
+    last: () => Promise<ArrayData<K> | undefined>;
+    next: () => Promise<ArrayData<K> | undefined>;
+    back: () => Promise<ArrayData<K> | undefined>;
+    page: (page?: number) => Promise<ArrayData<K> | undefined>;
+  };
+
   type ArrayData<K extends keyof D> =
     | {
         added: string[];
@@ -247,18 +261,6 @@ export function createSQueryFrom<
       }
     | null
     | undefined;
-  type ArrayInstance<K extends keyof D> = {
-    when: <e extends 'update' | 'refresh'>(
-      event: e,
-      listener: listenerSchema<e extends 'update' ? ModifiedData<K> : ArrayData<K>>,
-      uid?: string
-    ) => void;
-    update: (options: Partial<ArrayUpdateOption<K>>) => Promise<ArrayData<K> | undefined>;
-    last: () => Promise<ArrayData<K> | undefined>;
-    next: () => Promise<ArrayData<K> | undefined>;
-    back: () => Promise<ArrayData<K> | undefined>;
-    page: (page?: number) => Promise<ArrayData<K> | undefined>;
-  };
 
   type E<K extends keyof D> = keyof {
     [key in keyof C[K] as `refresh:${key & string}` | `refresh`]: any;
