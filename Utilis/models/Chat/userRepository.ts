@@ -1,10 +1,12 @@
 import * as SQLite from 'expo-sqlite';
 import { DB_NAME } from '../../../constants/Value';
+import { getMessages } from './messageReposotory';
 
 const db = SQLite.openDatabase(DB_NAME);
 
 export interface UserSchema {
   ID_Utilisateur: string;
+  ID_Conversation?: string;
   Nom_Utilisateur: string;
   Url_Pic?: string;
   Last_Seen: string;
@@ -56,11 +58,16 @@ export const readUser = (userID: string): Promise<UserSchema | null> => {
 
 export const getAllUsers = (pageNumber: number, itemsPerPage: number): Promise<UserSchema[]> => {
   const offset = pageNumber * itemsPerPage;
-  const query = `SELECT * FROM Utilisateurs LIMIT ${itemsPerPage} OFFSET ${offset}`;
+  const query = `SELECT 
+  Utilisateurs.*,
+   Conversations.ID_Conversation AS ID_Conversation 
+   FROM Utilisateurs
+    LEFT JOIN Conversations ON Utilisateurs.ID_Utilisateur = Conversations.ID_DESTINATAIRE
+    LIMIT ? OFFSET ?`;
 
   return new Promise((resolve) => {
     db.transaction((tx) => {
-      tx.executeSql(query, [], (_, result) => {
+      tx.executeSql(query, [itemsPerPage, offset], (_, result) => {
         if (result.rows.length > 0) {
           const users: UserSchema[] = [];
 
@@ -75,5 +82,7 @@ export const getAllUsers = (pageNumber: number, itemsPerPage: number): Promise<U
     });
   });
 };
+
+getMessages(1, 1, '');
 
 // let u = await readUser("")

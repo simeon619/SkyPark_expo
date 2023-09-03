@@ -10,7 +10,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatMessageDate } from '../../Utilis/date';
 import { useTelegramTransitions } from '../../Utilis/hooksKeyboard';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
-import { UserSchema } from '../../Utilis/models/Conversations/userRepository';
+
+import { MessageWithFileAndStatus, getMessages } from '../../Utilis/models/Chat/messageReposotory';
+import { UserSchema } from '../../Utilis/models/Chat/userRepository';
 import ImageRatio from '../../components/ImgRatio';
 import InstanceAudio from '../../components/InstanceAudio';
 import { TextRegular, TextRegularItalic } from '../../components/StyledText';
@@ -19,69 +21,60 @@ import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import InputMessage from '../../components/utilis/simpleComponent/inputMessage';
 import Colors from '../../constants/Colors';
 import { HOST } from '../../constants/Value';
-import { ArrayData } from '../../lib/SQueryClient';
-import { MessageInterface } from '../../managementState/server/Descriptions';
-import { useMessageStore } from '../../managementState/server/Discussion';
+import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
 import { NavigationStackProps } from '../../types/navigation';
 
-const Discussion = ({ navigation, route }: NavigationStackProps) => {
+const Discussion = ({ route, navigation }: NavigationStackProps) => {
   const colorSheme = useColorScheme();
 
   const user = route.params as any as { data: UserSchema };
-
+  const [pageNumber, setPageNumber] = useState(1);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const itemsPerPage = 10;
   const { width, height } = useWindowDimensions();
 
+  const [messagesOfDisc, setMessagesOfDisc] = useState<MessageWithFileAndStatus[]>([]);
   const scrollViewRef = useRef<FlatList<any>>(null);
 
-  const [messagesOfDisc, setMessagesOfDisc] = useState<MessageInterface[]>([]);
-  const [infoDiscussion, setInfoDiscussion] = useState<ArrayData<MessageInterface>>();
-
-  const { currentDiscussion, fetchMessages, messages, focusedUser, fetchDiscussion, deleteCurrentChannel } =
-    useMessageStore((state) => state);
-
   useEffect(() => {
-    if (!currentDiscussion) return;
-
-    const discussionId = currentDiscussion._id;
-    const discussionMessages = messages[discussionId]?.[infoDiscussion?.page || 1];
-    setInfoDiscussion(discussionMessages);
-
-    if (discussionMessages) {
-      updateMessagesAndInfoDiscussion(discussionId);
-    }
-  }, [messages]);
-
-  async function updateMessagesAndInfoDiscussion(discussionId: string) {
-    setMessagesOfDisc(() => {
-      let updatedMessages = [];
-      const page = infoDiscussion?.totalPages || 1;
-      for (let i = 1; i <= page; i++) {
-        const items = messages[discussionId][i]?.items || [];
-        updatedMessages.push(...items);
-      }
-      return updatedMessages;
+    eventEmitter.on(EventMessageType.receiveMessage + user.data.ID_Conversation, async () => {
+      let messages = (await getMessages(1, 1, user.data.ID_Conversation || ''))[0];
+      setMessagesOfDisc((prev) => [
+        ...prev,
+        {
+          Contenu_Message: messages.Contenu_Message,
+          Date_Envoye: messages.Date_Envoye,
+          Horodatage: messages.Horodatage,
+          ID_Expediteur: messages.ID_Expediteur,
+          files: messages.files,
+          Date_Lu: messages.Date_Lu,
+          Date_Reçu: Date.now(),
+        },
+      ]);
     });
-  }
+    fetchMessages();
 
-  useEffect(() => {
-    if (currentDiscussion) {
-      fetchMessages({ discussion: currentDiscussion, page: 1 });
-    }
-  }, [currentDiscussion]);
-
-  useEffect(() => {
-    fetchDiscussion(focusedUser?.account?._id);
     return () => {
-      deleteCurrentChannel();
+      eventEmitter.removeAllListeners(EventMessageType.receiveMessage + user.data.ID_Conversation);
     };
-  }, [focusedUser]);
+  }, [pageNumber]);
 
+  const fetchMessages = async () => {
+    if (!hasMoreMessages) {
+      return;
+    }
+
+    const newMessages = await getMessages(pageNumber, itemsPerPage, user.data.ID_Conversation || '');
+    if (newMessages.length === 0) {
+      setHasMoreMessages(false);
+      return;
+    }
+
+    setMessagesOfDisc((prev) => [...prev, ...newMessages]);
+  };
   const loadMoreMessages = () => {
-    if (!currentDiscussion || !infoDiscussion?.hasNextPage) return;
-
-    const nextPage = infoDiscussion.nextPage || 1;
-    fetchMessages({ discussion: currentDiscussion, page: nextPage });
+    setPageNumber(pageNumber + 1);
   };
 
   useFocusEffect(
@@ -95,9 +88,9 @@ const Discussion = ({ navigation, route }: NavigationStackProps) => {
   const scrollToIndex = (index: number) => {
     scrollViewRef.current?.scrollToIndex({ index, animated: true });
   };
-  useCallback(() => {
-    scrollViewRef.current?.scrollToIndex({ index: 0, animated: true });
-  }, [messages]);
+  // useCallback(() => {
+  //   scrollViewRef.current?.scrollToIndex({ index: 0, animated: true });
+  // }, [messages]);
 
   const { height: telegram } = useTelegramTransitions();
 
@@ -128,7 +121,6 @@ const Discussion = ({ navigation, route }: NavigationStackProps) => {
             borderBottomWidth: 0.2,
             borderBottomColor: Colors[colorSheme ?? 'light'].greyDark,
             position: 'absolute',
-
             zIndex: 85,
             top: 0,
             left: 0,
@@ -216,18 +208,20 @@ const Discussion = ({ navigation, route }: NavigationStackProps) => {
                 inverted={true}
                 keyboardShouldPersistTaps="always"
                 maxToRenderPerBatch={1}
-                onEndReachedThreshold={0.7}
+                onEndReachedThreshold={0.5}
                 onEndReached={loadMoreMessages}
                 data={messagesOfDisc}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 ListFooterComponent={listFooterComponent}
               />
+
+              {/* <FlatList data={[]} renderItem={renderItem} /> */}
             </View>
           </View>
         </Animated.View>
       </KeyboardGestureArea>
-      <InputMessage telegram={telegram} />
+      <InputMessage telegram={telegram} accountId={user.data.ID_Utilisateur} />
     </View>
   );
 };
@@ -244,10 +238,10 @@ const listFooterComponent = () => {
   return <View style={{ height: verticalScale(150) }} />;
 };
 
-const MessageItem = ({ item }: { item: MessageInterface }) => {
+const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
   const { account } = useAuthStore((state) => state);
 
-  let right = item?.account === account?._id;
+  let right = item?.ID_Expediteur === account?._id;
 
   return (
     <TouchableWithoutFeedback
@@ -277,7 +271,7 @@ const MessageItem = ({ item }: { item: MessageInterface }) => {
           backgroundColor: '#0000',
         }}
       >
-        {item?.text ? (
+        {item?.Contenu_Message ? (
           <View
             style={[
               right
@@ -304,11 +298,11 @@ const MessageItem = ({ item }: { item: MessageInterface }) => {
                 padding: moderateScale(7),
               }}
             >
-              {item?.text}
+              {item?.Contenu_Message}
             </TextRegular>
           </View>
         ) : (
-          item?.files?.map((file: any, i: any) => {
+          item?.files?.map((file, i) => {
             let type = 'image';
             if (file.extension === 'jpeg' || file.extension === 'jpg' || file.extension === 'png') {
               type = 'image';
@@ -328,7 +322,7 @@ const MessageItem = ({ item }: { item: MessageInterface }) => {
           fontSize: moderateScale(12),
         }}
       >
-        {formatMessageDate(item?.__createdAt)}
+        {formatMessageDate(item?.Horodatage || 0)}
       </TextRegularItalic>
     </TouchableWithoutFeedback>
   );

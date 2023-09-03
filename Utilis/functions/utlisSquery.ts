@@ -1,5 +1,7 @@
-import { ArrayData, InstanceInterface } from '../../lib/SQueryClient';
+import { ArrayData, FileType, InstanceInterface } from '../../lib/SQueryClient';
 import { SQuery } from '../../managementState';
+import eventEmitter, { EventMessageType } from '../../managementState/event';
+import { addStatutMessage, createMessageWithStatusAndFiles } from '../models/Chat/messageReposotory';
 
 export function mergeArrayData<T extends InstanceInterface>(
   existingData: ArrayData<T>,
@@ -53,9 +55,76 @@ export const getChannel = async (discussionId: string | undefined) => {
   if (!discussion) return;
   const ArrayDiscussion = await discussion?.channel;
   if (!ArrayDiscussion) return;
+
+  ArrayDiscussion?.when(
+    'update',
+    async (obj) => {
+      let messageId = obj?.added[0];
+
+      if (!messageId) return;
+
+      let messageInstance = await SQuery.newInstance('message', { id: messageId });
+
+      if (!messageInstance) return;
+
+      let newMessage = messageInstance.$cache;
+
+      let files =
+        newMessage.files?.map((file) => {
+          return {
+            extension: file.extension,
+            size: file.size,
+            url: file.url,
+          };
+        }) || [];
+
+      await createMessageWithStatusAndFiles(
+        {
+          Contenu_Message: newMessage.text,
+          Horodatage: newMessage.__createdAt,
+          ID_MESSAGE_SERVEUR: newMessage._id,
+          ID_Conversation: discussionId || '',
+          ID_Expediteur: newMessage.account,
+        },
+        { Date_Reçu: Date.now() },
+        files
+      );
+      eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+    },
+    'receiveMessage:' + discussionId
+  );
+
   return ArrayDiscussion;
 };
 
+export const sendServer = async (
+  discussionId: string,
+  accountId: string,
+  files: FileType[] | undefined,
+  value?: string
+) => {
+  let channel = await getChannel(discussionId);
+
+  let messageAdd = await channel?.update({
+    addNew: [
+      {
+        account: accountId,
+        text: value,
+        files: files,
+      },
+    ],
+  });
+
+  if (messageAdd?.added[0]) {
+    let messageInstance = await SQuery.newInstance('message', { id: messageAdd?.added[0] });
+
+    if (!messageInstance) return;
+
+    addStatutMessage({ ID_Message: messageAdd?.added[0], Date_Envoye: messageInstance?.__createdAt });
+
+    eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+  }
+};
 // if (withChannel && discussionId) {
 //   const discussion = await SQuery.newInstance('discussion', { id: discussionId });
 //   if (!discussion) return '' as GetDiscussionReturnType<T>;

@@ -42,7 +42,7 @@ export const createTable = async (db: SQLite.SQLiteDatabase) => {
     );
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Files (
-             _id VARCHAR(24) PRIMARY KEY ,
+             _id INTEGER PRIMARY KEY AUTOINCREMENT ,
              ID_Message VARCHAR(24) NOT NULL,
              URL TEXT ,
              Size INTEGER,
@@ -52,7 +52,7 @@ export const createTable = async (db: SQLite.SQLiteDatabase) => {
 
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Messages (
-             ID_Message VARCHAR(24) PRIMARY KEY AUTOINCREMENT,
+             ID_Message INTEGER PRIMARY KEY AUTOINCREMENT,
              ID_MESSAGE_SERVEUR VARCHAR(24),
              ID_Conversation VARCHAR(24) NOT NULL,
              ID_Expediteur VARCHAR(24),
@@ -63,7 +63,7 @@ export const createTable = async (db: SQLite.SQLiteDatabase) => {
 
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS StatutLecture (
-             ID_StatutLecture VARCHAR(24) PRIMARY KEY,
+             ID_StatutLecture INTEGER PRIMARY KEY AUTOINCREMENT,
              ID_Message VARCHAR(24) NOT NULL,
              Date_Envoye INTEGER ,
              Date_Reçu INTEGER ,
@@ -101,6 +101,12 @@ export const createTable = async (db: SQLite.SQLiteDatabase) => {
       `ALTER TABLE StatutLecture
            ADD FOREIGN KEY (ID_Message) REFERENCES Messages (ID_Message)`
     );
+
+    tx.executeSql(`CREATE INDEX idx_conversation_id ON Messages (ID_Conversation)`);
+
+    tx.executeSql(`CREATE INDEX idx_messages_id ON Messages (ID_Message)`);
+    tx.executeSql(`CREATE INDEX idx_StatutLecture_id ON StatutLecture (ID_Message)`);
+    tx.executeSql(`CREATE INDEX idx_Files_id ON Files (ID_Message)`);
   });
   //verifiez si toutes les tables on ete cree
   db.transaction((tx) => {

@@ -9,12 +9,13 @@ import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { horizontalScale, moderateScale, verticalScale } from '../../../Utilis/metrics';
 import Colors from '../../../constants/Colors';
-import { useMessageStore } from '../../../managementState/server/Discussion';
+
+import { sendMessage } from '../../../managementState/server/Discussion';
 import { TextLight } from '../../StyledText';
 import { View } from '../../Themed';
 import { InputTextMessage } from '../../register/input';
 
-const InputMessage = ({ telegram }: { telegram: SharedValue<number> }) => {
+const InputMessage = ({ telegram, accountId }: { telegram: SharedValue<number>; accountId: string }) => {
   // let recording = new Audio.Recording();
 
   // const [text, setText] = useState('');
@@ -27,7 +28,7 @@ const InputMessage = ({ telegram }: { telegram: SharedValue<number> }) => {
   const [heightInput, setHeightInput] = useState(40);
 
   const AnimatedViewInput = Animated.createAnimatedComponent(ViewNatif);
-  const { sendMessage, focusedUser } = useMessageStore((state) => state);
+  // const { sendMessage, focusedUser } = useMessageStore((state) => state);
 
   const { bottom } = useSafeAreaInsets();
 
@@ -67,7 +68,7 @@ const InputMessage = ({ telegram }: { telegram: SharedValue<number> }) => {
       const fileType = `audio/${ext}`;
 
       await sendMessage({
-        accountId: focusedUser?.account?._id,
+        accountId: accountId,
         files: [{ buffer: base64, type: fileType, fileName, size: 10, encoding: 'base64' }],
       });
     }

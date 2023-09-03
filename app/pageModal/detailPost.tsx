@@ -1,16 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  AccountInterface,
-  ProfileInterface,
-  PostInterface,
-  MessageInterface,
-} from '../../managementState/server/Descriptions';
-import PostHeader from '../../components/postDetail/PostHeader';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import TextComponent from '../../components/postDetail/TextComponent';
-import MediaComponent from '../../components/postDetail/MediaComponent';
-import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
+import { Ionicons } from '@expo/vector-icons';
 import {
   ActivityIndicator,
   BackHandler,
@@ -23,22 +13,32 @@ import {
   useColorScheme,
   useWindowDimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import { TextLight, TextMedium } from '../../components/StyledText';
-import { Ionicons } from '@expo/vector-icons';
+import MediaComponent from '../../components/postDetail/MediaComponent';
+import PostHeader from '../../components/postDetail/PostHeader';
+import TextComponent from '../../components/postDetail/TextComponent';
+import {
+  AccountInterface,
+  MessageInterface,
+  PostInterface,
+  ProfileInterface,
+} from '../../managementState/server/Descriptions';
 
-import useToggleStore from '../../managementState/client/preference';
-import Colors from '../../constants/Colors';
+import { useFocusEffect } from '@react-navigation/native';
 import { pickImage } from '../../Utilis/functions/media/media';
-import PostFooter from '../../components/post/PostFooter';
-import { useCommentPostStore } from '../../managementState/server/post/commentStore';
-import { useAuthStore } from '../../managementState/server/auth';
-import { PostType } from '../../types/PostType';
-import PostMedia from '../../components/post/PostMedia';
+import { mergeArrayData } from '../../Utilis/functions/utlisSquery';
 import CommentText from '../../components/comment/CommentText';
-import { NavigationStackProps } from '../../types/navigation';
-import { useFocusEffect, useNavigationState } from '@react-navigation/native';
+import PostFooter from '../../components/post/PostFooter';
+import PostMedia from '../../components/post/PostMedia';
+import Colors from '../../constants/Colors';
 import { ArrayData, ArrayDataInit } from '../../lib/SQueryClient';
-import { mergeArrayData } from '../../Utilis/functions/fn';
+import useToggleStore from '../../managementState/client/preference';
+import { useAuthStore } from '../../managementState/server/auth';
+import { useCommentPostStore } from '../../managementState/server/post/commentStore';
+import { PostType } from '../../types/PostType';
+import { NavigationStackProps } from '../../types/navigation';
 
 type userSchema = {
   account: AccountInterface;

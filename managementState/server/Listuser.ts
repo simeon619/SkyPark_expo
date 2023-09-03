@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { SQuery } from '..';
 
-import { getDiscussionId } from '../../Utilis/functions/utlisSquery';
+import { getChannel, getDiscussionId } from '../../Utilis/functions/utlisSquery';
 import { createPrivateConversation } from '../../Utilis/models/Chat/messageReposotory';
 import { addUser } from '../../Utilis/models/Chat/userRepository';
 import { AccountInterface, ProfileInterface, QuarterInterface } from './Descriptions';
@@ -90,6 +90,7 @@ export const useListUserStore = create<ListUserSchema, any>((set) => ({
       if (!userId) return;
       return new Promise(async (resolve, reject) => {
         const discussionId = await getDiscussionId(userId);
+        await getChannel(discussionId);
         if (!discussionId) {
           reject(new Error("L'identifiant de la discussion n'a pas été trouvé."));
           return;
@@ -118,7 +119,6 @@ export const useListUserStore = create<ListUserSchema, any>((set) => ({
           reject(new Error('Utilisateur non défini.'));
           return;
         }
-
         addUser({
           ID_Utilisateur: user.account._id,
           Nom_Utilisateur: user.account.name,
