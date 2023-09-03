@@ -1,6 +1,7 @@
 import { Image, ImageLoadEventData } from 'expo-image';
 import React, { useState } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { HOST } from '../constants/Value';
 const ImageRatio = ({ uri, ratio }: { uri: string | undefined; ratio: number }) => {
   const [aspectRatio, setAspectRatio] = useState(2 / 3);
   const [imagePath, setImagePath] = useState<string>('');
@@ -11,7 +12,7 @@ const ImageRatio = ({ uri, ratio }: { uri: string | undefined; ratio: number }) 
     setAspectRatio(imageAspectRatio);
   };
 
-  const imageSource = { uri };
+  const imageSource = { uri: HOST + uri };
 
   // useEffect(() => {
   //   const fetchImage = async () => {

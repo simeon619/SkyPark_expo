@@ -1,9 +1,9 @@
-import { ArrayData, ArrayDataInit, FileType } from '../../../lib/SQueryClient';
-import { PostInterface } from '../Descriptions';
 import { create } from 'zustand';
 import { SQuery } from '../..';
+import { mergeArrayData } from '../../../Utilis/functions/utlisSquery';
+import { ArrayData, ArrayDataInit, FileType } from '../../../lib/SQueryClient';
+import { PostInterface } from '../Descriptions';
 import { useAuthStore } from '../auth';
-import { mergeArrayData } from '../../../Utilis/functions/fn';
 
 type quarterPostSchema = {
   listPost: ArrayData<PostInterface>;

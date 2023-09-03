@@ -2,9 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { SQuery } from '..';
-import { openDatabase } from '../../Utilis/functions/initDB';
-import { createTable } from '../../Utilis/models/Conversations/database';
-import { DB_NAME } from '../../constants/Value';
 import {
   AccountInterface,
   AddressInterface,
@@ -165,8 +162,7 @@ const handleAuthAction = async (
       building,
     });
 
-    const db = await openDatabase(DB_NAME);
-    createTable(db);
+    // createTable(db);
 
     set(() => ({
       ...cache,

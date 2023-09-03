@@ -86,7 +86,7 @@ export const getChannel = async (discussionId: string | undefined) => {
           ID_Conversation: discussionId || '',
           ID_Expediteur: newMessage.account,
         },
-        { Date_Reçu: Date.now() },
+        { Date_Reçu: Date.now(), ID_MESSAGE_SERVEUR: messageId },
         files
       );
       eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
@@ -120,18 +120,44 @@ export const sendServer = async (
 
     if (!messageInstance) return;
 
-    addStatutMessage({ ID_Message: messageAdd?.added[0], Date_Envoye: messageInstance?.__createdAt });
+    addStatutMessage({ ID_MESSAGE_SERVEUR: messageAdd?.added[0], Date_Envoye: messageInstance?.__createdAt });
 
     eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
   }
 };
-// if (withChannel && discussionId) {
-//   const discussion = await SQuery.newInstance('discussion', { id: discussionId });
-//   if (!discussion) return '' as GetDiscussionReturnType<T>;
-//   const ArrayDiscussion = await discussion.channel;
+export const putMessageLocal = async (
+  files: FileType[] | undefined,
+  value: string | undefined,
+  discussionId: string,
+  accountId: string
+) => {
+  try {
+    let fileMap =
+      files?.map((file) => {
+        return {
+          extension: file.type.split('/')[1],
+          size: file.size,
+          url: file.uri || '',
+          buffer: file.buffer,
+          type: file.type,
+          fileName: file.fileName,
+          encoding: file.encoding,
+        };
+      }) || [];
 
-//   return {
-//     discussionId,
-//     channel: ArrayDiscussion,
-//   } as GetDiscussionReturnType<T>;
-// }
+    await createMessageWithStatusAndFiles(
+      {
+        Contenu_Message: value || null,
+        Horodatage: Date.now(),
+        ID_MESSAGE_SERVEUR: null,
+        ID_Conversation: discussionId,
+        ID_Expediteur: accountId,
+      },
+      {},
+      fileMap
+    );
+    eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+  } catch (error) {
+    console.error('Error sending message:', error);
+  }
+};

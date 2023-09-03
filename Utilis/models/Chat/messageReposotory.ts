@@ -1,7 +1,6 @@
-import * as SQLite from 'expo-sqlite';
-import { DB_NAME } from '../../../constants/Value';
+import SQLite from 'react-native-sqlite-storage';
 
-const db = SQLite.openDatabase(DB_NAME);
+const db = SQLite.openDatabase({ name: 'aq.db' });
 
 export interface ConversationPrivateSchema {
   ID_Conversation: string;
@@ -18,52 +17,38 @@ export interface ConversationGroupeSchema {
 export const createPrivateConversation = async (conv: ConversationPrivateSchema) => {
   const { ID_Conversation, Type_Conversation, ID_DESTINATAIRE } = conv;
 
-  db.transactionAsync(async (tx) => {
+  db.transaction(async (tx) => {
     const query = `
       INSERT INTO Conversations (ID_Conversation, Type_Conversation, ID_DESTINATAIRE)
       VALUES (?, ?, ?)
     `;
 
-    let result = await tx.executeSqlAsync(query, [ID_Conversation, Type_Conversation, ID_DESTINATAIRE]);
-    //@ts-ignore
-    if (result?.error) {
-      //@ts-ignore
-      console.log("Erreur lors de l'ajout de l'conv :", result?.error);
-      //@ts-ignore
-      throw new Error(result?.error);
-    }
-    //@ts-ignore
-    if (result.rowsAffected > 0) {
-      console.log('conv ajouté avec succès.');
-    } else {
-      console.log("Échec de l'ajout de l'conv.");
-    }
+    tx.executeSql(query, [ID_Conversation, Type_Conversation, ID_DESTINATAIRE], (_, result) => {
+      if (result.rowsAffected > 0) {
+        console.log('conv ajouté avec succès.');
+      } else {
+        console.log("Échec de l'ajout de l'conv.");
+      }
+    });
   });
 };
 
 export const createGroupConversation = async (conv: ConversationGroupeSchema) => {
   const { ID_Conversation, Type_Conversation, ID_Groupe } = conv;
 
-  db.transactionAsync(async (tx) => {
+  db.transaction(async (tx) => {
     const query = `
       INSERT INTO Conversations (ID_Conversation, Type_Conversation, ID_Groupe)
       VALUES (?, ?, ?)
     `;
 
-    let result = await tx.executeSqlAsync(query, [ID_Conversation, Type_Conversation, ID_Groupe]);
-    //@ts-ignore
-    if (result?.error) {
-      //@ts-ignore
-      console.log("Erreur lors de l'ajout de l'conv :", result?.error);
-      //@ts-ignore
-      throw new Error(result?.error);
-    }
-    //@ts-ignore
-    if (result.rowsAffected > 0) {
-      console.log('conv ajouté avec succès.');
-    } else {
-      console.log("Échec de l'ajout de l'conv.");
-    }
+    tx.executeSql(query, [ID_Conversation, Type_Conversation, ID_Groupe], (_, result) => {
+      if (result.rowsAffected > 0) {
+        console.log('conv ajouté avec succès.');
+      } else {
+        console.log("Échec de l'ajout de l'conv.");
+      }
+    });
   });
 };
 
@@ -71,24 +56,19 @@ interface Message {
   ID_MESSAGE_SERVEUR?: string | null;
   ID_Conversation: string;
   ID_Expediteur: string;
-  Contenu_Message: string;
+  Contenu_Message: string | null;
   Horodatage: number;
 }
 
 interface StatutLecture {
   // ID_StatutLecture: string;
-  ID_Message?: string;
+  ID_MESSAGE_SERVEUR?: string | null;
+  ID_Message?: string | null;
   Date_Envoye?: number | null;
   Date_Reçu?: number | null;
   Date_Lu?: number | null;
 }
-interface StatutMessage {
-  // ID_StatutLecture: string;
-  ID_Message: string;
-  Date_Envoye?: number | null;
-  Date_Reçu?: number | null;
-  Date_Lu?: number | null;
-}
+
 interface File {
   url: string | null;
   size: number | null;
@@ -114,10 +94,14 @@ export async function createMessageWithStatusAndFiles(
         ],
         (_, results) => {
           if (results.rowsAffected > 0) {
-            const MessageId = results.rows.item(0).ID_Message;
+            console.log(
+              '🚀 ~ file: messageReposotory.ts:103 ~ db.transaction ~ results.rows.item(0):',
+              results.rows.item(0)
+            );
+            // const MessageId = results.rows.item(0).ID_Message;
             tx.executeSql(
-              'INSERT INTO StatutLecture ( ID_Message, Date_Envoye, Date_Reçu, Date_Lu) VALUES (?, ?, ?, ?)',
-              [MessageId, statusData.Date_Envoye || null, statusData.Date_Reçu || null, statusData.Date_Lu || null],
+              'INSERT INTO StatutLecture ( Date_Envoye, Date_Reçu, Date_Lu) VALUES ( ?, ?, ?)',
+              [statusData.Date_Envoye || null, statusData.Date_Reçu || null, statusData.Date_Lu || null],
               (_, results) => {
                 if (results.rowsAffected > 0) {
                   const fileInsertPromises = filesData.map((file) => {
@@ -172,13 +156,13 @@ export async function createMessageWithStatusAndFiles(
   });
 }
 
-export async function addStatutMessage(statutLecture: StatutMessage): Promise<void> {
+export async function addStatutMessage(statutLecture: StatutLecture): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     db.transaction((tx) => {
       tx.executeSql(
-        'INSERT INTO StatutLecture (ID_Message, Date_Envoye, Date_Reçu, Date_Lu) VALUES (?, ?, ?, ?)',
+        // 'UPDATE StatutLecture (ID_MESSAGE_SERVEUR, Date_Envoye, Date_Reçu, Date_Lu) VALUES (?, ?, ?, ?)',
         [
-          statutLecture.ID_Message,
+          statutLecture.ID_MESSAGE_SERVEUR,
           statutLecture.Date_Envoye || null,
           statutLecture.Date_Reçu || null,
           statutLecture.Date_Lu || null,
@@ -204,6 +188,7 @@ export type MessageWithFileAndStatus = {
   Contenu_Message: string;
   ID_Expediteur: string;
   Horodatage: number;
+  ID_Conversation: string;
   Date_Envoye: number | null;
   Date_Reçu: number | null;
   Date_Lu: number | null;
@@ -220,6 +205,7 @@ export const getMessages = async (
     const query = `
       SELECT 
          Messages.ID_Message AS ID_Message,
+        Messages.ID_Conversation AS ID_Conversation,
         Messages.Contenu_Message AS Contenu_Message,
         Messages.ID_Expediteur AS ID_Expediteur,
         StatutLecture.Date_Envoye AS Date_Envoye,
@@ -239,7 +225,7 @@ export const getMessages = async (
         async (_, { rows }) => {
           let files = await getFilesForMessage(rows.item(0).ID_Message);
 
-          const messagesWithFilesAndStatus: MessageWithFileAndStatus[] = rows._array;
+          const messagesWithFilesAndStatus: MessageWithFileAndStatus[] = rows.raw();
           let result = messagesWithFilesAndStatus.map((message) => {
             return {
               ...message,
@@ -257,19 +243,31 @@ export const getMessages = async (
   });
 };
 export type FileSchema = {
-  _id: string;
+  _id: number;
   url: string;
   size: number;
   extension: string;
+  type: string;
+  fileName: string;
+  encoding:
+    | 'binary'
+    | 'base64'
+    | 'ascii'
+    | 'hex'
+    | 'base64url'
+    | 'latin1'
+    | 'ucs-2'
+    | 'ucs2'
+    | 'utf-8'
+    | 'utf16le'
+    | 'utf8';
+  buffer: Uint8Array;
 };
 
 export const getFilesForMessage = (messageId: string): Promise<FileSchema[]> => {
   const query = `
     SELECT 
-      Files._id AS _id,
-      Files.URL AS url,
-      Files.Size AS size,
-      Files.Extension AS extension
+      Files.*
     FROM Files
     WHERE Files.ID_Message = ?
   `;
@@ -298,6 +296,7 @@ export const getMessagesWithNullDateEnvoye = async (): Promise<MessageWithFileAn
     SELECT 
     Messages.ID_Message AS ID_Message,
    Messages.Contenu_Message AS Contenu_Message,
+   Messages.ID_Conversation AS ID_Conversation,
    Messages.ID_Expediteur AS ID_Expediteur,
    StatutLecture.Date_Envoye AS Date_Envoye,
    StatutLecture.Date_Reçu AS Date_Reçu,
@@ -315,7 +314,7 @@ export const getMessagesWithNullDateEnvoye = async (): Promise<MessageWithFileAn
         async (_, { rows }) => {
           let files = await getFilesForMessage(rows.item(0).ID_Message);
 
-          const messagesWithFilesAndStatus: MessageWithFileAndStatus[] = rows._array;
+          const messagesWithFilesAndStatus: MessageWithFileAndStatus[] = rows.raw();
           let result = messagesWithFilesAndStatus.map((message) => {
             return {
               ...message,

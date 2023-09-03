@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, useColorScheme } from 'react-native';
 import { verticalScale } from '../../Utilis/metrics';
 
-import { UserSchema, getAllUsers } from '../../Utilis/models/Chat/userRepository';
+import { RefreshControl } from 'react-native-gesture-handler';
+import { UserSchema, getAllUsers, readUser } from '../../Utilis/models/Chat/userRepository';
 import ItemChat from '../../components/discussion/ItemChat';
 import Colors from '../../constants/Colors';
+import { setListAccount } from '../../managementState/server/Listuser';
 
 const Chat = () => {
   // const { listAccount, setListAccount } = useListUserStore((state) => state);
@@ -18,20 +20,26 @@ const Chat = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    fetchUsers();
+    // setListAccount();
+    // fetchUsers();
   }, [pageNumber]);
   const fetchUsers = async () => {
-    if (!hasMoreUsers) {
-      return;
-    }
+    // if (!hasMoreUsers) {
+    //   return;
+    // }
 
-    const newUsers = await getAllUsers(pageNumber, itemsPerPage);
-    if (newUsers.length === 0) {
-      setHasMoreUsers(false);
-      return;
-    }
+    const t = await readUser('64ea9c0b03c6ae621b3e4951');
+    if (!t) return;
 
-    setUsers((prev) => [...prev, ...newUsers]);
+    // const newUsers = await getAllUsers(pageNumber, itemsPerPage);
+    // console.log('🚀 ~ file: Chat.tsx:30 ~ fetchUsers ~ newUsers:', newUsers);
+    // if (newUsers.length === 0) {
+    //   setHasMoreUsers(false);
+    //   return;
+    // }
+    setUsers([t]);
+
+    // setUsers((prev) => [...prev, ...newUsers]);
   };
 
   const loadMoreUsers = () => {
@@ -44,6 +52,7 @@ const Chat = () => {
       data={users}
       keyExtractor={(item) => item.ID_Utilisateur}
       onEndReached={loadMoreUsers}
+      refreshControl={<RefreshControl refreshing={false} onRefresh={fetchUsers} />}
       onEndReachedThreshold={0.5}
       contentContainerStyle={{
         flexGrow: 1,

@@ -1,7 +1,5 @@
-import { getDiscussionId, sendServer } from '../../Utilis/functions/utlisSquery';
-import { createMessageWithStatusAndFiles } from '../../Utilis/models/Chat/messageReposotory';
+import { getDiscussionId, putMessageLocal, sendServer } from '../../Utilis/functions/utlisSquery';
 import { FileType } from '../../lib/SQueryClient';
-import eventEmitter, { EventMessageType } from '../event';
 
 const LIMIT_MESSAGES = 20;
 
@@ -102,32 +100,12 @@ export const sendMessage = async (data: { value?: string; accountId: string | un
     console.error('Error sending message:', data);
     return;
   }
-
   let discussionId = await getDiscussionId(accountId);
-  let filess =
-    files?.map((file) => {
-      return {
-        extension: file.type.split('/')[1],
-        size: file.size,
-        url: file.uri || '',
-      };
-    }) || [];
-
-  await createMessageWithStatusAndFiles(
-    {
-      Contenu_Message: value || '',
-      Horodatage: Date.now(),
-      ID_MESSAGE_SERVEUR: null,
-      ID_Conversation: discussionId || '',
-      ID_Expediteur: accountId,
-    },
-    {},
-    filess
-  );
-  eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+  if (!discussionId) return;
 
   try {
-    sendServer(discussionId || '', accountId, files, value);
+    await putMessageLocal(files, value, discussionId, accountId);
+    await sendServer(discussionId, accountId, files, value);
   } catch (error) {
     console.error('Error sending message:', error);
   }

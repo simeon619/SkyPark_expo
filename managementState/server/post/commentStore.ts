@@ -1,9 +1,8 @@
-import { ArrayData, ArrayDataInit } from './../../../lib/SQueryClient';
 import { create } from 'zustand';
 import { SQuery } from '../..';
 import { FileType } from '../../../lib/SQueryClient';
 import { PostInterface } from '../Descriptions';
-import { mergeArrayData } from '../../../Utilis/functions/fn';
+import { ArrayData, ArrayDataInit } from './../../../lib/SQueryClient';
 
 export async function setCommentPost(data: {
   postId: string;
@@ -87,7 +86,6 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
       },
     });
 
-    console.log('🚀 ~ file: commentStore.ts:85 ~ getComments: ~ ArrayComment:', ArrayComment);
     set(() => ({
       loadingComment: false,
     }));

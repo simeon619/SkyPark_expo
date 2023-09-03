@@ -1,70 +1,82 @@
-import * as SQLite from 'expo-sqlite';
+import SQLite from 'react-native-sqlite-storage';
 
-export async function openDatabase(pathToDatabaseFile: string): Promise<SQLite.SQLiteDatabase> {
-  return SQLite.openDatabase(pathToDatabaseFile);
-}
+const db = SQLite.openDatabase({ name: 'aq.db' });
 
-export const createTable = async (db: SQLite.SQLiteDatabase) => {
-  await db.execAsync([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false);
+export const createTable = async () => {
+  // await db.execAsync([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false);
 
-  // db.exec([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false, () => console.log('Foreign keys turned on'));
+  db.executeSql('PRAGMA foreign_keys = ON;');
 
   db.transaction((tx) => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Utilisateurs (
-             ID_Utilisateur VARCHAR(24) PRIMARY KEY,
+             ID_Utilisateur TEXT PRIMARY KEY,
              Nom_Utilisateur TEXT NOT NULL,
              Url_Pic TEXT,
-             Last_Seen DATETIME NOT NULL
+             Last_Seen INTEGER NOT NULL
            )`
     );
+  });
 
+  db.transaction((tx) => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Groupes (
-             ID_Groupe VARCHAR(24) PRIMARY KEY,
+             ID_Groupe VARCHAR(32) PRIMARY KEY,
              Nom_Groupe VARCHAR(250) NOT NULL
            )`
     );
+  });
 
+  db.transaction((tx) => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Conversations (
-             ID_Conversation VARCHAR(24) PRIMARY KEY,
-             Type_Conversation VARCHAR(24) NOT NULL,
-             ID_DESTINATAIRE VARCHAR(24),
-             ID_Groupe VARCHAR(24) 
+             ID_Conversation VARCHAR(32) PRIMARY KEY,
+             Type_Conversation VARCHAR(32) NOT NULL,
+             ID_DESTINATAIRE VARCHAR(32),
+             ID_Groupe VARCHAR(32) 
            )`
     );
+  });
+
+  db.transaction((tx) => {
     tx.executeSql(
-      `CREATE TABLE IF NOT EXISTS ParticipantsAuGroupe (
-             ID_Utilisateur VARCHAR(24),
-             ID_Groupe VARCHAR(24)
+      `CREATE TABLE IF NOT EXISTS Participants (
+             ID_Utilisateur VARCHAR(32),
+             ID_Groupe VARCHAR(32)
            )`
     );
+  });
+
+  db.transaction((tx) => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Files (
-             _id INTEGER PRIMARY KEY AUTOINCREMENT ,
-             ID_Message VARCHAR(24) NOT NULL,
-             URL TEXT ,
+             ID_File VARCHAR(32) PRIMARY KEY,
+             ID_Message VARCHAR(32) NOT NULL,
+             URL TEXT,
              Size INTEGER,
              Extension TEXT
            )`
     );
+  });
 
+  db.transaction((tx) => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Messages (
-             ID_Message INTEGER PRIMARY KEY AUTOINCREMENT,
-             ID_MESSAGE_SERVEUR VARCHAR(24),
-             ID_Conversation VARCHAR(24) NOT NULL,
-             ID_Expediteur VARCHAR(24),
-             Contenu_Message TEXT ,
-             Horodatage INTEGER NOT NULL,
-           )`
+           ID_Message INTEGER PRIMARY KEY AUTOINCREMENT,
+           ID_MESSAGE_SERVEUR VARCHAR(32),
+           ID_Conversation VARCHAR(32) NOT NULL,
+           ID_Expediteur VARCHAR(32),
+           Contenu_Message TEXT ,
+           Horodatage INTEGER NOT NULL,
+         )`
     );
+  });
 
+  db.transaction((tx) => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS StatutLecture (
              ID_StatutLecture INTEGER PRIMARY KEY AUTOINCREMENT,
-             ID_Message VARCHAR(24) NOT NULL,
+             ID_Message VARCHAR(32) NOT NULL,
              Date_Envoye INTEGER ,
              Date_Reçu INTEGER ,
              Date_Lu INTEGER 
@@ -78,36 +90,46 @@ export const createTable = async (db: SQLite.SQLiteDatabase) => {
       `ALTER TABLE Files
            ADD FOREIGN KEY (ID_Message) REFERENCES Messages (ID_Message)`
     );
+  });
 
+  db.transaction((tx) => {
     tx.executeSql(
       `ALTER TABLE Messages
            ADD FOREIGN KEY (ID_Conversation) REFERENCES Conversations (ID_Conversation),
            ADD FOREIGN KEY (ID_Expediteur) REFERENCES Utilisateurs (ID_Utilisateur),`
     );
+  });
 
+  db.transaction((tx) => {
     tx.executeSql(
       `ALTER TABLE Conversations
            ADD FOREIGN KEY (ID_DESTINATAIRE) REFERENCES Utilisateurs (ID_Utilisateur),
            ADD FOREIGN KEY (ID_Groupe) REFERENCES Groupes (ID_Groupe)`
     );
+  });
 
+  db.transaction((tx) => {
     tx.executeSql(
       `ALTER TABLE ParticipantsAuGroupe
            ADD FOREIGN KEY (ID_Utilisateur) REFERENCES Utilisateurs (ID_Utilisateur),
            ADD FOREIGN KEY (ID_Groupe) REFERENCES Groupes (ID_Groupe)`
     );
+  });
 
+  db.transaction((tx) => {
     tx.executeSql(
       `ALTER TABLE StatutLecture
-           ADD FOREIGN KEY (ID_Message) REFERENCES Messages (ID_Message)`
+         ADD FOREIGN KEY (ID_Message) REFERENCES Messages (ID_Message)`
     );
-
-    tx.executeSql(`CREATE INDEX idx_conversation_id ON Messages (ID_Conversation)`);
-
-    tx.executeSql(`CREATE INDEX idx_messages_id ON Messages (ID_Message)`);
-    tx.executeSql(`CREATE INDEX idx_StatutLecture_id ON StatutLecture (ID_Message)`);
-    tx.executeSql(`CREATE INDEX idx_Files_id ON Files (ID_Message)`);
   });
+
+  db.transaction((tx) => {
+    tx.executeSql(
+      `ALTER TABLE StatutLecture
+         ADD FOREIGN KEY (ID_Message) REFERENCES Messages (ID_Message)`
+    );
+  });
+
   //verifiez si toutes les tables on ete cree
   db.transaction((tx) => {
     tx.executeSql(`SELECT name FROM sqlite_master WHERE type='table';`, [], (_, result) => {
@@ -118,7 +140,7 @@ export const createTable = async (db: SQLite.SQLiteDatabase) => {
   });
 };
 
-export const dropAllTables = (db: SQLite.SQLiteDatabase) => {
+export const dropAllTables = () => {
   db.transaction((tx) => {
     tx.executeSql(`SELECT name FROM sqlite_master WHERE type='table';`, [], (_, result) => {
       for (let i = 0; i < result.rows.length; i++) {

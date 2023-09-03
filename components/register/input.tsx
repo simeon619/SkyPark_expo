@@ -8,7 +8,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { pickImage } from '../../Utilis/functions/media/media';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
-import { useMessageStore } from '../../managementState/server/Discussion';
+import { sendMessage } from '../../managementState/server/Discussion';
 import { TextExtraLight } from '../StyledText';
 
 type InputProps = {
@@ -157,13 +157,14 @@ export const InputBottomSheet = ({
 export const InputTextMessage = ({
   placeholder,
   startRecording,
+  accountId,
 }: {
   placeholder: string;
   startRecording: () => void;
+  accountId: string;
 }) => {
   const colorScheme = useColorScheme();
   const heightAnim = useSharedValue(0);
-  const { sendMessage, focusedUser } = useMessageStore((state) => state);
 
   const [text, setText] = useState('');
   const animatedStyles = useAnimatedStyle(() => {
@@ -235,7 +236,7 @@ export const InputTextMessage = ({
                 let files = images?.map((image) => {
                   return image.PrepareImage;
                 });
-                sendMessage({ accountId: focusedUser?.account?._id, files });
+                sendMessage({ accountId: accountId, files });
               }
             }}
             style={{}}
@@ -252,7 +253,7 @@ export const InputTextMessage = ({
               <TouchableOpacity
                 onPress={() => {
                   sendMessage({
-                    accountId: focusedUser?.account?._id,
+                    accountId: accountId,
                     value: text,
                   });
                   setText('');

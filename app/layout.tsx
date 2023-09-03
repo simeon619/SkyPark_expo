@@ -32,9 +32,8 @@ import { useAuthStore } from '../managementState/server/auth';
 
 import { SplashScreen } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { createTable, openDatabase } from '../Utilis/models/Conversations/database';
+import { createTable, dropAllTables } from '../Utilis/models/Chat/database';
 import { TextLight } from '../components/StyledText';
-import { DB_NAME } from '../constants/Value';
 import Forum from './forum';
 import GroupActivity from './groupActivity';
 import ItemGroup from './groupActivity/ItemGroup';
@@ -127,9 +126,8 @@ function RootLayoutNav() {
 
   useEffect(() => {
     const deleteDb = async () => {
-      const db = await openDatabase(DB_NAME);
-      await createTable(db);
-      // dropAllTables(db);
+      await createTable();
+      // dropAllTables();
     };
 
     deleteDb();

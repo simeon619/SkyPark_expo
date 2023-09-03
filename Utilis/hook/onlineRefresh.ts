@@ -1,4 +1,5 @@
 import NetInfo from '@react-native-community/netinfo';
+import { sendServer } from '../functions/utlisSquery';
 import { getMessagesWithNullDateEnvoye } from '../models/Chat/messageReposotory';
 
 NetInfo.addEventListener((state) => {
@@ -7,10 +8,10 @@ NetInfo.addEventListener((state) => {
       let messages = await getMessagesWithNullDateEnvoye();
 
       messages.forEach(async (message) => {
-        // sendServer()
+        sendServer(message.ID_Conversation, message.ID_Expediteur, message.files, message.Contenu_Message);
       });
     };
 
-    sendMesssageNotSend();
+    // sendMesssageNotSend();
   }
 });

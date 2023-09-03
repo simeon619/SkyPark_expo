@@ -20,7 +20,6 @@ import { View } from '../../components/Themed';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import InputMessage from '../../components/utilis/simpleComponent/inputMessage';
 import Colors from '../../constants/Colors';
-import { HOST } from '../../constants/Value';
 import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
 import { NavigationStackProps } from '../../types/navigation';
@@ -50,6 +49,7 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
           files: messages.files,
           Date_Lu: messages.Date_Lu,
           Date_Reçu: Date.now(),
+          ID_Conversation: messages.ID_Conversation,
         },
       ]);
     });
@@ -309,7 +309,7 @@ const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
             } else if (file.extension === 'm4a' || file.extension === 'mp3') {
               type = 'audio';
             }
-            if (type === 'image') return <ImageRatio uri={HOST + file.url} key={i} ratio={2.5} />;
+            if (type === 'image') return <ImageRatio uri={file.url} key={i} ratio={2.5} />;
             if (type === 'audio') return <InstanceAudio voiceUrl={file.url} key={i} />;
           })
         )}

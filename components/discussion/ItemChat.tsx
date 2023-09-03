@@ -11,10 +11,14 @@ import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
 import { TextMedium, TextRegular, TextRegularItalic } from '../StyledText';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
+import { useNavigation } from '@react-navigation/native';
 
 const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
+  console.log('🚀 ~ file: ItemChat.tsx:17 ~ ItemChat ~ conversation:', conversation);
   const { ctxMenu } = useMenuDiscussionIsOpen((state) => state);
   const [lastMessage, setLastMessge] = useState<MessageWithFileAndStatus>();
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     eventEmitter.on(EventMessageType.receiveMessage + conversation.ID_Conversation, async () => {
@@ -117,19 +121,21 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
         >
           {formatMessageDate(lastMessage?.Date_Reçu || 0)}
         </TextMedium>
+
         {!(lastMessage?.ID_Expediteur == account?._id) && (
-          <TextMedium
-            style={{
-              color: '#fff',
-              alignSelf: 'center',
-              backgroundColor: primaryColour,
-              padding: moderateScale(3),
-              borderRadius: 99,
-              fontSize: moderateScale(14),
-            }}
-          >
-            {Math.ceil(Math.random() * 2)}
-          </TextMedium>
+          <></>
+          // <TextMedium
+          //   style={{
+          //     color: '#fff',
+          //     alignSelf: 'center',
+          //     backgroundColor: primaryColour,
+          //     padding: moderateScale(3),
+          //     borderRadius: 99,
+          //     // fontSize: moderateScale(14),
+          //   }}
+          // >
+          //   {/* {Math.ceil(Math.random() * 2)} */}
+          // </TextMedium>
         )}
       </View>
     </TouchableOpacity>

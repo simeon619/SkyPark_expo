@@ -167,7 +167,9 @@ const InputMessage = ({ telegram, accountId }: { telegram: SharedValue<number>; 
   }
   return (
     <AnimatedViewInput style={viewInputStyle}>
-      {!(duration > 0) && <InputTextMessage startRecording={startRecording} placeholder="Ecrivez votre message" />}
+      {!(duration > 0) && (
+        <InputTextMessage startRecording={startRecording} placeholder="Ecrivez votre message" accountId={accountId} />
+      )}
       {duration > 0 && (
         <View
           style={{
