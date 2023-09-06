@@ -34,7 +34,7 @@ const ImageRatio = ({ uri, ratio }: { uri: string | undefined; ratio: number }) 
   return (
     <Image
       contentFit="cover"
-      source={imageSource}
+      source={{ uri }}
       style={{
         width: '100%',
         maxHeight: height / ratio,

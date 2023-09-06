@@ -1,6 +1,6 @@
 import SQLite from 'react-native-sqlite-storage';
 
-const db = SQLite.openDatabase({ name: 'aq.db' });
+export const db = SQLite.openDatabase({ name: 'three.db', location: 'Documents' });
 
 export const createTable = async () => {
   // await db.execAsync([{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], false);
@@ -33,7 +33,7 @@ export const createTable = async () => {
              ID_Conversation VARCHAR(32) PRIMARY KEY,
              Type_Conversation VARCHAR(32) NOT NULL,
              ID_DESTINATAIRE VARCHAR(32),
-             ID_Groupe VARCHAR(32) 
+             ID_Groupe VARCHAR(32)
            )`
     );
   });
@@ -50,11 +50,16 @@ export const createTable = async () => {
   db.transaction((tx) => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Files (
-             ID_File VARCHAR(32) PRIMARY KEY,
+             ID_File INTEGER PRIMARY KEY AUTOINCREMENT,
              ID_Message VARCHAR(32) NOT NULL,
-             URL TEXT,
-             Size INTEGER,
-             Extension TEXT
+             url TEXT,
+             uri TEXT,
+             size INTEGER,
+             extension TEXT,
+             fileName TEXT,
+             encoding VARCHAR(32),
+             type VARCHAR(32),
+             buffer BLOB
            )`
     );
   });
@@ -62,12 +67,11 @@ export const createTable = async () => {
   db.transaction((tx) => {
     tx.executeSql(
       `CREATE TABLE IF NOT EXISTS Messages (
-           ID_Message INTEGER PRIMARY KEY AUTOINCREMENT,
-           ID_MESSAGE_SERVEUR VARCHAR(32),
+           ID_Message VARCHAR(32) PRIMARY KEY,
            ID_Conversation VARCHAR(32) NOT NULL,
            ID_Expediteur VARCHAR(32),
            Contenu_Message TEXT ,
-           Horodatage INTEGER NOT NULL,
+           Horodatage INTEGER NOT NULL
          )`
     );
   });
@@ -130,6 +134,23 @@ export const createTable = async () => {
     );
   });
 
+  db.transaction((tx) => {
+    tx.executeSql('CREATE INDEX IF NOT EXISTS idx_ID_Conversation ON Messages (ID_Conversation)');
+  });
+
+  db.transaction((tx) => {
+    tx.executeSql('CREATE INDEX IF NOT EXISTS idx_ID_Utilisateurs ON Utilisateurs (ID_Utilisateur)');
+  });
+
+  db.transaction((tx) => {
+    tx.executeSql('CREATE INDEX IF NOT EXISTS idx_ID_Messages ON Messages (ID_Message)');
+  });
+  db.transaction((tx) => {
+    tx.executeSql('CREATE INDEX IF NOT EXISTS idx_ID_Message_StatutLecture ON StatutLecture (ID_Message)');
+  });
+  db.transaction((tx) => {
+    tx.executeSql('CREATE INDEX IF NOT EXISTS idx_ID_Message_Files ON Files (ID_Message)');
+  });
   //verifiez si toutes les tables on ete cree
   db.transaction((tx) => {
     tx.executeSql(`SELECT name FROM sqlite_master WHERE type='table';`, [], (_, result) => {

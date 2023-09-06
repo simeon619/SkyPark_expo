@@ -1,7 +1,7 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { View as ViewNatif, useColorScheme } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
@@ -15,7 +15,7 @@ import { TextLight } from '../../StyledText';
 import { View } from '../../Themed';
 import { InputTextMessage } from '../../register/input';
 
-const InputMessage = ({ telegram, accountId }: { telegram: SharedValue<number>; accountId: string }) => {
+const InputMessage = memo(({ telegram, accountId }: { telegram: SharedValue<number>; accountId: string }) => {
   // let recording = new Audio.Recording();
 
   // const [text, setText] = useState('');
@@ -236,6 +236,6 @@ const InputMessage = ({ telegram, accountId }: { telegram: SharedValue<number>; 
       )}
     </AnimatedViewInput>
   );
-};
+});
 
 export default InputMessage;

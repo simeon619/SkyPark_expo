@@ -1,15 +1,19 @@
 import { ArrayData, FileType, InstanceInterface } from '../../lib/SQueryClient';
 import { SQuery } from '../../managementState';
 import eventEmitter, { EventMessageType } from '../../managementState/event';
-import { addStatutMessage, createMessageWithStatusAndFiles } from '../models/Chat/messageReposotory';
+import { useAuthStore } from '../../managementState/server/auth';
+import {
+  createMessageWithStatusAndFiles,
+  createPrivateConversation,
+  getConversationIdByDestinataire,
+  updateStatutMessage,
+} from '../models/Chat/messageReposotory';
 
 export function mergeArrayData<T extends InstanceInterface>(
   existingData: ArrayData<T>,
   newData: Partial<ArrayData<T>>
 ) {
   const uniqueIds = new Set(existingData?.items.map((item) => item._id));
-
-  console.log({ existingData });
 
   newData?.items?.forEach((newItem) => {
     if (!uniqueIds.has(newItem._id)) {
@@ -34,27 +38,40 @@ export function mergeArrayData<T extends InstanceInterface>(
   };
 }
 
-export const getDiscussionId = async (receiverId: string) => {
-  const res = await SQuery.service('messenger', 'createDiscussion', {
-    receiverAccountId: receiverId,
-  });
+export const getDiscussionId = async (receiverId: string | undefined) => {
+  if (!receiverId) return;
+  let discussionId = await getConversationIdByDestinataire(receiverId);
 
-  if (!res.response?.id) {
-    console.error('getDiscussionId  : ' + res?.response?.id);
+  if (!discussionId) {
+    try {
+      const res = await SQuery.service('messenger', 'createDiscussion', {
+        receiverAccountId: receiverId,
+      });
+
+      if (res.response?.id) {
+        await createPrivateConversation({
+          ID_Conversation: res.response.id,
+          ID_DESTINATAIRE: receiverId,
+          Type_Conversation: 'private',
+        });
+        discussionId = res.response.id;
+      } else {
+        console.error('Failed to create discussion:', res);
+      }
+    } catch (error) {
+      console.error('Error creating discussion:', error);
+    }
   }
-  let discussionId = res.response?.id;
 
   return discussionId;
 };
 
 // let y = getDiscussionId('', true);
 
-export const getChannel = async (discussionId: string | undefined) => {
+export const getChannel = async (discussionId: string | undefined | null, accountId: string) => {
   if (!discussionId) return;
   const discussion = await SQuery.newInstance('discussion', { id: discussionId });
-  if (!discussion) return;
   const ArrayDiscussion = await discussion?.channel;
-  if (!ArrayDiscussion) return;
 
   ArrayDiscussion?.when(
     'update',
@@ -69,41 +86,43 @@ export const getChannel = async (discussionId: string | undefined) => {
 
       let newMessage = messageInstance.$cache;
 
-      let files =
-        newMessage.files?.map((file) => {
-          return {
-            extension: file.extension,
-            size: file.size,
-            url: file.url,
-          };
-        }) || [];
+      if (newMessage.account !== useAuthStore.getState().account?._id) {
+        let files =
+          newMessage.files?.map((file) => {
+            return {
+              extension: file.extension,
+              size: file.size,
+              url: file.url,
+            };
+          }) || [];
 
-      await createMessageWithStatusAndFiles(
-        {
-          Contenu_Message: newMessage.text,
-          Horodatage: newMessage.__createdAt,
-          ID_MESSAGE_SERVEUR: newMessage._id,
-          ID_Conversation: discussionId || '',
-          ID_Expediteur: newMessage.account,
-        },
-        { Date_Reçu: Date.now(), ID_MESSAGE_SERVEUR: messageId },
-        files
-      );
-      eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+        await createMessageWithStatusAndFiles(
+          {
+            Contenu_Message: newMessage.text,
+            Horodatage: newMessage.__createdAt,
+            ID_Message: newMessage._id,
+            ID_Conversation: discussionId || '',
+            ID_Expediteur: newMessage.account,
+          },
+          { Date_Reçu: Date.now(), ID_Message: messageId, Date_Envoye: newMessage.__createdAt },
+          files
+        );
+        eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+      }
     },
     'receiveMessage:' + discussionId
   );
-
   return ArrayDiscussion;
 };
 
 export const sendServer = async (
   discussionId: string,
   accountId: string,
-  files: FileType[] | undefined,
+  messageId: string,
+  files?: FileType[],
   value?: string
 ) => {
-  let channel = await getChannel(discussionId);
+  let channel = await getChannel(discussionId, accountId);
 
   let messageAdd = await channel?.update({
     addNew: [
@@ -120,7 +139,7 @@ export const sendServer = async (
 
     if (!messageInstance) return;
 
-    addStatutMessage({ ID_MESSAGE_SERVEUR: messageAdd?.added[0], Date_Envoye: messageInstance?.__createdAt });
+    updateStatutMessage({ ID_Message: messageId, Date_Envoye: messageInstance?.__createdAt });
 
     eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
   }
@@ -129,35 +148,41 @@ export const putMessageLocal = async (
   files: FileType[] | undefined,
   value: string | undefined,
   discussionId: string,
-  accountId: string
+  accountId: string,
+  messageId: string
 ) => {
   try {
     let fileMap =
       files?.map((file) => {
         return {
+          ...file,
           extension: file.type.split('/')[1],
-          size: file.size,
-          url: file.uri || '',
-          buffer: file.buffer,
-          type: file.type,
-          fileName: file.fileName,
-          encoding: file.encoding,
+          uri: file.uri,
+          url: undefined,
+          buffer: undefined,
         };
       }) || [];
+    const startTime = performance.now();
 
     await createMessageWithStatusAndFiles(
       {
         Contenu_Message: value || null,
         Horodatage: Date.now(),
-        ID_MESSAGE_SERVEUR: null,
+        ID_Message: messageId,
         ID_Conversation: discussionId,
         ID_Expediteur: accountId,
       },
       {},
       fileMap
     );
+
+    const endTime = performance.now();
+
+    const executionTime = endTime - startTime;
+
+    console.log(`Temps d'exécution de getDiscussionId : ${executionTime} ms`);
     eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
   } catch (error) {
-    console.error('Error sending message:', error);
+    console.error('Error put in local message:', error);
   }
 };

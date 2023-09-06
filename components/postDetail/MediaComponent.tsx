@@ -22,7 +22,6 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
   }
 
   const numberMedia = media?.length;
-  console.log('🚀 ~ file: MediaComponent.tsx:26 ~ MediaComponent ~ numberMedia:', numberMedia);
 
   const handleImageLoad = (event: NativeSyntheticEvent<ImageProgressEventDataIOS>) => {};
 
@@ -107,7 +106,6 @@ const ImageComponent = ({ uri, caption }: { uri: string; caption: string | undef
   const navigation = useNavigation();
   // const [visible, setVisible] = useState(false);
   const [aspectRatio, setAspectRatio] = useState(0);
-  console.log('🚀 ~ file: MediaComponent.tsx:111 ~ ImageComponent ~ aspectRatio:', aspectRatio);
 
   const handleImageLoad = (event: NativeSyntheticEvent<ImageLoadEventData>) => {
     const { width, height } = event.nativeEvent.source;

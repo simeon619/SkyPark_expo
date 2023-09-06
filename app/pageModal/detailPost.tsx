@@ -47,7 +47,6 @@ type userSchema = {
 
 const regex = new RegExp(/[^\s\r\n]/g);
 const DetailPost = ({ navigation, route }: NavigationStackProps) => {
-  console.log('🚀 ~ file: detailPost.tsx:50 ~ DetailPost ~ route:', route);
   const params = route.params as any as {
     dataPost: string;
     infoUser: string;

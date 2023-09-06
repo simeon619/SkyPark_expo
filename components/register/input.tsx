@@ -234,9 +234,9 @@ export const InputTextMessage = ({
                 let images = await pickImage({ numberImages: 1 });
 
                 let files = images?.map((image) => {
-                  return image.PrepareImage;
+                  return image;
                 });
-                sendMessage({ accountId: accountId, files });
+                sendMessage({ accountId: accountId, files: files || [] });
               }
             }}
             style={{}}
@@ -255,6 +255,7 @@ export const InputTextMessage = ({
                   sendMessage({
                     accountId: accountId,
                     value: text,
+                    files: [],
                   });
                   setText('');
                 }}

@@ -65,8 +65,6 @@ const PostHeader = ({
 
     navigation.navigate('DetailPost', { dataPost, infoUser, messageUser, id: data._id });
 
-    // console.log('🚀 ~ file: detailPost.tsx:50 ~ DetailPost ~ route:', state);
-
     // route.push(`/postDetails/${data._id}`);
   }
   // function handleGoToDetail(): void {

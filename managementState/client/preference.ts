@@ -99,9 +99,7 @@ export const usePostInSchema = create<PostInSchema>((set, get) => ({
     return false;
   },
   clearPostIdIn: () => {
-    console.log('🚀 ~ file: postInSchema.ts:29 ~ usePostInSchema: ~ get.dataAVA', get().data);
     get().data.clear();
-    console.log('🚀 ~ file: postInSchema.ts:29 ~ usePostInSchema: ~ get.dataAPR', get().data);
   },
 }));
 

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { FlatList, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { AndroidSoftInputModes, KeyboardController, KeyboardGestureArea } from 'react-native-keyboard-controller';
@@ -24,58 +24,74 @@ import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
 import { NavigationStackProps } from '../../types/navigation';
 
+type Action = { type: 'addMessage' | 'updateMessage'; messages: MessageWithFileAndStatus[] };
 const Discussion = ({ route, navigation }: NavigationStackProps) => {
   const colorSheme = useColorScheme();
 
   const user = route.params as any as { data: UserSchema };
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(0);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const itemsPerPage = 10;
   const { width, height } = useWindowDimensions();
 
-  const [messagesOfDisc, setMessagesOfDisc] = useState<MessageWithFileAndStatus[]>([]);
+  function messagesReducer(state: Record<string, MessageWithFileAndStatus>, action: Action) {
+    switch (action.type) {
+      case 'addMessage':
+        const newObjet: Record<string, MessageWithFileAndStatus> = {};
+        action.messages.forEach((message) => {
+          newObjet[message.ID_Message] = message;
+          if (state[message.ID_Message]) {
+            delete state[message.ID_Message];
+          }
+        });
+        return {
+          ...newObjet,
+          ...state,
+        };
+
+      default:
+        return state;
+    }
+  }
+
+  const [messagesOfDisc, dispatch] = useReducer(messagesReducer, {});
   const scrollViewRef = useRef<FlatList<any>>(null);
+  // const messagesArray = Object.values(messagesOfDisc);
+  const messagesArray = useMemo(() => Object.values(messagesOfDisc), [messagesOfDisc]);
 
   useEffect(() => {
-    eventEmitter.on(EventMessageType.receiveMessage + user.data.ID_Conversation, async () => {
-      let messages = (await getMessages(1, 1, user.data.ID_Conversation || ''))[0];
-      setMessagesOfDisc((prev) => [
-        ...prev,
-        {
-          Contenu_Message: messages.Contenu_Message,
-          Date_Envoye: messages.Date_Envoye,
-          Horodatage: messages.Horodatage,
-          ID_Expediteur: messages.ID_Expediteur,
-          files: messages.files,
-          Date_Lu: messages.Date_Lu,
-          Date_Reçu: Date.now(),
-          ID_Conversation: messages.ID_Conversation,
-        },
-      ]);
-    });
     fetchMessages();
+  }, [pageNumber]);
+
+  useEffect(() => {
+    const handleMessageReceived = async () => {
+      const messages = await getMessages(1, 1, user.data.ID_Conversation);
+      if (messages) {
+        dispatch({ type: 'addMessage', messages: messages });
+      }
+    };
+
+    eventEmitter.on(EventMessageType.receiveMessage + user.data.ID_Conversation, handleMessageReceived);
 
     return () => {
-      eventEmitter.removeAllListeners(EventMessageType.receiveMessage + user.data.ID_Conversation);
+      eventEmitter.removeListener(EventMessageType.receiveMessage + user.data.ID_Conversation, handleMessageReceived);
     };
-  }, [pageNumber]);
+  }, []);
 
   const fetchMessages = async () => {
     if (!hasMoreMessages) {
       return;
     }
-
-    const newMessages = await getMessages(pageNumber, itemsPerPage, user.data.ID_Conversation || '');
+    const newMessages = await getMessages(pageNumber, itemsPerPage, user.data.ID_Conversation);
     if (newMessages.length === 0) {
       setHasMoreMessages(false);
       return;
     }
-
-    setMessagesOfDisc((prev) => [...prev, ...newMessages]);
+    dispatch({ type: 'addMessage', messages: newMessages });
   };
-  const loadMoreMessages = () => {
+  const loadMoreMessages = useCallback(() => {
     setPageNumber(pageNumber + 1);
-  };
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -162,7 +178,7 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
                     color: Colors[colorSheme ?? 'light'].messageColourLight,
                   }}
                 >
-                  En ligne
+                  en ligne a {formatMessageDate(user.data.Last_Seen)}
                 </TextRegular>
               </View>
             </View>
@@ -207,10 +223,9 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
                 ListHeaderComponent={listerHeaderComponent}
                 inverted={true}
                 keyboardShouldPersistTaps="always"
-                maxToRenderPerBatch={1}
                 onEndReachedThreshold={0.5}
                 onEndReached={loadMoreMessages}
-                data={messagesOfDisc}
+                data={messagesArray}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 ListFooterComponent={listFooterComponent}
@@ -225,8 +240,8 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
     </View>
   );
 };
-const keyExtractor = (item: any) => item._id;
-const renderItem = ({ item }: { item: any }) => {
+const keyExtractor = (item: MessageWithFileAndStatus) => item.ID_Message;
+const renderItem = ({ item }: { item: MessageWithFileAndStatus }) => {
   return <MessageItem item={item} />;
 };
 
@@ -243,6 +258,23 @@ const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
 
   let right = item?.ID_Expediteur === account?._id;
 
+  const whatIconStatus = ({
+    send,
+    received,
+    seen,
+  }: {
+    send: number | null | undefined;
+    received: number | null | undefined;
+    seen: number | null | undefined;
+  }) => {
+    if (received && seen) {
+      return <Ionicons name="checkmark-done-outline" size={16} color="blue" />;
+    } else if (received) {
+      return <Ionicons name="checkmark-done-outline" size={16} color="grey" />;
+    } else if (send) {
+      return <Ionicons name="checkmark-outline" size={16} color="grey" />;
+    } else return <Ionicons name="remove-circle-outline" size={16} color="grey" />;
+  };
   return (
     <TouchableWithoutFeedback
       // onPress={(e) => {}}
@@ -309,8 +341,8 @@ const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
             } else if (file.extension === 'm4a' || file.extension === 'mp3') {
               type = 'audio';
             }
-            if (type === 'image') return <ImageRatio uri={file.url} key={i} ratio={2.5} />;
-            if (type === 'audio') return <InstanceAudio voiceUrl={file.url} key={i} />;
+            if (type === 'image') return <ImageRatio uri={file.uri} key={i} ratio={2.5} />;
+            // if (type === 'audio') return <InstanceAudio voiceUrl={file.url} key={i} />;
           })
         )}
       </View>
@@ -322,6 +354,11 @@ const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
           fontSize: moderateScale(12),
         }}
       >
+        {whatIconStatus({
+          received: item?.Date_Reçu,
+          seen: item?.Date_Lu,
+          send: item?.Date_Envoye,
+        })}
         {formatMessageDate(item?.Horodatage || 0)}
       </TextRegularItalic>
     </TouchableWithoutFeedback>

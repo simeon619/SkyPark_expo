@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, useColorScheme } from 'react-native';
 import { verticalScale } from '../../Utilis/metrics';
 
 import { RefreshControl } from 'react-native-gesture-handler';
-import { UserSchema, getAllUsers, readUser } from '../../Utilis/models/Chat/userRepository';
+import { UserSchema, getAllUsers } from '../../Utilis/models/Chat/userRepository';
 import ItemChat from '../../components/discussion/ItemChat';
 import Colors from '../../constants/Colors';
 import { setListAccount } from '../../managementState/server/Listuser';
@@ -14,42 +14,48 @@ const Chat = () => {
   // const { setFocusedUser } = useMessageStore((state) => state);
   const colorScheme = useColorScheme();
 
-  const [users, setUsers] = useState<UserSchema[]>([]);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [users, setUsers] = useState<Record<string, UserSchema>>({});
+  const [pageNumber, setPageNumber] = useState(0);
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
   const itemsPerPage = 10;
 
   useEffect(() => {
-    // setListAccount();
-    // fetchUsers();
+    fetchUsers();
   }, [pageNumber]);
   const fetchUsers = async () => {
-    // if (!hasMoreUsers) {
-    //   return;
-    // }
-
-    const t = await readUser('64ea9c0b03c6ae621b3e4951');
-    if (!t) return;
-
-    // const newUsers = await getAllUsers(pageNumber, itemsPerPage);
-    // console.log('🚀 ~ file: Chat.tsx:30 ~ fetchUsers ~ newUsers:', newUsers);
-    // if (newUsers.length === 0) {
-    //   setHasMoreUsers(false);
-    //   return;
-    // }
-    setUsers([t]);
-
-    // setUsers((prev) => [...prev, ...newUsers]);
+    if (!hasMoreUsers) {
+      return;
+    }
+    let valid = await setListAccount();
+    let test = valid?.some((v) => v === 1);
+    if (test) {
+      const newUsers = await getAllUsers(pageNumber, itemsPerPage);
+      if (newUsers.length === 0) {
+        setHasMoreUsers(false);
+        return;
+      }
+      setUsers((prev) => {
+        const newObjet: Record<string, UserSchema> = {};
+        newUsers.forEach((user) => {
+          newObjet[user.ID_Utilisateur] = user;
+        });
+        return {
+          ...prev,
+          ...newObjet,
+        };
+      });
+    }
   };
 
   const loadMoreUsers = () => {
     setPageNumber(pageNumber + 1);
   };
+  const usersArray = useMemo(() => Object.values(users), [users]);
 
   return (
     <FlatList
       style={{ flex: 1 }}
-      data={users}
+      data={usersArray}
       keyExtractor={(item) => item.ID_Utilisateur}
       onEndReached={loadMoreUsers}
       refreshControl={<RefreshControl refreshing={false} onRefresh={fetchUsers} />}

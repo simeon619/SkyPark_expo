@@ -27,7 +27,7 @@
     "@shopify/flash-list": "1.4.3",
     "date-fns": "^2.30.0",
     "eventemitter3": "^5.0.1",
-    "expo": "49.0.8",
+    "expo": "^49.0.9",
     "expo-asset": "~8.10.1",
     "expo-av": "~13.4.1",
     "expo-blur": "~12.4.1",
