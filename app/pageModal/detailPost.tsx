@@ -154,7 +154,7 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
   const renderItem = ({ item }: { item: PostInterface }) => {
     switch (item.type) {
       case PostType.TEXT:
-        return <CommentText dataPost={item} />;
+        return <CommentText dataPost={item} postParent={user.account.name} />;
       case PostType.T_MEDIA:
         return <PostMedia dataPost={item} />;
       // case PostType.SURVEY:
@@ -198,8 +198,6 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
         refreshControl={<RefreshControl refreshing={loadingComment} onRefresh={() => getData(1)} />}
         scrollEventThrottle={20}
         onEndReached={handleLoadMore}
-        // maxToRenderPerBatch={5}
-        // removeClippedSubviews={true}
         onEndReachedThreshold={0.6}
         ListFooterComponent={ListFooterComponent}
       />
@@ -276,11 +274,10 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
           </View>
         )}
       </View>
-      {/* </ScrollView> */}
     </SafeAreaView>
   );
 };
 
-const keyExtractor = (item: PostInterface, index: number) => index.toString();
+const keyExtractor = (item: PostInterface, index: number) => item._id;
 
 export default DetailPost;

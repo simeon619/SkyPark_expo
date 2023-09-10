@@ -11,15 +11,14 @@ import { horizontalScale, moderateScale } from '../Utilis/metrics';
 import { TextMediumItalic } from './StyledText';
 import { HOST } from '../constants/Value';
 
-const InstanceAudio = ({ voiceUrl }: { voiceUrl: any }) => {
+const InstanceAudio = ({ voiceUrl, voiceUri }: { voiceUrl: string | undefined; voiceUri: string | undefined }) => {
   const [sound, setSound] = useState<Audio.Sound>();
   const [isPlay, setIsPlay] = useState<boolean>(false);
   const [audioPath, setAudioPath] = useState<string>('');
   const [audioDuration, setAudioDuration] = useState(0);
   const [audioPosition, setAudioPosition] = useState(0);
-  const [progress, setProgress] = useState<number>();
 
-  let { width, height } = useWindowDimensions();
+  let { width } = useWindowDimensions();
   const tooglePlay = () => {
     setIsPlay((prev) => !prev);
   };
@@ -34,11 +33,13 @@ const InstanceAudio = ({ voiceUrl }: { voiceUrl: any }) => {
       await FileSystem.writeAsStringAsync(path, base64String, {
         encoding: FileSystem.EncodingType.Base64,
       });
-
       setAudioPath(path);
     };
-
-    fetchAudio();
+    if (voiceUri) {
+      setAudioPath(voiceUri);
+    } else {
+      fetchAudio();
+    }
     return () => {
       // if (sound) {
       //     await sound.stopAsync();
@@ -52,7 +53,7 @@ const InstanceAudio = ({ voiceUrl }: { voiceUrl: any }) => {
   useEffect(() => {
     const initAudio = async () => {
       const { sound, status } = await Audio.Sound.createAsync({
-        uri: HOST + voiceUrl,
+        uri: audioPath,
       });
       setSound(sound);
       if (status.isLoaded) {
@@ -95,7 +96,6 @@ const InstanceAudio = ({ voiceUrl }: { voiceUrl: any }) => {
   async function playSound() {
     await sound?.playAsync();
   }
-
   async function pauseSound() {
     try {
       await sound?.pauseAsync();

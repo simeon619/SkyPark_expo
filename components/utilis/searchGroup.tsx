@@ -2,11 +2,11 @@ import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { TextInput } from 'react-native-gesture-handler';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
 import useToggleStore from '../../managementState/client/preference';
 import { View } from '../Themed';
+import { TextInput } from 'react-native';
 
 const SearchGroup = () => {
   const colorScheme = useColorScheme();

@@ -19,7 +19,7 @@ import {
   Poppins_100Thin_Italic as ThinItalic,
 } from '@expo-google-fonts/poppins';
 import { DarkTheme, DefaultTheme, NavigationContainer, ThemeProvider } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Font from 'expo-font';
 import * as Linking from 'expo-linking';
 import { useCallback, useEffect, useState } from 'react';
@@ -45,8 +45,9 @@ import Login from './register/Login';
 import Signup from './register/Signup';
 import CheckProfile from './settings/CheckProfile';
 import TabLayout from './tabs/layout';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 const prefix = Linking.createURL('/');
 export default function RootLayout() {
   // SplashScreen.preventAutoHideAsync();
@@ -135,68 +136,54 @@ function RootLayoutNav() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer fallback={<TextLight>Loading...</TextLight>}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <KeyboardProvider>
-            <MenuProvider>
-              <MagicModalPortal />
-              <Stack.Navigator
-                screenOptions={{
-                  headerShown: false,
-                  transitionSpec: {
-                    open: {
-                      animation: 'spring',
-                      config: {},
-                    },
-                    close: {
-                      animation: 'spring',
-                      config: {},
-                    },
-                  },
-                }}
-                initialRouteName="Bottomtabs"
-              >
-                {isAuth ? (
-                  <>
-                    <Stack.Screen name="Bottomtabs" component={TabLayout} />
-                    <Stack.Screen
-                      name="ViewerImage"
-                      component={ViewerImage}
-                      options={{
-                        headerShown: false,
-                        presentation: 'modal',
-                        animationEnabled: true,
-                        detachPreviousScreen: true,
-                      }}
-                    />
-                    <Stack.Screen name="Profile" component={Profile} />
-                    {/* <Stack.Screen name="postDetails" component={PostD} /> */}
-                    <Stack.Screen name="Discussion" component={discussion} />
-                    <Stack.Screen name="CheckProfile" component={CheckProfile} />
-                    <Stack.Screen name="GroupActivity" component={GroupActivity} />
-                    <Stack.Screen name="ItemGroup" component={ItemGroup} />
-                    <Stack.Screen name="Forum" component={Forum} />
-                    <Stack.Screen name="DetailPost" component={DetailPost} />
-                  </>
-                ) : (
-                  <>
-                    <Stack.Screen name="Login" component={Login} />
-                    {/* <Stack.Screen name="CheckProfile" component={CheckProfile} /> */}
-                    <Stack.Screen
-                      name="Signup"
-                      component={Signup}
-                      options={{
-                        presentation: 'card',
-                        animationEnabled: true,
-                      }}
-                    />
-                  </>
-                )}
-              </Stack.Navigator>
-            </MenuProvider>
-          </KeyboardProvider>
-        </ThemeProvider>
-      </NavigationContainer>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <NavigationContainer fallback={<TextLight>Loading...</TextLight>}>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <KeyboardProvider>
+              <MenuProvider>
+                <MagicModalPortal />
+                <Stack.Navigator
+                  screenOptions={{
+                    headerShown: false,
+                  }}
+                  initialRouteName="Bottomtabs"
+                >
+                  {isAuth ? (
+                    <>
+                      <Stack.Screen name="Bottomtabs" component={TabLayout} />
+                      <Stack.Screen
+                        name="ViewerImage"
+                        component={ViewerImage}
+                        options={{
+                          headerShown: false,
+                        }}
+                      />
+                      <Stack.Screen name="Profile" component={Profile} options={{ animation: 'slide_from_bottom' }} />
+                      <Stack.Screen name="Discussion" component={discussion} />
+                      <Stack.Screen name="CheckProfile" component={CheckProfile} />
+                      <Stack.Screen name="GroupActivity" component={GroupActivity} />
+                      <Stack.Screen name="ItemGroup" component={ItemGroup} />
+                      <Stack.Screen name="Forum" component={Forum} />
+                      <Stack.Screen name="DetailPost" component={DetailPost} />
+                    </>
+                  ) : (
+                    <>
+                      <Stack.Screen name="Login" component={Login} />
+                      <Stack.Screen
+                        name="Signup"
+                        component={Signup}
+                        options={{
+                          presentation: 'card',
+                        }}
+                      />
+                    </>
+                  )}
+                </Stack.Navigator>
+              </MenuProvider>
+            </KeyboardProvider>
+          </ThemeProvider>
+        </NavigationContainer>
+      </GestureHandlerRootView>
     </SafeAreaProvider>
   );
 }

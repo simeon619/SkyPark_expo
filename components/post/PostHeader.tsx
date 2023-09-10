@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, useColorScheme } from 'react-native';
-import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { Pressable, TouchableOpacity, useColorScheme } from 'react-native';
 import { formatPostDate } from '../../Utilis/date';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
@@ -16,6 +15,7 @@ import {
 } from '../../managementState/server/Descriptions';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
+import { TouchableWithoutFeedback } from 'react-native';
 
 const PostHeader = ({
   data,
@@ -59,17 +59,10 @@ const PostHeader = ({
     const dataPost = JSON.stringify(data);
     const infoUser = JSON.stringify(user);
     const messageUser = JSON.stringify(message);
-
-    // route.push('/(postDetails)/');
     //@ts-ignore
-
     navigation.navigate('DetailPost', { dataPost, infoUser, messageUser, id: data._id });
-
-    // route.push(`/postDetails/${data._id}`);
   }
-  // function handleGoToDetail(): void {
-  //   route.push(`/pageModal/detailPost`);
-  // }
+
   return (
     <View
       style={{
@@ -88,7 +81,7 @@ const PostHeader = ({
         }}
       >
         <ImageProfile size={SMALL_PIC_USER + 10} image={user?.profile.imgProfile[0]?.url} />
-        <TouchableWithoutFeedback onPress={handleGoToDetail} style={{ flex: 1 }}>
+        <Pressable onPress={handleGoToDetail} style={{ flex: 1 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -123,7 +116,7 @@ const PostHeader = ({
           >
             {formatPostDate(data.__createdAt)}
           </TextRegular>
-        </TouchableWithoutFeedback>
+        </Pressable>
       </View>
       <TouchableOpacity style={{ marginLeft: horizontalScale(1) }}>
         <Ionicons name="ellipsis-vertical" size={24} color={Colors[colorScheme ?? 'light'].greyDark} />

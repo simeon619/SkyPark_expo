@@ -3,8 +3,7 @@ import { Image } from 'expo-image';
 
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Text, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { Text, TouchableOpacity, TouchableWithoutFeedback, useColorScheme, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { pickImage } from '../../Utilis/functions/media/media';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
@@ -123,7 +122,7 @@ const CheckProfile = ({ navigation, route }: NavigationStackProps) => {
             try {
               let images = await pickImage({ numberImages: 1 });
               let pre = images?.map((item) => {
-                return item.PrepareImage;
+                return item;
               });
 
               if (images && images.length !== 0 && profile?._id) {

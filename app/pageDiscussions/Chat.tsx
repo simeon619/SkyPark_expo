@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, useColorScheme } from 'react-native';
 import { verticalScale } from '../../Utilis/metrics';
 
-import { RefreshControl } from 'react-native-gesture-handler';
 import { UserSchema, getAllUsers } from '../../Utilis/models/Chat/userRepository';
 import ItemChat from '../../components/discussion/ItemChat';
 import Colors from '../../constants/Colors';
 import { setListAccount } from '../../managementState/server/Listuser';
+import { RefreshControl } from 'react-native';
 
 const Chat = () => {
   // const { listAccount, setListAccount } = useListUserStore((state) => state);

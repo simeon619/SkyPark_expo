@@ -75,7 +75,7 @@ type stateForm = {
 export const useTypeForm = create<stateForm, any>(
   persist(
     (set, get) => ({
-      IconName: 'Annonce',
+      IconName: 'Post',
       switchForm: (value: IconName) => {
         set({ IconName: value });
       },

@@ -10,8 +10,8 @@ import { NavigationStackProps } from '../../types/navigation';
 
 const FormViewerImage = ({ route }: NavigationStackProps) => {
   const params = route.params as any as { uri: string; caption: string };
-  const uri = params.uri as string;
-  const caption = params.caption as string;
+  const uri = params?.uri as string;
+  const caption = params?.caption as string;
   const navigation = useNavigation();
 
   const images = [
@@ -22,7 +22,7 @@ const FormViewerImage = ({ route }: NavigationStackProps) => {
 
   return (
     <View style={{ justifyContent: 'center', flex: 1, backgroundColor: '#eee' }}>
-      <StatusBar style="dark" backgroundColor="#00f0" />
+      {/* <StatusBar style="dark" backgroundColor="#00f0" /> */}
       <ImageView
         images={images}
         imageIndex={0}

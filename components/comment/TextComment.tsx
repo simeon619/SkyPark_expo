@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { moderateScale } from '../../Utilis/metrics';
+import { horizontalScale, moderateScale } from '../../Utilis/metrics';
 import useToggleStore from '../../managementState/client/preference';
 import { TextLight } from '../StyledText';
-import { Pressable, TouchableOpacity } from 'react-native';
+import { Pressable } from 'react-native';
 
 import {
   AccountInterface,
@@ -11,10 +11,9 @@ import {
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
 import { useNavigation } from '@react-navigation/native';
-import { View } from '../Themed';
-let EXCEED_LIMIT = 50;
+let EXCEED_LIMIT = 10;
 
-const TextComponent = ({
+const TextComment = ({
   message,
   data,
   user,
@@ -33,11 +32,7 @@ const TextComponent = ({
   const navigation = useNavigation();
 
   const [textIsExpandable, setTextIsExpandable] = useState(false);
-  const { primaryColour } = useToggleStore((state) => state);
-
-  const toggleMoreText = () => {
-    setMoreText((prev) => !prev);
-  };
+  const { primaryColourLight } = useToggleStore((state) => state);
 
   useEffect(() => {
     setTextIsExpandable(message?.text.length > EXCEED_LIMIT);
@@ -50,26 +45,36 @@ const TextComponent = ({
     navigation.push('DetailPost', { dataPost, infoUser, messageUser, id: data._id });
   }
   return (
-    <View>
-      <Pressable onPress={handleGoToDetail}>
+    <Pressable onPress={handleGoToDetail} style={{ paddingLeft: horizontalScale(60) }}>
+      <TextLight
+        numberOfLines={textIsExpandable ? (moreText ? undefined : 3) : undefined}
+        style={{
+          fontSize: moderateScale(15),
+          backgroundColor: '#0001',
+
+          padding: moderateScale(5),
+          borderRadius: moderateScale(15),
+
+          // textAlign: "left",
+          // paddingHorizontal: horizontalScale(10),
+        }}
+      >
+        {message?.text}
+      </TextLight>
+      {textIsExpandable && (
         <TextLight
-          numberOfLines={textIsExpandable ? (moreText ? undefined : 3) : undefined}
           style={{
             fontSize: moderateScale(15),
-            // textAlign: "left",
-            // paddingHorizontal: horizontalScale(10),
+            // backgroundColor: 'grey',
+            // padding: moderateScale(5),
+            // borderRadius: moderateScale(15),
           }}
         >
-          {message?.text}
+          {'Voir Plus'}
         </TextLight>
-        {textIsExpandable && (
-          <TextLight style={{ fontSize: moderateScale(15), color: primaryColour }}>
-            {moreText ? 'Voir Moins' : 'Voir Plus'}
-          </TextLight>
-        )}
-      </Pressable>
-    </View>
+      )}
+    </Pressable>
   );
 };
 
-export default TextComponent;
+export default TextComment;

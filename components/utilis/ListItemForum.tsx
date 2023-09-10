@@ -1,7 +1,6 @@
 import { AntDesign } from '@expo/vector-icons';
 import React from 'react';
-import { useWindowDimensions } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import { FlatList, useWindowDimensions } from 'react-native';
 import { formatPostDate } from '../../Utilis/date';
 import { horizontalScale, moderateScale, shadow } from '../../Utilis/metrics';
 import ItemForum from '../../itemForum.json';
@@ -29,7 +28,7 @@ const ListItemForum = () => {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View>
-            <TextLight style={{ color: '#aaae' }}>il ya {formatPostDate(item.createdAt)}</TextLight>
+            <TextLight style={{ color: '#aaae' }}>il ya {formatPostDate(+item.createdAt)}</TextLight>
           </View>
           <View>
             <TextLight style={{ color: '#aaae' }}>

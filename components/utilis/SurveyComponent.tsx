@@ -2,7 +2,6 @@
 import { AntDesign } from '@expo/vector-icons';
 import React, { useState } from 'react';
 
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import { SurveySchema } from '../../types/PostType';

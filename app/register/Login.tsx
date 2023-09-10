@@ -14,7 +14,7 @@ import Colors from '../../constants/Colors';
 import { BottomSheetComponent } from '../../components/register/BottomSheet';
 import { NavigationStackProps } from '../../types/navigation';
 
-const Login = ({ navigation, route }: NavigationStackProps) => {
+const Login = () => {
   const colorScheme = useColorScheme();
 
   const { height, width } = useWindowDimensions();
@@ -150,8 +150,6 @@ const Login = ({ navigation, route }: NavigationStackProps) => {
         Topacity={Topacity}
         BtranslateY={BtranslateY}
         TtranslateY={TtranslateY}
-        navigation={navigation}
-        route={route}
       />
     </SafeAreaView>
   );

@@ -334,7 +334,7 @@ const Profile = ({ navigation, route }: NavigationStackProps) => {
             //     _id: string;
             // }
             if (mediaProfileState[key].selected) {
-              return <MediaComponent media={media} key={key} caption="" navigation={navigation} route={route} />;
+              return <MediaComponent media={media} key={key} caption="" />;
             }
           })}
         </View>

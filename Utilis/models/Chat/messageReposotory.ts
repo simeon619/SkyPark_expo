@@ -266,7 +266,7 @@ export async function updateStatutMessage(statutLecture: StatutLecture): Promise
 
 export type MessageWithFileAndStatus = {
   files: FileType[];
-  Contenu_Message: string;
+  Contenu_Message: string | null;
   ID_Message: string;
   ID_Expediteur: string;
   Horodatage: number;

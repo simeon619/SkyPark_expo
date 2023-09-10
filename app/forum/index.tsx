@@ -1,8 +1,7 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { AnimatePresence, MotiText, MotiView, useAnimationState } from 'moti';
 import React, { useState } from 'react';
-import { Dimensions, useColorScheme, useWindowDimensions } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Dimensions, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import MotiHat from '../../assets/svg/hat';

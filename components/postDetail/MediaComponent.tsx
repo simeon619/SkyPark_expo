@@ -4,9 +4,9 @@ import {
   ImageLoadEventData,
   ImageProgressEventDataIOS,
   NativeSyntheticEvent,
+  TouchableWithoutFeedback,
   useWindowDimensions,
 } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { horizontalScale, verticalScale } from '../../Utilis/metrics';
 import { View } from '../Themed';
 

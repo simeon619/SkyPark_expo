@@ -1,8 +1,14 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, View as ViewNatif } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View as ViewNatif,
+} from 'react-native';
 //@ts-ignore
 import InsetShadow from 'react-native-inset-shadow';
 import { MagicModalPortal, magicModal } from 'react-native-magic-modal';
@@ -19,8 +25,8 @@ const SurveyForm = () => {
 
   const hideForm = useAnimatedStyle(() => {
     return {
-      display: IconName === 'Sondage' ? 'flex' : 'none',
-      opacity: withTiming(IconName === 'Sondage' ? 1 : 0),
+      display: IconName === 'Vote' ? 'flex' : 'none',
+      opacity: withTiming(IconName === 'Vote' ? 1 : 0),
     };
   }, [IconName]);
   const { daysSurvey, setDaysSurvey } = useDaysSurvey();

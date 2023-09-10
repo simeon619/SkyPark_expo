@@ -7,13 +7,13 @@ import {
   NativeSyntheticEvent,
   useWindowDimensions,
 } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { horizontalScale, verticalScale } from '../../Utilis/metrics';
 import { HOST } from '../../constants/Value';
 import { UrlData } from '../../lib/SQueryClient';
 import { TextLight } from '../StyledText';
 import { View } from '../Themed';
 import ShadowImage from './ShadowImage';
+import { TouchableWithoutFeedback } from 'react-native';
 
 const GAP_MEDIA = 10;
 const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
@@ -42,7 +42,6 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
           // allowDownscaling={true}
           // cachePolicy={'disk'}
         />
-        <TextLight></TextLight>
       </TouchableWithoutFeedback>
     );
   };

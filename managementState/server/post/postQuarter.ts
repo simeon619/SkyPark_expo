@@ -43,6 +43,8 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
       },
     });
 
+    // posts?.items[0].statPost.
+
     if (posts) {
       set((state) => {
         return {

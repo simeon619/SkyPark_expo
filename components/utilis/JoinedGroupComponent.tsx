@@ -1,6 +1,5 @@
 import { Image } from 'expo-image';
 import React from 'react';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import { LARGE_PIC_USER } from '../../constants/Value';
 import useToggleStore from '../../managementState/client/preference';
@@ -9,7 +8,7 @@ import { TextMedium } from '../StyledText';
 import { View } from '../Themed';
 
 import { Feather } from '@expo/vector-icons';
-import { useWindowDimensions } from 'react-native';
+import { TouchableOpacity, useWindowDimensions } from 'react-native';
 const JoinedGroupComponent = ({ item }: { item: groupJoinedSchema | undefined }) => {
   if (!item) return null;
   const ImageComponent = ({

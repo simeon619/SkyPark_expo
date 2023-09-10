@@ -13,15 +13,11 @@ import { ScrollView, View } from '../Themed';
 import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
 import { useAuthStore } from '../../managementState/server/auth';
 import { FileType } from '../../lib/SQueryClient';
-import { NavigationProps } from '../../types/navigation';
+import { useNavigation } from '@react-navigation/native';
 
-const DefaultForm = ({
-  text,
-  setText,
-  navigation,
-  route,
-}: { text: string; setText: React.Dispatch<React.SetStateAction<string>> } & NavigationProps) => {
+const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<React.SetStateAction<string>> }) => {
   const colorScheme = useColorScheme();
+  const navigation = useNavigation();
   //   const isExpanded = useSharedValue(true);
   interface ImageItem {
     uri: string;
@@ -33,8 +29,8 @@ const DefaultForm = ({
   const { IconName } = useTypeForm((state) => state);
   const hideForm = useAnimatedStyle(() => {
     return {
-      display: IconName !== 'Post' ? 'flex' : 'flex',
-      opacity: withTiming(IconName !== 'Post' ? 1 : 1),
+      display: IconName == 'Post' ? 'flex' : 'none',
+      opacity: withTiming(IconName == 'Post' ? 1 : 0),
     };
   }, [IconName]);
 
@@ -184,6 +180,7 @@ const DefaultForm = ({
               return (
                 <Pressable
                   onPress={() => {
+                    //@ts-ignore
                     navigation.navigate('ViewerImage', { uri: image.uri, caption: '' });
                   }}
                   key={index}

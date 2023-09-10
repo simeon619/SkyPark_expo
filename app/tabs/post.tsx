@@ -1,8 +1,7 @@
 import { BlurView } from 'expo-blur';
 
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, useColorScheme, useWindowDimensions } from 'react-native';
-import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { StyleSheet, TextInput, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import { View } from '../../components/Themed';
@@ -13,9 +12,8 @@ import Colors from '../../constants/Colors';
 import { SMALL_PIC_USER, formTextPlaceholder } from '../../constants/Value';
 import { useBlurSurvey, useTypeForm } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
-import { NavigationTabProps } from '../../types/navigation';
 
-const PostTabScreen = ({ navigation, route }: any) => {
+const PostTabScreen = () => {
   const colorScheme = useColorScheme();
   const [heightInput, setHeightInput] = useState(40);
 
@@ -93,7 +91,7 @@ const PostTabScreen = ({ navigation, route }: any) => {
             }}
           />
         </View>
-        <DefaultForm text={text} setText={setText} navigation={navigation} route={route} />
+        <DefaultForm text={text} setText={setText} />
         <SurveyForm />
       </View>
       {/* <TimePickerSurvey /> */}

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, useColorScheme } from 'react-native';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { TouchableOpacity, View, useColorScheme } from 'react-native';
 import { formatMessageDate } from '../../Utilis/date';
 import { horizontalScale, moderateScale } from '../../Utilis/metrics';
 import { MessageWithFileAndStatus, getMessages } from '../../Utilis/models/Chat/messageReposotory';
@@ -9,10 +9,10 @@ import Colors from '../../constants/Colors';
 import useToggleStore, { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
 import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
-import { TextMedium, TextRegular, TextRegularItalic } from '../StyledText';
+import { TextLight, TextMedium, TextRegular, TextRegularItalic } from '../StyledText';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
 import { useNavigation } from '@react-navigation/native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { getTypeFile } from '../../Utilis/functions/media/extension';
 
 const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
   const { ctxMenu } = useMenuDiscussionIsOpen((state) => state);
@@ -32,27 +32,6 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
   }, []);
 
   const account = useAuthStore((state) => state.account);
-
-  const whatIconStatus = useCallback(
-    ({
-      send,
-      received,
-      seen,
-    }: {
-      send: number | null | undefined;
-      received: number | null | undefined;
-      seen: number | null | undefined;
-    }) => {
-      if (received && seen) {
-        return <Ionicons name="checkmark-done-outline" size={18} color="blue" />;
-      } else if (received) {
-        return <Ionicons name="checkmark-done-outline" size={18} color="grey" />;
-      } else if (send) {
-        return <Ionicons name="checkmark-outline" size={18} color="grey" />;
-      } else return <Ionicons name="remove-circle-outline" size={16} color="grey" />;
-    },
-    []
-  );
 
   useEffect(() => {
     const initLastMessage = async () => {
@@ -81,8 +60,8 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 10,
-        borderBottomColor: Colors[colorScheme ?? 'light'].grey,
-        borderBottomWidth: 1,
+        // borderBottomColor: Colors[colorScheme ?? 'light'].grey,
+        // borderBottomWidth: 1,
       }}
     >
       <ImageProfile image={conversation?.Url_Pic} size={moderateScale(55)} />
@@ -96,17 +75,7 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
         }}
       >
         <TextRegular style={{ fontSize: moderateScale(16) }}>{conversation?.Nom_Utilisateur}</TextRegular>
-        <TextRegularItalic style={{ color: 'gray' }} numberOfLines={1}>
-          {whatIconStatus({
-            received: lastMessage?.Date_Reçu,
-            seen: lastMessage?.Date_Lu,
-            send: lastMessage?.Date_Envoye,
-          })}
-          {/* {!!lastMessage?.files && lastMessage?.files.length} {!!lastMessage?.files && lastMessage?.files[0].extension}{' '} */}
-          {!!lastMessage?.Contenu_Message
-            ? lastMessage?.Contenu_Message
-            : 'Envoyez un message a ' + conversation?.Nom_Utilisateur}
-        </TextRegularItalic>
+        <ViewLastMessage last={lastMessage} />
       </View>
       <View
         style={{
@@ -121,7 +90,7 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
             fontSize: moderateScale(12),
           }}
         >
-          {!!lastMessage?.Date_Reçu && formatMessageDate(lastMessage?.Date_Reçu)}
+          {Boolean(lastMessage?.Date_Envoye) && formatMessageDate(lastMessage?.Date_Envoye || 0)}
         </TextMedium>
 
         {!(lastMessage?.ID_Expediteur == account?._id) && (
@@ -145,3 +114,61 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
 };
 
 export default ItemChat;
+const ViewLastMessage = ({ last }: { last: MessageWithFileAndStatus | undefined }) => {
+  if (!last) {
+    return <TextLight>Envoyez votre premier message</TextLight>;
+  }
+
+  const whatIconStatus = useCallback(
+    ({
+      send,
+      received,
+      seen,
+    }: {
+      send: number | null | undefined;
+      received: number | null | undefined;
+      seen: number | null | undefined;
+    }) => {
+      if (received && seen) {
+        return <Ionicons name="checkmark-done-outline" size={18} color="blue" />;
+      } else if (received) {
+        return <Ionicons name="checkmark-done-outline" size={18} color="grey" />;
+      } else if (send) {
+        return <Ionicons name="checkmark-outline" size={18} color="grey" />;
+      } else return <Ionicons name="remove-circle-outline" size={16} color="grey" />;
+    },
+    []
+  );
+  return (
+    <>
+      <View style={{ flexDirection: 'row' }}>
+        {whatIconStatus({ send: last.Date_Envoye, received: last.Date_Reçu, seen: last.Date_Lu })}
+
+        <View style={{ flexDirection: 'row' }}>
+          <TextLight numberOfLines={1}>{last.Contenu_Message}</TextLight>
+
+          {getTypeFile(last?.files?.[0]?.extension) === 'image' && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="image" size={18} color="grey" />
+              <TextLight> Photo</TextLight>
+            </View>
+          )}
+
+          {getTypeFile(last?.files?.[0]?.extension) === 'video' && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="videocam" size={20} color="grey" />
+              <TextLight>Video</TextLight>
+            </View>
+          )}
+
+          {getTypeFile(last?.files?.[0]?.extension) === 'audio' && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="mic" size={20} color="blue" />
+              <TextLight>Audio</TextLight>
+            </View>
+          )}
+        </View>
+      </View>
+    </>
+  );
+};

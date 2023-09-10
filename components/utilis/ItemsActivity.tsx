@@ -1,7 +1,6 @@
 import { Image } from 'expo-image';
 import React from 'react';
-import { useColorScheme } from 'react-native';
-import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { TouchableOpacity, TouchableWithoutFeedback, useColorScheme } from 'react-native';
 import { formatPostDate } from '../../Utilis/date';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
@@ -11,11 +10,12 @@ import useToggleStore from '../../managementState/client/preference';
 import { TextLight, TextMedium } from '../StyledText';
 import { View } from '../Themed';
 import ShadowImage from './ShadowImage';
-import { NavigationProps } from '../../types/navigation';
+import { useNavigation } from '@react-navigation/native';
 
-const ItemsActivity = ({ navigation, route }: NavigationProps) => {
+const ItemsActivity = () => {
   const colorScheme = useColorScheme();
   const { primaryColour } = useToggleStore((state) => state);
+  const navigation = useNavigation();
 
   return (
     <View style={{ paddingHorizontal: horizontalScale(10), marginTop: verticalScale(25) }}>
@@ -67,8 +67,8 @@ const ItemsActivity = ({ navigation, route }: NavigationProps) => {
               }}
             >
               <TouchableWithoutFeedback
-                //@ts-ignore
                 onPress={() => {
+                  //@ts-ignore
                   navigation.navigate('ItemGroup', {
                     name: item.name,
                     pic: item.pic,

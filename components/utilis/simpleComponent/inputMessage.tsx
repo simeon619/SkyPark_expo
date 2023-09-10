@@ -2,10 +2,9 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { View as ViewNatif, useColorScheme } from 'react-native';
+import { TouchableWithoutFeedback, View as ViewNatif, useColorScheme } from 'react-native';
 import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { horizontalScale, moderateScale, verticalScale } from '../../../Utilis/metrics';
 import Colors from '../../../constants/Colors';
@@ -69,7 +68,7 @@ const InputMessage = memo(({ telegram, accountId }: { telegram: SharedValue<numb
 
       await sendMessage({
         accountId: accountId,
-        files: [{ buffer: base64, type: fileType, fileName, size: 10, encoding: 'base64' }],
+        files: [{ buffer: base64, type: fileType, fileName, size: 10, encoding: 'base64', uri: pathVoiceNote }],
       });
     }
     let status = await recording?.getStatusAsync();

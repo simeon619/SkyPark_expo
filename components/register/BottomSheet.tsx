@@ -6,17 +6,16 @@ import BottomSheet, {
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { useColorScheme, useWindowDimensions } from 'react-native';
-import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { TouchableWithoutFeedback, useColorScheme, useWindowDimensions } from 'react-native';
 import Animated, { interpolateColor, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
-
 import { useAuthStore } from '../../managementState/server/auth';
 import { TextExtraLightItalic, TextRegular } from '../StyledText';
 import { View } from '../Themed';
 import { InputBottomSheet } from './input';
-import { NavigationStackProps } from '../../types/navigation';
+import { TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export const BottomSheetComponent = ({
   BtranslateY,
@@ -24,20 +23,20 @@ export const BottomSheetComponent = ({
   TtranslateY,
   Topacity,
   flex,
-  route,
-  navigation,
 }: {
   BtranslateY: any;
   Bopacity: any;
   TtranslateY: any;
   Topacity: any;
   flex: any;
-} & NavigationStackProps) => {
-  const { address, profile, user, loading, fetchLogin } = useAuthStore();
+}) => {
+  const { address, profile, user, fetchLogin } = useAuthStore();
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (user?._id && address?._id && profile?._id) {
-      navigation.replace('CheckProfile');
+      //@ts-ignore
+      navigation.navigate('CheckProfile');
     }
   });
 
@@ -80,9 +79,7 @@ export const BottomSheetComponent = ({
     const containerAnimatedStyle = useAnimatedStyle(() => ({
       backgroundColor: interpolateColor(animatedIndex.value, [0, 1], ['#fff', '#FCF3F3']),
     }));
-
     const containerStyle = useMemo(() => [style, containerAnimatedStyle], [style, containerAnimatedStyle]);
-
     return <Animated.View pointerEvents="none" style={containerStyle} />;
   };
   const snapPoints = useMemo(() => ['6%', '50%'], []);
@@ -178,6 +175,7 @@ export const BottomSheetComponent = ({
 
         <TouchableOpacity
           onPress={() => {
+            //@ts-ignore
             navigation.navigate('Signup');
           }}
           style={{ marginTop: verticalScale(35) }}

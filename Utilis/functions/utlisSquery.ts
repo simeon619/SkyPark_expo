@@ -149,7 +149,8 @@ export const putMessageLocal = async (
   value: string | undefined,
   discussionId: string,
   accountId: string,
-  messageId: string
+  messageId: string,
+  createMsg: number
 ) => {
   try {
     let fileMap =
@@ -162,12 +163,10 @@ export const putMessageLocal = async (
           buffer: undefined,
         };
       }) || [];
-    const startTime = performance.now();
-
     await createMessageWithStatusAndFiles(
       {
         Contenu_Message: value || null,
-        Horodatage: Date.now(),
+        Horodatage: createMsg,
         ID_Message: messageId,
         ID_Conversation: discussionId,
         ID_Expediteur: accountId,
@@ -176,11 +175,6 @@ export const putMessageLocal = async (
       fileMap
     );
 
-    const endTime = performance.now();
-
-    const executionTime = endTime - startTime;
-
-    console.log(`Temps d'exécution de getDiscussionId : ${executionTime} ms`);
     eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
   } catch (error) {
     console.error('Error put in local message:', error);

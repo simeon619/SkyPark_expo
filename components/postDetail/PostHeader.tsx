@@ -14,7 +14,7 @@ import {
 } from '../../managementState/server/Descriptions';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
 import { useNavigation } from '@react-navigation/native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { TouchableWithoutFeedback } from 'react-native';
 
 const PostHeader = ({
   data,

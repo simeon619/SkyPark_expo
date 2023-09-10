@@ -10,16 +10,16 @@ import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metr
 import { TextThin } from '../StyledText';
 import { ScrollView } from '../Themed';
 import ImageProfile from './simpleComponent/ImageProfile';
-import { NavigationStackProps } from '../../types/navigation';
-import Animated from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
 
-const HeaderHome = ({ navigation, route }: NavigationStackProps) => {
+const HeaderHome = () => {
   const { width } = useWindowDimensions();
   const colorScheme = useColorScheme();
-  const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
+  const { primaryColour } = useToggleStore((state) => state);
   const { IconName, switchForm } = useTypeForm((state) => state);
 
   const { profile } = useAuthStore((state) => state);
+  const navigation = useNavigation();
 
   return (
     <>
@@ -65,8 +65,6 @@ const HeaderHome = ({ navigation, route }: NavigationStackProps) => {
               width: moderateScale(22),
               aspectRatio: 1,
               tintColor: Colors[colorScheme ?? 'light'].overLay,
-
-              // backgroundColor: "red",
             }}
             transition={200}
           />
@@ -81,6 +79,7 @@ const HeaderHome = ({ navigation, route }: NavigationStackProps) => {
         </View>
         <TouchableOpacity
           onPress={() => {
+            //@ts-ignore
             navigation.navigate('Profile');
           }}
         >
@@ -103,17 +102,15 @@ const HeaderHome = ({ navigation, route }: NavigationStackProps) => {
         >
           {icons.map((icon, index) => (
             <TouchableOpacity key={index} onPress={() => switchForm(icon.name)}>
-              {
-                <Image
-                  source={icon.url}
-                  style={{
-                    width: 27,
-                    aspectRatio: 1,
-                    tintColor: IconName === icon.name ? primaryColour : '#000000',
-                  }}
-                  transition={200}
-                />
-              }
+              <Image
+                source={icon.url}
+                style={{
+                  width: 27,
+                  aspectRatio: 1,
+                  tintColor: IconName === icon.name ? primaryColour : '#000000',
+                }}
+                transition={200}
+              />
             </TouchableOpacity>
           ))}
         </ScrollView>

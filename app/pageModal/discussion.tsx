@@ -2,10 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { FlatList, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { FlatList, Pressable, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { AndroidSoftInputModes, KeyboardController, KeyboardGestureArea } from 'react-native-keyboard-controller';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp, FadeOutUp, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatMessageDate } from '../../Utilis/date';
 import { useTelegramTransitions } from '../../Utilis/hooksKeyboard';
@@ -14,7 +13,6 @@ import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metr
 import { MessageWithFileAndStatus, getMessages } from '../../Utilis/models/Chat/messageReposotory';
 import { UserSchema } from '../../Utilis/models/Chat/userRepository';
 import ImageRatio from '../../components/ImgRatio';
-import InstanceAudio from '../../components/InstanceAudio';
 import { TextRegular, TextRegularItalic } from '../../components/StyledText';
 import { View } from '../../components/Themed';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
@@ -23,41 +21,35 @@ import Colors from '../../constants/Colors';
 import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
 import { NavigationStackProps } from '../../types/navigation';
+import { useTempMsgStore } from '../../managementState/client/tempMessage';
+import InstanceAudio from '../../components/InstanceAudio';
+import { TouchableWithoutFeedback } from 'react-native';
+import { getTypeFile } from '../../Utilis/functions/media/extension';
 
 type Action = { type: 'addMessage' | 'updateMessage'; messages: MessageWithFileAndStatus[] };
+
 const Discussion = ({ route, navigation }: NavigationStackProps) => {
   const colorSheme = useColorScheme();
 
   const user = route.params as any as { data: UserSchema };
+  const discussions = user.data.ID_Conversation || '';
   const [pageNumber, setPageNumber] = useState(0);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const itemsPerPage = 10;
   const { width, height } = useWindowDimensions();
 
-  function messagesReducer(state: Record<string, MessageWithFileAndStatus>, action: Action) {
-    switch (action.type) {
-      case 'addMessage':
-        const newObjet: Record<string, MessageWithFileAndStatus> = {};
-        action.messages.forEach((message) => {
-          newObjet[message.ID_Message] = message;
-          if (state[message.ID_Message]) {
-            delete state[message.ID_Message];
-          }
-        });
-        return {
-          ...newObjet,
-          ...state,
-        };
+  const { messages, setMsg } = useTempMsgStore((state) => state);
 
-      default:
-        return state;
-    }
-  }
-
-  const [messagesOfDisc, dispatch] = useReducer(messagesReducer, {});
   const scrollViewRef = useRef<FlatList<any>>(null);
   // const messagesArray = Object.values(messagesOfDisc);
-  const messagesArray = useMemo(() => Object.values(messagesOfDisc), [messagesOfDisc]);
+  const messagesArray = useMemo(() => {
+    if (messages && messages[discussions]) {
+      return Object.values(messages[discussions]).sort((a, b) => {
+        return b.Horodatage - a.Horodatage;
+      });
+    }
+    return [];
+  }, [messages]);
 
   useEffect(() => {
     fetchMessages();
@@ -66,8 +58,8 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
   useEffect(() => {
     const handleMessageReceived = async () => {
       const messages = await getMessages(1, 1, user.data.ID_Conversation);
-      if (messages) {
-        dispatch({ type: 'addMessage', messages: messages });
+      if (messages && discussions) {
+        setMsg({ [discussions]: messages });
       }
     };
 
@@ -87,16 +79,17 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
       setHasMoreMessages(false);
       return;
     }
-    dispatch({ type: 'addMessage', messages: newMessages });
+    if (discussions && newMessages.length !== 0) {
+      setMsg({ [discussions]: newMessages });
+    }
   };
-  const loadMoreMessages = useCallback(() => {
+  const loadMoreMessages = () => {
     setPageNumber(pageNumber + 1);
-  }, []);
+  };
 
   useFocusEffect(
     useCallback(() => {
       KeyboardController.setInputMode(AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE);
-
       return () => KeyboardController.setDefaultMode();
     }, [])
   );
@@ -219,11 +212,11 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
             <View style={{ height, width }}>
               <FlatList
                 ref={scrollViewRef}
-                scrollEventThrottle={500}
+                scrollEventThrottle={150}
                 ListHeaderComponent={listerHeaderComponent}
                 inverted={true}
                 keyboardShouldPersistTaps="always"
-                onEndReachedThreshold={0.5}
+                onEndReachedThreshold={0.9}
                 onEndReached={loadMoreMessages}
                 data={messagesArray}
                 keyExtractor={keyExtractor}
@@ -256,7 +249,7 @@ const listFooterComponent = () => {
 const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
   const { account } = useAuthStore((state) => state);
 
-  let right = item?.ID_Expediteur === account?._id;
+  let right = item?.ID_Expediteur !== account?._id;
 
   const whatIconStatus = ({
     send,
@@ -276,92 +269,90 @@ const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
     } else return <Ionicons name="remove-circle-outline" size={16} color="grey" />;
   };
   return (
-    <TouchableWithoutFeedback
-      // onPress={(e) => {}}
-      onLongPress={() => {}}
-      style={[
-        {
-          padding: moderateScale(5),
-          margin: moderateScale(10),
-          maxWidth: '80%',
-          flexDirection: 'column',
-          elevation: 99,
-        },
-        right
-          ? {
-              alignSelf: 'flex-end',
-            }
-          : {
-              alignSelf: 'flex-start',
-            },
-      ]}
-    >
-      <View
-        style={{
-          flexDirection: 'column',
-          // overflow: "hidden",
-          backgroundColor: '#0000',
-        }}
+    <Animated.View entering={FadeInUp}>
+      <Pressable
+        // onPress={(e) => {}}
+        onLongPress={() => {}}
+        style={[
+          {
+            padding: moderateScale(5),
+            margin: moderateScale(10),
+            maxWidth: '80%',
+            flexDirection: 'column',
+            elevation: 99,
+          },
+          right
+            ? {
+                alignSelf: 'flex-end',
+              }
+            : {
+                alignSelf: 'flex-start',
+              },
+        ]}
       >
-        {item?.Contenu_Message ? (
-          <View
-            style={[
-              right
-                ? {
-                    // borderTopLeftRadius: 10,
-                    borderTopLeftRadius: moderateScale(25),
-                    borderBottomLeftRadius: moderateScale(25),
-                    borderBottomRightRadius: moderateScale(25),
-                    backgroundColor: '#7285E5',
-                  }
-                : {
-                    borderTopRightRadius: moderateScale(25),
-                    backgroundColor: '#ECECEC',
+        <View
+          style={{
+            flexDirection: 'column',
+            // overflow: "hidden",
+            backgroundColor: '#0000',
+          }}
+        >
+          {item?.Contenu_Message ? (
+            <View
+              style={[
+                right
+                  ? {
+                      // borderTopLeftRadius: 10,
+                      borderTopLeftRadius: moderateScale(25),
+                      borderBottomLeftRadius: moderateScale(25),
+                      borderBottomRightRadius: moderateScale(25),
+                      backgroundColor: '#7285E5',
+                    }
+                  : {
+                      borderTopRightRadius: moderateScale(25),
+                      backgroundColor: '#ECECEC',
 
-                    borderBottomLeftRadius: moderateScale(25),
-                    borderBottomRightRadius: moderateScale(25),
-                  },
-            ]}
-          >
-            <TextRegular
-              style={{
-                fontSize: moderateScale(15),
-                color: right ? '#fef' : '#000',
-                padding: moderateScale(7),
-              }}
+                      borderBottomLeftRadius: moderateScale(25),
+                      borderBottomRightRadius: moderateScale(25),
+                    },
+              ]}
             >
-              {item?.Contenu_Message}
-            </TextRegular>
-          </View>
-        ) : (
-          item?.files?.map((file, i) => {
-            let type = 'image';
-            if (file.extension === 'jpeg' || file.extension === 'jpg' || file.extension === 'png') {
-              type = 'image';
-            } else if (file.extension === 'm4a' || file.extension === 'mp3') {
-              type = 'audio';
-            }
-            if (type === 'image') return <ImageRatio uri={file.uri} key={i} ratio={2.5} />;
-            // if (type === 'audio') return <InstanceAudio voiceUrl={file.url} key={i} />;
-          })
-        )}
-      </View>
-      <TextRegularItalic
-        style={{
-          color: 'grey',
-          textAlign: right ? 'right' : 'left',
-          backgroundColor: '#0000',
-          fontSize: moderateScale(12),
-        }}
-      >
-        {whatIconStatus({
-          received: item?.Date_Reçu,
-          seen: item?.Date_Lu,
-          send: item?.Date_Envoye,
-        })}
-        {formatMessageDate(item?.Horodatage || 0)}
-      </TextRegularItalic>
-    </TouchableWithoutFeedback>
+              <TextRegular
+                style={{
+                  fontSize: moderateScale(15),
+                  color: right ? '#fef' : '#000',
+                  padding: moderateScale(7),
+                }}
+              >
+                {item?.Contenu_Message}
+              </TextRegular>
+            </View>
+          ) : (
+            item?.files?.map((file, i) => {
+              if (getTypeFile(file.extension) === 'image')
+                return <ImageRatio uri={file.uri} url={file.url} key={i} ratio={2.5} />;
+              if (getTypeFile(file.extension) === 'audio')
+                return <InstanceAudio voiceUrl={file.url} voiceUri={file.uri} key={i} />;
+            })
+          )}
+        </View>
+        <TextRegularItalic
+          style={{
+            color: 'grey',
+            textAlign: right ? 'right' : 'left',
+            backgroundColor: '#0000',
+            fontSize: moderateScale(12),
+          }}
+        >
+          {whatIconStatus({
+            received: item?.Date_Reçu,
+            seen: item?.Date_Lu,
+            send: item?.Date_Envoye,
+          })}
+          {formatMessageDate(item?.Horodatage || 0)}
+        </TextRegularItalic>
+      </Pressable>
+    </Animated.View>
   );
 };
 

@@ -5,15 +5,16 @@ import { PostInterface } from '../../managementState/server/Descriptions';
 import TextComponent from '../utilis/TextComponent';
 import CommentFooter from './CommentFooter';
 import CommentHeader from './CommentHeader';
+import TextComment from './TextComment';
 
-const CommentText = ({ dataPost }: { dataPost: PostInterface }) => {
+const CommentText = ({ dataPost, postParent }: { dataPost: PostInterface; postParent: string }) => {
   const message = useMessagePost({ dataPost });
   const infoUser = useInfoUserPost({ accountId: message?.account });
 
   return (
     <>
-      <CommentHeader data={dataPost} user={infoUser} message={message} />
-      <TextComponent data={dataPost} message={message} user={infoUser} />
+      <CommentHeader data={dataPost} user={infoUser} message={message} postParent={postParent} />
+      <TextComment data={dataPost} message={message} user={infoUser} />
       <CommentFooter data={dataPost} user={infoUser} message={message} />
     </>
   );

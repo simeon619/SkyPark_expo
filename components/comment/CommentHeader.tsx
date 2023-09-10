@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, useColorScheme } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Pressable, TouchableOpacity, useColorScheme } from 'react-native';
 import { formatPostDate } from '../../Utilis/date';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
@@ -15,12 +14,14 @@ import {
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
-import { useNavigation, useNavigationState } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import useToggleStore from '../../managementState/client/preference';
 
 const CommentHeader = ({
   data,
   user,
   message,
+  postParent,
 }: {
   data: PostInterface;
   message: MessageInterface | undefined;
@@ -30,11 +31,12 @@ const CommentHeader = ({
         profile: ProfileInterface;
       }
     | undefined;
+  postParent: string;
 }) => {
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const nameUser = user?.account.name || 'user' + Math.ceil(Math.random() * 80000000);
-
+  const { primaryColour } = useToggleStore((state) => state);
   function handleGoToDetail(): void {
     const dataPost = JSON.stringify(data);
     const infoUser = JSON.stringify(user);
@@ -59,7 +61,7 @@ const CommentHeader = ({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: verticalScale(5),
+        // paddingVertical: verticalScale(5),
       }}
     >
       <View
@@ -76,7 +78,7 @@ const CommentHeader = ({
             style={{
               flexDirection: 'row',
               flex: 1,
-              columnGap: horizontalScale(7),
+              columnGap: horizontalScale(1),
             }}
           >
             <View style={{ flexShrink: 0, alignSelf: 'flex-start' }}>
@@ -85,14 +87,16 @@ const CommentHeader = ({
                 style={{
                   color: Colors[colorScheme ?? 'light'].greyDark,
                   fontSize: moderateScale(15),
-                  paddingTop: horizontalScale(1),
+                  // paddingTop: horizontalScale(1),
                 }}
               >
                 <TextLight
                   numberOfLines={1}
                   style={{ color: Colors[colorScheme ?? 'light'].text, fontSize: moderateScale(15) }}
                 >
-                  {nameUser.length > 20 ? `${nameUser.slice(0, 20)}...` : nameUser}
+                  {nameUser.length > 20 ? `${nameUser.slice(0, 20)}...` : nameUser}{' '}
+                  <TextLight style={{ color: Colors[colorScheme ?? 'light'].greyDark }}>en reponse a</TextLight>
+                  <TextLight style={{ color: primaryColour }}> @{postParent}</TextLight>
                 </TextLight>
               </TextLight>
             </View>
