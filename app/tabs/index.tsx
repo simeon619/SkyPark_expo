@@ -15,7 +15,7 @@ import Neighbor from '../pagePost/Neighbor';
 import { useListUserStore } from '../../managementState/server/Listuser';
 import { NavigationStackProps } from '../../types/navigation';
 
-const Home = ({ navigation, route }: NavigationStackProps) => {
+const Home = () => {
   const { primaryColour } = useToggleStore((state) => state);
 
   const colorScheme = useColorScheme();
@@ -29,7 +29,7 @@ const Home = ({ navigation, route }: NavigationStackProps) => {
       }}
     >
       <StatusBar backgroundColor={primaryColour} style={'light'} />
-      <HeaderHome navigation={navigation} route={route} />
+      <HeaderHome />
       <View style={{ flex: 1, paddingHorizontal: horizontalScale(10) }}>
         <Tab.Navigator
           initialRouteName="Tous les voisins"

@@ -3,47 +3,45 @@ import { SQuery } from '../..';
 import { FileType } from '../../../lib/SQueryClient';
 import { PostInterface } from '../Descriptions';
 import { ArrayData, ArrayDataInit } from './../../../lib/SQueryClient';
+import { mergeArrayData } from '../../../Utilis/functions/utlisSquery';
 
-export async function setCommentPost(data: {
-  postId: string;
-  accountId: string;
-  type: string;
-  files?: FileType[];
-  value?: string;
-}) {
-  const post = await SQuery.newInstance('post', { id: data.postId });
+// export async function setCommentPost(data: {
+//   postId: string;
+//   accountId: string;
+//   type: string;
+//   files?: FileType[];
+//   value?: string;
+// }) {
+//   const post = await SQuery.newInstance('post', { id: data.postId });
+//   if (!post) return;
+//   const res = await SQuery.service('post', 'statPost', {
+//     postId: data.postId,
+//     newPostData: {
+//       message: {
+//         text: data.value,
+//         files: data.files,
+//         account: data.accountId,
+//       },
+//       type: data.type,
+//     },
+//   });
 
-  if (!post) return;
+//   if (!res?.response) return;
 
-  post.when('refresh', (obj) => {});
+//   res.response.newComment;
 
-  const res = await SQuery.service('post', 'statPost', {
-    postId: data.postId,
-    newPostData: {
-      message: {
-        text: data.value,
-        files: data.files,
-        account: data.accountId,
-      },
-      type: data.type,
-    },
-  });
+//   const postStat = res.response.post.statPost;
 
-  if (!res?.response) return;
+//   postStat.totalCommentsCount;
 
-  res.response.newComment;
-
-  const postStat = res.response.post.statPost;
-
-  postStat.totalCommentsCount;
-
-  return res.response;
-}
+//   return res.response;
+// }
 
 type CommentPostSchema = {
-  // commentList: ArrayData<PostInterface>;
+  commentList: Record<string, ArrayData<PostInterface>> | undefined;
   loadingComment: boolean;
-  getComments: (postId: string, page?: number) => Promise<ArrayData<PostInterface>>;
+  initComment: () => void;
+  getComments: (postId: string, page?: number) => Promise<void>;
   setComment: (data: {
     postId: string;
     accountId: string | undefined;
@@ -64,17 +62,71 @@ type CommentPostSchema = {
 };
 
 export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
-  // commentList: ArrayDataInit,
-
+  commentList: undefined,
   loadingComment: false,
 
   getComments: async (postId: string, page: number | undefined) => {
     set(() => ({
       loadingComment: true,
     }));
+
     const post = await SQuery.newInstance('post', { id: postId });
     // if (!post) return;
     const comments = await post?.comments;
+
+    comments?.when(
+      'update',
+      async (obj) => {
+        let commentId = obj.added[0];
+        if (!commentId) return;
+        const post = await SQuery.newInstance('post', { id: commentId });
+        if (!post) return;
+        post.when(
+          'refresh',
+          (obj) => {
+            let oldState: PostInterface;
+            set((state) => {
+              const newState = { ...state };
+              if (!newState.commentList) {
+                newState.commentList = { [postId]: { ...ArrayDataInit, items: [] } };
+              }
+              let index = newState.commentList[postId].items.findIndex((item) => item._id === commentId);
+              if (index !== -1) {
+                oldState = newState.commentList[postId].items[index];
+              }
+              return {
+                commentList: {
+                  [postId]: mergeArrayData(
+                    newState.commentList[postId],
+                    { ...newState.commentList[postId], items: [{ ...oldState, ...obj }] },
+                    true
+                  ),
+                },
+              };
+            });
+          },
+          commentId
+        );
+        set((state) => {
+          let ArrayPos = [post.$cache];
+          const newState = { ...state };
+          if (!newState.commentList) {
+            newState.commentList = { [postId]: { ...ArrayDataInit, items: [] } };
+          }
+          return {
+            commentList: {
+              [postId]: mergeArrayData(
+                newState.commentList[postId],
+                { ...newState.commentList[postId], items: ArrayPos },
+                true
+              ),
+            },
+            loadingComment: false,
+          };
+        });
+      },
+      'listPost:update'
+    );
 
     let ArrayComment = await comments?.update({
       paging: {
@@ -85,19 +137,58 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
         },
       },
     });
+    if (!ArrayComment) return;
 
-    set(() => ({
+    await Promise.all(
+      ArrayComment.items.map(async (item) => {
+        const commentInstance = await SQuery.newInstance('post', { id: item._id });
+        commentInstance?.when(
+          'refresh',
+          (obj) => {
+            let oldState: PostInterface;
+            set((state) => {
+              const newState = { ...state };
+              if (!newState.commentList) {
+                newState.commentList = { [postId]: { ...ArrayDataInit, items: [] } };
+              }
+              let index = newState.commentList[postId].items.findIndex((item) => item._id === commentInstance.$id);
+              if (index !== -1) {
+                oldState = newState.commentList[postId].items[index];
+              }
+              return {
+                commentList: {
+                  [postId]: mergeArrayData(
+                    newState.commentList[postId],
+                    { ...newState.commentList[postId], items: [{ ...oldState, ...obj }] },
+                    true
+                  ),
+                },
+              };
+            });
+          },
+          commentInstance.$id
+        );
+      })
+    );
+    if (ArrayComment) {
+      set((state) => {
+        const newState = { ...state };
+        if (!newState.commentList) {
+          newState.commentList = { [postId]: { ...ArrayDataInit, items: [] } };
+        }
+        return {
+          //@ts-ignore
+          commentList: { [postId]: mergeArrayData(newState.commentList[postId], ArrayComment) },
+          loadingComment: false,
+        };
+      });
+    }
+  },
+  initComment: () => {
+    set({
+      commentList: {},
       loadingComment: false,
-    }));
-    return !!ArrayComment ? ArrayComment : ArrayDataInit;
-
-    // if (ArrayComment) {
-    //   set((state) => ({
-    //     //@ts-ignore
-    //     commentList: mergeArrayData(state.commentList, ArrayComment),
-    //     loadingComment: false,
-    //   }));
-    // }
+    });
   },
 
   setComment: async (data) => {
@@ -105,24 +196,7 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
 
     const post = await SQuery.newInstance('post', { id: data.postId });
     const comments = await post?.comments;
-
     if (!post || !comments) return;
-
-    comments.when('update', async (obj) => {
-      let commentId = obj?.added[0];
-      if (!commentId) return;
-
-      const comment = await SQuery.newInstance('post', { id: commentId });
-
-      if (!comment) return;
-
-      let commentCache = comment.$cache;
-
-      // set((state) => ({
-      //   commentList: { ...state.commentList, items: [commentCache, ...state.commentList.items] },
-      // }));
-    });
-
     const res = await SQuery.service('post', 'statPost', {
       postId: data.postId,
       newPostData: {

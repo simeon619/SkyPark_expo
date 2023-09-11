@@ -11,6 +11,8 @@ import {
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
 import { useNavigation } from '@react-navigation/native';
+import { useCommentPostStore } from '../../managementState/server/post/commentStore';
+import { ArrayDataInit } from '../../lib/SQueryClient';
 let EXCEED_LIMIT = 10;
 
 const TextComment = ({
@@ -32,8 +34,6 @@ const TextComment = ({
   const navigation = useNavigation();
 
   const [textIsExpandable, setTextIsExpandable] = useState(false);
-  const { primaryColourLight } = useToggleStore((state) => state);
-
   useEffect(() => {
     setTextIsExpandable(message?.text.length > EXCEED_LIMIT);
   }, [message?.text]);
@@ -41,6 +41,7 @@ const TextComment = ({
     const dataPost = JSON.stringify(data);
     const infoUser = JSON.stringify(user);
     const messageUser = JSON.stringify(message);
+
     //@ts-ignore
     navigation.push('DetailPost', { dataPost, infoUser, messageUser, id: data._id });
   }

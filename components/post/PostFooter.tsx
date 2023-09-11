@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { iconsStat } from '../../Utilis/data';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
@@ -31,60 +31,43 @@ const PostFooter = ({
       }
     | undefined;
 }) => {
+  const [statPos, setStatPos] = useState(data.statPost);
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const { primaryColour } = useToggleStore((state) => state);
-  const [statPos, setStatPos] = React.useState(data.statPost);
 
   const sendLike = async () => {
     try {
-      const res = await SQuery.service('post', 'statPost', {
+      await SQuery.service('post', 'statPost', {
         postId: data._id,
         like: !statPos['isLiked'],
       });
-      return res.response?.post.statPost;
     } catch (error) {
-      return undefined;
+      console.log(error, 'like');
     }
   };
-  const [value, func] = useDebouncedApi(sendLike, 2000);
+  const [_value, func] = useDebouncedApi(sendLike, 2000);
 
-  const toogleLike = useCallback(
-    (statPos: typeof data.statPost) => {
-      setStatPos(() => {
-        return {
-          ...statPos,
-          likes: statPos['isLiked'] ? statPos['likes'] - 1 : statPos['likes'] + 1,
-          isLiked: !statPos['isLiked'],
-        };
-      });
-    },
-    [value]
-  );
+  const toogleLike = useCallback((statPos: typeof data.statPost) => {
+    setStatPos(() => {
+      return {
+        ...statPos,
+        likes: statPos['isLiked'] ? statPos['likes'] - 1 : statPos['likes'] + 1,
+        isLiked: !statPos['isLiked'],
+      };
+    });
+  }, []);
 
   useEffect(() => {
-    if (value) {
-      setStatPos(() => value);
-    } else {
-      toogleLike(statPos);
+    if (data.statPost) {
+      setStatPos(data.statPost);
     }
-  }, [value]);
+  }, [data.statPost]);
 
   const actionComment = (actionName: string) => {
     switch (actionName) {
       case 'comments': {
-        let newStat = {
-          ...data,
-          statPost: value
-            ? {
-                ...value,
-              }
-            : {
-                ...data.statPost,
-              },
-        } satisfies PostInterface;
-
-        const dataPost = JSON.stringify(newStat);
+        const dataPost = JSON.stringify(data);
         const infoUser = JSON.stringify(user);
         const messageUser = JSON.stringify(message);
         //@ts-ignore

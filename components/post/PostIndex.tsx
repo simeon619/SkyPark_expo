@@ -13,12 +13,9 @@ import { RefreshControl } from 'react-native';
 
 const PostIndex = ({ DATA, loadData }: { DATA: ArrayData<PostInterface>; loadData: (page: number) => void }) => {
   const { loadindGetData } = useQuarterPostStore((state) => state);
-
   useEffect(() => {
     fetchData();
   }, []);
-
-  // Function to fetch data from your API
   const fetchData = async () => {
     try {
       loadData(1);
@@ -33,7 +30,20 @@ const PostIndex = ({ DATA, loadData }: { DATA: ArrayData<PostInterface>; loadDat
       loadData(DATA.nextPage || 1);
     }
   };
-
+  const renderItem = ({ item }: { item: PostInterface }) => {
+    switch (item.type) {
+      case PostType.TEXT:
+        return <PostText dataPost={item} />;
+      case PostType.T_MEDIA:
+        return <PostMedia dataPost={item} />;
+      // case PostType.SURVEY:
+      //   return <PostSurvey dataPost={item} />;
+      // case PostType.GROUP_JOIN:
+      //   return <PostJoined dataPost={item} />;
+      default:
+        return <TextMedium style={{ fontSize: moderateScale(25), textAlign: 'center' }}>pas encore gerer</TextMedium>;
+    }
+  };
   const ListFooterComponent = useCallback(() => {
     return (
       <>
@@ -60,21 +70,6 @@ const PostIndex = ({ DATA, loadData }: { DATA: ArrayData<PostInterface>; loadDat
       ListFooterComponent={ListFooterComponent}
     />
   );
-};
-
-const renderItem = ({ item }: { item: PostInterface }) => {
-  switch (item.type) {
-    case PostType.TEXT:
-      return <PostText dataPost={item} />;
-    case PostType.T_MEDIA:
-      return <PostMedia dataPost={item} />;
-    // case PostType.SURVEY:
-    //   return <PostSurvey dataPost={item} />;
-    // case PostType.GROUP_JOIN:
-    //   return <PostJoined dataPost={item} />;
-    default:
-      return <TextMedium style={{ fontSize: moderateScale(25), textAlign: 'center' }}>pas encore gerer</TextMedium>;
-  }
 };
 
 const keyExtractor = (item: PostInterface, index: number) => index.toString();

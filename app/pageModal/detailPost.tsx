@@ -25,15 +25,12 @@ import {
   PostInterface,
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
-
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigationState } from '@react-navigation/native';
 import { pickImage } from '../../Utilis/functions/media/media';
-import { mergeArrayData } from '../../Utilis/functions/utlisSquery';
 import CommentText from '../../components/comment/CommentText';
 import PostFooter from '../../components/post/PostFooter';
 import PostMedia from '../../components/post/PostMedia';
 import Colors from '../../constants/Colors';
-import { ArrayData, ArrayDataInit } from '../../lib/SQueryClient';
 import useToggleStore from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
 import { useCommentPostStore } from '../../managementState/server/post/commentStore';
@@ -45,7 +42,7 @@ type userSchema = {
   profile: ProfileInterface;
 };
 
-const regex = new RegExp(/[^\s\r\n]/g);
+// const regex = new RegExp(/[^\s\r\n]/g);
 const DetailPost = ({ navigation, route }: NavigationStackProps) => {
   const params = route.params as any as {
     dataPost: string;
@@ -61,14 +58,17 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
   const commentable = params.commentable;
 
   const inputRef = useRef<TextInput>(null);
+  const navigationState = useNavigationState((state) => state);
 
-  const { setComment, loadingComment, getComments } = useCommentPostStore((state) => state);
+  const { setComment, loadingComment, getComments, commentList } = useCommentPostStore((state) => state);
   const { account } = useAuthStore((state) => state);
   const { primaryColour } = useToggleStore((state) => state);
 
+  const [data, setData] = useState<PostInterface[]>([]);
+
   const [isInputFocused, setInputFocused] = useState(commentable);
   const [text, setText] = useState('');
-  const [commentList, setCommentList] = useState<ArrayData<PostInterface>>({ ...ArrayDataInit, items: [] });
+  // const [commentList, setCommentList] = useState<ArrayData<PostInterface>>({ ...ArrayDataInit, items: [] });
 
   const { height } = useWindowDimensions();
   const colorScheme = useColorScheme();
@@ -81,7 +81,13 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
 
   useEffect(() => {
     getData(1);
-  }, []);
+  }, [navigationState.index]);
+
+  useEffect(() => {
+    if (commentList?.[id]?.items) {
+      setData(commentList?.[id]?.items || []);
+    }
+  }, [id, commentList?.[id]]);
 
   useFocusEffect(() => {
     const backAction = () => {
@@ -92,14 +98,16 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
       return false;
     };
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    return () => backHandler.remove();
+    return () => {
+      backHandler.remove();
+    };
   });
 
   const getData = async (nbrPage: number) => {
-    const data = await getComments(id, nbrPage);
-    setCommentList((prev) => {
-      return mergeArrayData(prev, data);
-    });
+    await getComments(id, nbrPage);
+    // setCommentList((prev) => {
+    //   return mergeArrayData(prev, data);
+    // });
   };
 
   const handleFocus = () => {
@@ -126,8 +134,8 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
   }
 
   const handleLoadMore = () => {
-    if (commentList?.hasNextPage) {
-      getData(commentList?.nextPage || 1);
+    if (!!commentList && commentList[id]?.nextPage) {
+      getData(commentList[id]?.nextPage || 1);
     }
   };
 
@@ -190,7 +198,7 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
         <TextLight style={{ fontSize: moderateScale(20), textAlign: 'center' }}>Commentaires</TextLight>
       </View>
       <FlatList
-        data={commentList?.items}
+        data={data}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         ListHeaderComponent={listHeaderComponent}
@@ -225,7 +233,7 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
           <Pressable onPress={handleFocus}>
             <TextLight style={{ fontSize: moderateScale(15), flex: 1, marginVertical: verticalScale(5) }}>
               {isInputFocused ? 'En reponse a' : 'Répondre a'}{' '}
-              <TextLight style={{ color: primaryColour }}>@{user.account.name}</TextLight>
+              <TextLight style={{ color: primaryColour }}>@{user?.account?.name}</TextLight>
             </TextLight>
           </Pressable>
           <Ionicons

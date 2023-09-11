@@ -19,9 +19,8 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
   loadindGetData: false,
   loadingPublish: false,
   getListPost: async (page: number) => {
-    set((state) => {
+    set(() => {
       return {
-        ...state,
         loadindGetData: true,
       };
     });
@@ -33,6 +32,55 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
 
     const Thread = await quarter?.Thread;
 
+    if (!Thread) return;
+
+    Thread.when(
+      'update',
+      async (obj) => {
+        let postId = obj.added[0];
+        if (!postId) return;
+        set(() => {
+          return {
+            loadindGetData: true,
+          };
+        });
+        const post = await SQuery.newInstance('post', { id: postId });
+
+        post?.when(
+          'refresh',
+          (obj) => {
+            console.log('🚀 ~ file: postQuarter.ts:52 ~ obj:', obj);
+            let oldState: PostInterface;
+            set((state) => {
+              const newState = { ...state };
+
+              let index = newState.listPost.items.findIndex((item) => item._id === post.$id);
+              if (index !== -1) {
+                oldState = newState.listPost.items[index];
+              }
+              return {
+                listPost: mergeArrayData(
+                  newState.listPost,
+                  { ...newState.listPost, items: [{ ...oldState, ...obj }] },
+                  true
+                ),
+              };
+            });
+          },
+          post.$id
+        );
+
+        if (!post) return;
+        set((state) => {
+          let ArrayPos = [post.$cache];
+          return {
+            listPost: mergeArrayData(state.listPost, { ...state.listPost, items: ArrayPos }, true),
+            loadindGetData: false,
+          };
+        });
+      },
+      'ThreadQuarte:update'
+    );
     const posts = await Thread?.update({
       paging: {
         page,
@@ -42,9 +90,34 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         },
       },
     });
-
-    // posts?.items[0].statPost.
-
+    if (!posts) return;
+    await Promise.all(
+      posts.items.map(async (item) => {
+        const post = await SQuery.newInstance('post', { id: item._id });
+        post?.when(
+          'refresh',
+          (obj) => {
+            console.log('🚀 ~ file: postQuarter.ts:100 ~ posts.items.map ~ obj:', obj);
+            let oldState: PostInterface;
+            set((state) => {
+              const newState = { ...state };
+              let index = newState.listPost.items.findIndex((i) => i._id === post.$id);
+              if (index !== -1) {
+                oldState = newState.listPost.items[index];
+              }
+              return {
+                listPost: mergeArrayData(
+                  newState.listPost,
+                  { ...newState.listPost, items: [{ ...oldState, ...obj }] },
+                  true
+                ),
+              };
+            });
+          },
+          post.$id
+        );
+      })
+    );
     if (posts) {
       set((state) => {
         return {
@@ -83,10 +156,6 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         },
       ],
     });
-
-    Thread?.when('refresh', (obj) => {});
-
-    t?.added[0];
 
     set((state) => {
       return {

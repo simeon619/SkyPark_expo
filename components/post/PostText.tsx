@@ -9,6 +9,8 @@ import PostFooter from './PostFooter';
 const PostText = ({ dataPost }: { dataPost: PostInterface }) => {
   const message = useMessagePost({ dataPost });
   const infoUser = useInfoUserPost({ accountId: message?.account });
+
+  console.log('🚀 ~ file: PostText.tsx:14 ~ PostText ~ dataPost.statPost:', dataPost.statPost);
   return (
     <>
       <PostHeader data={dataPost} user={infoUser} message={message} />

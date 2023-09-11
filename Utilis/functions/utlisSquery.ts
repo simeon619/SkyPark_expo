@@ -11,19 +11,25 @@ import {
 
 export function mergeArrayData<T extends InstanceInterface>(
   existingData: ArrayData<T>,
-  newData: Partial<ArrayData<T>>
+  newData: Partial<ArrayData<T>>,
+  isUpdated?: boolean
 ) {
   const uniqueIds = new Set(existingData?.items.map((item) => item._id));
+  const mergedItems = existingData?.items.slice() || [];
 
   newData?.items?.forEach((newItem) => {
     if (!uniqueIds.has(newItem._id)) {
       uniqueIds.add(newItem._id);
-      existingData?.items.push(newItem);
+      mergedItems.push(newItem);
+    } else if (isUpdated) {
+      const index = mergedItems.findIndex((item) => item._id === newItem._id);
+      if (index !== -1) {
+        mergedItems[index] = newItem;
+      }
     }
   });
-
   return {
-    items: existingData?.items || [],
+    items: mergedItems,
     hasNextPage: newData?.hasNextPage || false,
     totalItems: newData?.totalItems || 0,
     totalPages: newData?.totalPages || 0,
@@ -47,7 +53,6 @@ export const getDiscussionId = async (receiverId: string | undefined) => {
       const res = await SQuery.service('messenger', 'createDiscussion', {
         receiverAccountId: receiverId,
       });
-
       if (res.response?.id) {
         await createPrivateConversation({
           ID_Conversation: res.response.id,
@@ -65,10 +70,7 @@ export const getDiscussionId = async (receiverId: string | undefined) => {
 
   return discussionId;
 };
-
-// let y = getDiscussionId('', true);
-
-export const getChannel = async (discussionId: string | undefined | null, accountId: string) => {
+export const getChannel = async (discussionId: string | undefined | null) => {
   if (!discussionId) return;
   const discussion = await SQuery.newInstance('discussion', { id: discussionId });
   const ArrayDiscussion = await discussion?.channel;
@@ -122,7 +124,7 @@ export const sendServer = async (
   files?: FileType[],
   value?: string
 ) => {
-  let channel = await getChannel(discussionId, accountId);
+  let channel = await getChannel(discussionId);
 
   let messageAdd = await channel?.update({
     addNew: [
