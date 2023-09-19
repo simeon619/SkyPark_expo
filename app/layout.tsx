@@ -135,8 +135,8 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
         <NavigationContainer fallback={<TextLight>Loading...</TextLight>}>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             <KeyboardProvider>
@@ -183,7 +183,8 @@ function RootLayoutNav() {
             </KeyboardProvider>
           </ThemeProvider>
         </NavigationContainer>
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
+ 

@@ -1,39 +1,45 @@
-//@ts-nocheck
 import { AntDesign } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Animated from 'react-native-reanimated';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
-import { SurveySchema } from '../../types/PostType';
-import { TextLight } from '../StyledText';
+import { TextLight, TextLightItalic } from '../StyledText';
 import { View } from '../Themed';
-import TextComponent from './TextComponent';
+import { TouchableOpacity } from 'react-native';
+import { LabelInterface, SurveyInterface } from '../../managementState/server/Descriptions';
+import { SQuery } from '../../managementState';
+import { calculeDateEnd } from '../../Utilis/date';
 
 const SurveyComponent = ({
   dataSurvey,
   question,
+  postId,
 }: {
-  dataSurvey: SurveySchema | undefined;
+  dataSurvey: (SurveyInterface & { labels: LabelInterface[] }) | undefined;
   question: string | undefined;
+  postId: string;
 }) => {
-  if (!dataSurvey) return null;
+  if (!dataSurvey) return <></>;
 
-  //ici on aura plus tard une liste venant du serveur qui renvera true ou false en fonction de si l'user a voté ou non
-  const [hasVoted, setHasVoted] = useState(false);
-  const [dataSurveyA, setDataSurveyA] = useState(dataSurvey);
+  const [hasVoted, setHasVoted] = useState(true);
 
-  const handleVote = (item: any) => {
-    if (!hasVoted) {
-      setHasVoted(true);
+  console.log('🚀 ~ file: SurveyComponent.tsx:27 ~ dataSurvey:', dataSurvey);
 
-      const updatedOptions = [...dataSurveyA.options];
-      const index = updatedOptions.findIndex((option) => option.id === item.id);
-      if (index !== -1) {
-        updatedOptions[index] = { ...item, votes: item.votes + 1 };
-      }
-
-      setDataSurveyA({ ...dataSurveyA, options: updatedOptions, totalVotes: dataSurveyA.totalVotes + 1 });
+  const computeTotal = () => {
+    if (dataSurvey) {
+      return dataSurvey.labels.reduce((a, b) => a + b.votes, 0);
     }
+    return 0;
+  };
+
+  useEffect(() => {});
+
+  const handleVote = async (item: LabelInterface) => {
+    const dataSurveyA = await SQuery.service('post', 'survey', {
+      labelId: item._id,
+      postId: postId,
+    });
+    console.log('🚀 ~ file: SurveyComponent.tsx:40 ~ handleVote ~ dataSurveyA:', dataSurveyA);
   };
 
   return (
@@ -49,10 +55,13 @@ const SurveyComponent = ({
         padding: moderateScale(10),
       }}
     >
-      <TextComponent text={question} />
-      {dataSurveyA.options.map((item, index) => {
-        let percentage = ((item.votes * 100) / dataSurveyA.totalVotes).toFixed(1);
+      {/* <TextComponent  /> */}
+      <TextLightItalic>{question}</TextLightItalic>
+      {dataSurvey.labels.map((item, index, arr) => {
+        const computeTotal = arr.reduce((a, b) => a + b.votes, 0);
+        let percentage = ((item.votes * 100) / computeTotal).toFixed(1);
         percentage = percentage === 'NaN' ? '0' : percentage;
+
         return (
           <TouchableOpacity key={index} onPress={() => handleVote(item)} style={{ paddingVertical: verticalScale(0) }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: horizontalScale(10) }}>
@@ -83,6 +92,7 @@ const SurveyComponent = ({
                 {hasVoted ? <AntDesign name="check" size={moderateScale(15)} color="white" /> : null}
               </View>
               <Animated.View
+                //@ts-ignore
                 style={{
                   height: verticalScale(7),
                   width: `${percentage}%`,
@@ -94,10 +104,22 @@ const SurveyComponent = ({
           </TouchableOpacity>
         );
       })}
-
-      <TextLight style={{ fontSize: moderateScale(15), opacity: hasVoted ? 1 : 0 }}>
-        {dataSurveyA.totalVotes} vote{dataSurveyA.totalVotes > 1 ? 's' : ''}{' '}
-      </TextLight>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderTopColor: '#0001',
+          borderTopWidth: 1,
+        }}
+      >
+        <TextLight style={{ fontSize: moderateScale(15), opacity: hasVoted ? 1 : 0 }}>
+          {computeTotal()} vote{computeTotal() > 1 ? 's' : ''}{' '}
+        </TextLight>
+        <TextLight>
+          <TextLight>{calculeDateEnd(dataSurvey.__createdAt + dataSurvey.delay)}</TextLight>
+        </TextLight>
+      </View>
     </View>
   );
 };

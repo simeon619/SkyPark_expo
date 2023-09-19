@@ -3,7 +3,7 @@ import { AppState, AppStateStatus, Platform } from 'react-native';
 
 function onAppStateChange(status: AppStateStatus) {
   if (Platform.OS !== 'web') {
-    //State zustand for
+    status;
   }
 }
 

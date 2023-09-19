@@ -1,4 +1,4 @@
-import { isYesterday } from 'date-fns';
+import { addWeeks, isPast, isTomorrow, isWithinInterval, isYesterday, nextMonday } from 'date-fns';
 import isThisYear from 'date-fns/esm/isThisYear';
 import isToday from 'date-fns/esm/isToday';
 import format from 'date-fns/format';
@@ -31,6 +31,33 @@ export const formatMessageDate = (timestamp: number) => {
   }
 
   return formattedDate;
+};
+
+//function who determine date  with date-fns and string return like lun , 17 may 2022 at 12 :55
+
+export const calculeDateEnd = (times: number) => {
+  let date = new Date(times);
+  if (isPast(date)) {
+    return `Vote terminé`;
+  } else if (isToday(date)) {
+    return `Se termine aujourd'hui à ${format(date, 'HH:mm')}`;
+  } else if (isTomorrow(date)) {
+    return `Se termine demain à ${format(date, 'HH:mm')}`;
+  } else if (isWithinInterval(date, { start: date, end: addWeeks(date, 1) })) {
+    return `Se termine ${format(date, 'eeee', {
+      locale: fr,
+    })} à ${format(date, 'HH:mm')}`;
+  } else {
+    return `Se termine ${format(date, 'eeee dd MMM yyyy')} à ${format(date, 'HH:mm')}`;
+  }
+};
+
+export const surveyTimeIsDone = (times: number) => {
+  let date = new Date(times);
+  if (isPast(date)) {
+    return true;
+  }
+  return false;
 };
 export const formatPostDate = (timestamp: Date | number) => {
   const currentDate = new Date();

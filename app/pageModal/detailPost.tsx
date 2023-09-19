@@ -36,6 +36,9 @@ import { useAuthStore } from '../../managementState/server/auth';
 import { useCommentPostStore } from '../../managementState/server/post/commentStore';
 import { PostType } from '../../types/PostType';
 import { NavigationStackProps } from '../../types/navigation';
+import PostSurvey from '../../components/post/PostSurvey';
+import { useSurveyStore } from '../../managementState/server/post/surveyStore';
+import SurveyComponent from '../../components/utilis/SurveyComponent';
 
 type userSchema = {
   account: AccountInterface;
@@ -63,6 +66,7 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
   const { setComment, loadingComment, getComments, commentList } = useCommentPostStore((state) => state);
   const { account } = useAuthStore((state) => state);
   const { primaryColour } = useToggleStore((state) => state);
+  const { listSurvey } = useSurveyStore((state) => state);
 
   const [data, setData] = useState<PostInterface[]>([]);
 
@@ -153,8 +157,9 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
     return (
       <>
         <PostHeader data={post} user={user} message={message} />
-        <TextComponent message={message} />
+        {post.type !== '3' && <TextComponent message={message} />}
         {post.type === '2' && <MediaComponent caption={message?.text} media={message?.files} />}
+        <SurveyComponent dataSurvey={listSurvey.get(id)} question={message?.text} postId={id} />
         <PostFooter data={post} user={user} message={message} />
       </>
     );
@@ -165,8 +170,8 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
         return <CommentText dataPost={item} postParent={user.account.name} />;
       case PostType.T_MEDIA:
         return <PostMedia dataPost={item} />;
-      // case PostType.SURVEY:
-      //   return <PostSurvey dataPost={item} />;
+      case PostType.SURVEY:
+        return <PostSurvey dataPost={item} />;
       // case PostType.GROUP_JOIN:
       //   return <PostJoined dataPost={item} />;
       default:

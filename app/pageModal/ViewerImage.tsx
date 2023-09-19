@@ -1,5 +1,4 @@
 import { useNavigation } from '@react-navigation/native';
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import ImageView from 'react-native-image-viewing';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';

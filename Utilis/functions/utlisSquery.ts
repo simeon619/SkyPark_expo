@@ -14,8 +14,8 @@ export function mergeArrayData<T extends InstanceInterface>(
   newData: Partial<ArrayData<T>>,
   isUpdated?: boolean
 ) {
-  const uniqueIds = new Set(existingData?.items.map((item) => item._id));
-  const mergedItems = existingData?.items.slice() || [];
+  const mergedItems = [...existingData?.items];
+  const uniqueIds = new Set(mergedItems?.map((item) => item._id));
 
   newData?.items?.forEach((newItem) => {
     if (!uniqueIds.has(newItem._id)) {

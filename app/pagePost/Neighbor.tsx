@@ -5,14 +5,10 @@ import PostIndex from '../../components/post/PostIndex';
 
 import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
 const Neighbor = () => {
-  const { getListPost, listPost } = useQuarterPostStore((state) => state);
-
-  // useEffect(() => {
-  //   getListPost(listPost.page || 1);
-  // }, []);
+  const { getListPost, listPost, loadindGetData } = useQuarterPostStore((state) => state);
   return (
     <View style={{ flex: 1 }}>
-      <PostIndex DATA={listPost} loadData={getListPost} />
+      <PostIndex DATA={listPost} loadData={getListPost} loadindGetData={loadindGetData} />
     </View>
   );
 };

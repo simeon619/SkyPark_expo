@@ -1,27 +1,48 @@
-import { UrlData, DescriptionsType, ControllerType, FileType, ArrayData } from '../../lib/SQueryClient';
+import { ControllerType, DescriptionsType, UrlData } from '../../lib/SQueryClient';
 
+const post = {} as Partial<PostInterface>;
+const survey = {} as Partial<SurveyInterface>;
 const newPostData = {
+  ...post,
   message: {
     text: '' as string | undefined,
-    files: [] as FileType[] | undefined,
-    account: '' as string | undefined,
+  } as MessageInterface,
+  survey: {
+    ...survey,
+    options: [] as LabelInterface[],
   },
-  theme: '' as string | undefined,
-  type: '' as string | undefined,
 };
 const send = {
-  like: false as boolean | undefined,
+  like: true as boolean | undefined,
   newPostData: {} as Partial<typeof newPostData> | undefined,
   accountShared: '' as string | undefined,
   postId: '' as string | undefined,
 };
 export const Controller = {
   post: {
+    // allUserPost:{
+    //   send:{},
+    //   receive:ArrayDataInit
+    // },
+    survey: {
+      receive: {
+        newLabel: '',
+        lastLabel: '',
+        totalVotes: 0,
+        delay: 0,
+        limiteDate: 0,
+      },
+      send: { postId: '', labelId: '' },
+    },
     statPost: {
       send: {} as Partial<typeof send> & { postId: string },
       receive: {
-        post: {} as PostInterface,
-        newComment: {} as PostInterface | undefined,
+        newCommentId: '',
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        totalCommentsCount: 0,
+        isLiked: false,
       },
     },
   },
@@ -120,7 +141,7 @@ export const Controller = {
           query: {},
         },
       },
-      receive: {} as ArrayData<any>,
+      receive: {} as AccountInterface[],
     },
     padiezdList: {
       send: {
@@ -269,6 +290,64 @@ export const Descriptions = {
       },
     ],
   },
+  label: {
+    label: {
+      type: String,
+    },
+    votes: {
+      type: Number,
+    },
+    _id: {
+      type: String,
+    },
+    __createdAt: {
+      type: Number,
+    },
+    __updatedAt: {
+      type: Number,
+    },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
+  },
+  survey: {
+    options: [
+      {
+        type: String,
+        ref: 'label' as const,
+        required: true,
+      },
+    ],
+    totalVotes: {
+      type: Number,
+    },
+    delay: {
+      type: Number,
+      required: true,
+    },
+    _id: {
+      type: String,
+    },
+    __createdAt: {
+      type: Number,
+    },
+    __updatedAt: {
+      type: Number,
+    },
+    __parentList: [
+      {
+        type: {
+          modelPath: String,
+          id: String,
+        },
+      },
+    ],
+  },
   post: {
     client: {
       type: String, // modelPath user / manager / supervisor,
@@ -281,11 +360,17 @@ export const Descriptions = {
     theme: {
       type: String,
     },
+    survey: {
+      type: String,
+      ref: 'survey' as const,
+    },
     statPost: {
       type: {
         likes: Number,
         comments: Number,
         shares: Number,
+        totalCommentsCount: Number,
+        isLiked: Boolean,
       },
     },
     message: {
@@ -293,9 +378,11 @@ export const Descriptions = {
       ref: 'message' as const,
       required: true as const,
     },
+
     type: {
       type: String,
     },
+
     comments: [
       {
         type: String,
@@ -1090,19 +1177,37 @@ export const CacheValues = {
     __updatedAt: 0,
     __parentList: [],
   } as MessageInterface,
+
+  label: {
+    _id: '',
+    label: '',
+    votes: 0,
+    __createdAt: 0,
+    __updatedAt: 0,
+    __parentList: [],
+  } as LabelInterface,
+  survey: {
+    _id: '',
+    options: [],
+    totalVotes: 0,
+    delay: 0,
+    __createdAt: 0,
+    __updatedAt: 0,
+    __parentList: [],
+  } as SurveyInterface,
   post: {
     _id: '',
     message: '',
     comments: [],
     client: '',
     padiezd: '',
+    survey: '',
     type: '',
     theme: '',
     statPost: {
       likes: 0,
       comments: 0,
       shares: 0,
-      commentsCount: 0,
       totalCommentsCount: 0,
       isLiked: false,
     },
@@ -1184,6 +1289,29 @@ export const CacheValues = {
     __parentList: [],
   } as TestInterface,
 } satisfies CacheType;
+export interface LabelInterface {
+  _id: string;
+  label: string;
+  votes: number;
+  __createdAt: number;
+  __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
+}
+export interface SurveyInterface {
+  _id: string;
+  options: string[];
+  totalVotes: number;
+  delay: number;
+  __createdAt: number;
+  __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
+}
 export interface TestInterface {
   simpleArray?: number[];
   fileArray?: UrlData[];
@@ -1261,17 +1389,17 @@ export interface PostInterface {
   client: string;
   padiezd: string;
   theme: string;
-  type: string;
   _id: string;
   message: string;
+  survey: string;
   statPost: {
     likes: number;
     comments: number;
     shares: number;
-    commentsCount: number;
     totalCommentsCount: number;
     isLiked: boolean;
   };
+  type: string;
   comments: string[];
   __createdAt: number;
   __updatedAt: number;

@@ -37,6 +37,11 @@ import { mergeArrayData } from '../../../Utilis/functions/utlisSquery';
 //   return res.response;
 // }
 
+type surveySchema = {
+  options: { label: string }[];
+  delay: number;
+};
+
 type CommentPostSchema = {
   commentList: Record<string, ArrayData<PostInterface>> | undefined;
   loadingComment: boolean;
@@ -48,12 +53,13 @@ type CommentPostSchema = {
     type: string;
     files?: FileType[];
     value?: string;
+    surveyOptions?: surveySchema;
   }) => Promise<
     | {
+        newCommentId: string;
         likes: number;
         comments: number;
         shares: number;
-        commentsCount: number;
         totalCommentsCount: number;
         isLiked: boolean;
       }
@@ -192,23 +198,29 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
   },
 
   setComment: async (data) => {
-    if (!data.accountId) return;
+    const { value, accountId, files, type, postId, surveyOptions } = data;
 
+    if (!accountId) return;
     const post = await SQuery.newInstance('post', { id: data.postId });
     const comments = await post?.comments;
+
     if (!post || !comments) return;
     const res = await SQuery.service('post', 'statPost', {
-      postId: data.postId,
+      postId: postId,
       newPostData: {
         message: {
-          text: data.value,
-          files: data.files,
-          account: data.accountId,
+          //@ts-ignore
+          text: value,
+          //@ts-ignore
+          files: files,
+          account: accountId,
         },
-        type: data.type,
+        type: type,
+        //@ts-ignore
+        survey: surveyOptions,
       },
     });
 
-    return res.response?.post.statPost;
+    return res.response;
   },
 }));

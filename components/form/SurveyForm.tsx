@@ -17,11 +17,16 @@ import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metr
 import useToggleStore, { useBlurSurvey, useDaysSurvey, useTypeForm } from '../../managementState/client/preference';
 import { TextLight, TextRegular } from '../StyledText';
 import { View } from '../Themed';
+import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
+import { useNavigation } from '@react-navigation/native';
+import { useAuthStore } from '../../managementState/server/auth';
 
-const SurveyForm = () => {
+const SurveyForm = ({ text, setText }: { text: string; setText: React.Dispatch<React.SetStateAction<string>> }) => {
   const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
   const { setBlurSurvey } = useBlurSurvey((state) => state);
   const { IconName } = useTypeForm((state) => state);
+  const { publishPost } = useQuarterPostStore((state) => state);
+  const { account } = useAuthStore((state) => state);
 
   const hideForm = useAnimatedStyle(() => {
     return {
@@ -29,24 +34,25 @@ const SurveyForm = () => {
       opacity: withTiming(IconName === 'Vote' ? 1 : 0),
     };
   }, [IconName]);
-  const { daysSurvey, setDaysSurvey } = useDaysSurvey();
-  const timeoutRef = useRef<NodeJS.Timeout>();
-  const [options, setOptions] = useState<string[]>([]);
-  const [blur, setBlur] = useState(0);
-  const nbrOptions = 5;
-  useEffect(() => {
-    if (options.length === 0) {
-      timeoutRef.current = setTimeout(() => {
-        setOptions((prevOptions) => ['', '']);
-      });
-    }
 
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [options]);
+  const { daysSurvey, setDaysSurvey } = useDaysSurvey();
+  // const timeoutRef = useRef<NodeJS.Timeout>();
+  const [options, setOptions] = useState<string[]>(['', '']);
+  const nbrOptions = 5;
+  // useEffect(() => {
+  //   if (options.length === 0) {
+  //     timeoutRef.current = setTimeout(() => {
+  //       setOptions(['', '']);
+  //     });
+  //   }
+
+  //   return () => {
+  //     if (timeoutRef.current) {
+  //       clearTimeout(timeoutRef.current);
+  //     }
+  //   };
+  // }, [options]);
+  const navigation = useNavigation();
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -66,11 +72,30 @@ const SurveyForm = () => {
       return;
     }
     const newOptions = options.filter((_, i) => i !== index);
-
     setOptions(newOptions);
   };
 
-  const handleSubmit = () => {};
+  const handleSubmit = () => {
+    if (options.length <= 1) {
+      return;
+    }
+    const labels = options.map((option) => {
+      return {
+        label: option,
+      };
+    });
+    publishPost({
+      accountId: account?._id,
+      type: '3',
+      value: text,
+      surveyOptions: {
+        delay: 1000 * 60 * 60 * 24 * daysSurvey,
+        options: [...labels],
+      },
+    });
+    setText('');
+    navigation.goBack();
+  };
 
   const TimePickerSurvey = () => {
     const timesSurveyDays = [{ d: 1 }, { d: 2 }, { d: 3 }, { d: 4 }, { d: 5 }, { d: 6 }, { d: 7 }];
@@ -89,7 +114,7 @@ const SurveyForm = () => {
         }}
       >
         {/* <TouchableWithoutFeedback onPress={handleModalPress}> */}
-        <ScrollView style={{}} keyboardShouldPersistTaps="handled">
+        <View>
           {timesSurveyDays.map(({ d }, i) => (
             <ViewNatif
               onTouchStart={() => {
@@ -120,7 +145,7 @@ const SurveyForm = () => {
               </TextLight>
             </ViewNatif>
           ))}
-        </ScrollView>
+        </View>
         {/* </TouchableWithoutFeedback> */}
       </LinearGradient>
     );
@@ -152,8 +177,6 @@ const SurveyForm = () => {
                   flexDirection: 'row-reverse',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  // gap: horizontalScale(5),
-                  // marginLeft: moderateScale(15),
                 }}
               >
                 {index >= 2 ? (
@@ -170,7 +193,6 @@ const SurveyForm = () => {
                 )}
                 <TextInput
                   key={index}
-                  // multiline={true}
                   autoFocus={index >= 2 ? true : false}
                   maxLength={150}
                   style={{

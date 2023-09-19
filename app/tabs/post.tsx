@@ -92,7 +92,7 @@ const PostTabScreen = () => {
           />
         </View>
         <DefaultForm text={text} setText={setText} />
-        <SurveyForm />
+        <SurveyForm text={text} setText={setText} />
       </View>
       {/* <TimePickerSurvey /> */}
     </SafeAreaView>

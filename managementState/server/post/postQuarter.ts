@@ -5,12 +5,23 @@ import { ArrayData, ArrayDataInit, FileType } from '../../../lib/SQueryClient';
 import { PostInterface } from '../Descriptions';
 import { useAuthStore } from '../auth';
 
+type surveySchema = {
+  options: { label: string }[];
+  delay: number;
+};
+
 type quarterPostSchema = {
   listPost: ArrayData<PostInterface>;
   loadindGetData: boolean;
   loadingPublish: boolean;
 
-  publishPost: (data: { value?: string; accountId: string | undefined; files?: FileType[]; type: string }) => void;
+  publishPost: (data: {
+    value?: string;
+    accountId: string | undefined;
+    files?: FileType[];
+    type: string;
+    surveyOptions?: surveySchema;
+  }) => void;
   getListPost: (page: number) => void;
 };
 
@@ -49,7 +60,6 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         post?.when(
           'refresh',
           (obj) => {
-            console.log('🚀 ~ file: postQuarter.ts:52 ~ obj:', obj);
             let oldState: PostInterface;
             set((state) => {
               const newState = { ...state };
@@ -97,7 +107,7 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         post?.when(
           'refresh',
           (obj) => {
-            console.log('🚀 ~ file: postQuarter.ts:100 ~ posts.items.map ~ obj:', obj);
+            console.log('🚀 ~ file: postQuarter.ts:107 ~ posts.items.map ~ obj:', obj);
             let oldState: PostInterface;
             set((state) => {
               const newState = { ...state };
@@ -133,7 +143,7 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         loadingPublish: true,
       };
     });
-    const { value, accountId, files, type } = data;
+    const { value, accountId, files, type, surveyOptions } = data;
 
     if (!accountId) return;
     const quarterId = useAuthStore.getState().quarter?._id;
@@ -144,7 +154,7 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
 
     const Thread = await quarter?.Thread;
 
-    const t = await Thread?.update({
+    await Thread?.update({
       addNew: [
         {
           message: {
@@ -152,6 +162,7 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
             files,
             account: accountId,
           },
+          survey: surveyOptions,
           type,
         },
       ],
