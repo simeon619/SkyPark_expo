@@ -29,7 +29,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["INTERNET"],
+      "permissions": ["android.permission.INTERNET", "android.permission.RECORD_AUDIO"],
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.sk.skypark"
     },
@@ -37,6 +37,14 @@
       "bundler": "metro",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": ["expo-build-properties", "expo-image-picker", "expo-router"]
+    "plugins": ["expo-build-properties", "expo-image-picker", "expo-router"],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6fa4cf5e-5732-4964-a92b-2d2ba97ce704"
+      }
+    }
   }
 }

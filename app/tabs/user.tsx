@@ -8,6 +8,7 @@ import HeaderHome from '../../components/utilis/HeaderHome';
 import TabPageItem from '../../components/utilis/TabPageItem';
 import Colors from '../../constants/Colors';
 import useToggleStore from '../../managementState/client/preference';
+import Favourites from '../PageUser/Favourites';
 import MyActivity from '../PageUser/MyActivity';
 
 const UserTabScreen = () => {
@@ -47,8 +48,17 @@ const UserTabScreen = () => {
           }}
         >
           <Tab.Screen
-            name="Mes activités"
+            name="Mes activites"
             component={MyActivity}
+            options={{
+              tabBarLabel({ focused, children }) {
+                return <TabPageItem children={children} focused={focused} />;
+              },
+            }}
+          />
+          <Tab.Screen
+            name="Mes favoris"
+            component={Favourites}
             options={{
               tabBarLabel({ focused, children }) {
                 return <TabPageItem children={children} focused={focused} />;

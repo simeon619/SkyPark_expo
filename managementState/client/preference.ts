@@ -65,7 +65,7 @@ interface Icon {
 
 export type IconName = (typeof icons)[number]['name'];
 
-export const typeform: IconName = 'Client';
+export const typeform: IconName = 'Post';
 
 type stateForm = {
   IconName: IconName;

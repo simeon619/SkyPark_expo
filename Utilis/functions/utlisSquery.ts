@@ -3,8 +3,8 @@ import { SQuery } from '../../managementState';
 import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
 import {
-  createMessageWithStatusAndFiles,
-  createPrivateConversation,
+  createConversation,
+  createMessage,
   getConversationIdByDestinataire,
   updateStatutMessage,
 } from '../models/Chat/messageReposotory';
@@ -14,22 +14,27 @@ export function mergeArrayData<T extends InstanceInterface>(
   newData: Partial<ArrayData<T>>,
   isUpdated?: boolean
 ) {
-  const mergedItems = [...existingData?.items];
-  const uniqueIds = new Set(mergedItems?.map((item) => item._id));
+  const ArrayExistingItems = existingData?.items ?? [];
+  // console.log('🚀 ~ file: utlisSquery.ts:18 ~ ArrayExistingItems:', ArrayExistingItems);
+  const ArrayNewDataItems = newData?.items ?? [];
+  // console.log('🚀 ~ file: utlisSquery.ts:20 ~ ArrayNewDataItems:', ArrayNewDataItems);
 
-  newData?.items?.forEach((newItem) => {
+  const uniqueIds = new Set(ArrayExistingItems.map((item) => item._id));
+
+  ArrayNewDataItems.forEach((newItem) => {
     if (!uniqueIds.has(newItem._id)) {
       uniqueIds.add(newItem._id);
-      mergedItems.push(newItem);
+      ArrayExistingItems?.push(newItem);
     } else if (isUpdated) {
-      const index = mergedItems.findIndex((item) => item._id === newItem._id);
+      const index = ArrayExistingItems.findIndex((item) => item._id === newItem._id);
       if (index !== -1) {
-        mergedItems[index] = newItem;
+        ArrayExistingItems[index] = newItem;
       }
     }
   });
+
   return {
-    items: mergedItems,
+    items: ArrayExistingItems,
     hasNextPage: newData?.hasNextPage || false,
     totalItems: newData?.totalItems || 0,
     totalPages: newData?.totalPages || 0,
@@ -54,10 +59,11 @@ export const getDiscussionId = async (receiverId: string | undefined) => {
         receiverAccountId: receiverId,
       });
       if (res.response?.id) {
-        await createPrivateConversation({
-          ID_Conversation: res.response.id,
-          ID_DESTINATAIRE: receiverId,
-          Type_Conversation: 'private',
+        await createConversation({
+          idConversation: res.response.id,
+          idDestinataire: receiverId,
+          typeConversation: 'private',
+          idGroupe: null,
         });
         discussionId = res.response.id;
       } else {
@@ -73,6 +79,7 @@ export const getDiscussionId = async (receiverId: string | undefined) => {
 export const getChannel = async (discussionId: string | undefined | null) => {
   if (!discussionId) return;
   const discussion = await SQuery.newInstance('discussion', { id: discussionId });
+
   const ArrayDiscussion = await discussion?.channel;
 
   ArrayDiscussion?.when(
@@ -95,20 +102,27 @@ export const getChannel = async (discussionId: string | undefined | null) => {
               extension: file.extension,
               size: file.size,
               url: file.url,
+              buffer: null,
             };
           }) || [];
 
-        await createMessageWithStatusAndFiles(
-          {
-            Contenu_Message: newMessage.text,
-            Horodatage: newMessage.__createdAt,
-            ID_Message: newMessage._id,
-            ID_Conversation: discussionId || '',
-            ID_Expediteur: newMessage.account,
+        await createMessage({
+          newMessage: {
+            contenuMessage: newMessage.text,
+            horodatage: newMessage.__createdAt,
+            idConversation: discussionId,
+            idExpediteur: newMessage.account,
+            idMessage: messageId,
           },
-          { Date_Reçu: Date.now(), ID_Message: messageId, Date_Envoye: newMessage.__createdAt },
-          files
-        );
+          filesData: files,
+          statusData: {
+            dateLu: null,
+            dateReçu: Date.now(),
+            dateEnvoye: newMessage.__createdAt,
+            idStatutLecture: 1,
+            idMessage: messageId,
+          },
+        });
         eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
       }
     },
@@ -141,14 +155,14 @@ export const sendServer = async (
 
     if (!messageInstance) return;
 
-    updateStatutMessage({ ID_Message: messageId, Date_Envoye: messageInstance?.__createdAt });
+    updateStatutMessage({ idMessage: messageId, dateEnvoye: messageInstance?.__createdAt }, discussionId);
 
     eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
   }
 };
 export const putMessageLocal = async (
-  files: FileType[] | undefined,
-  value: string | undefined,
+  files: FileType[] | null,
+  value: string | null,
   discussionId: string,
   accountId: string,
   messageId: string,
@@ -161,21 +175,27 @@ export const putMessageLocal = async (
           ...file,
           extension: file.type.split('/')[1],
           uri: file.uri,
-          url: undefined,
-          buffer: undefined,
+          url: null,
+          buffer: null,
         };
       }) || [];
-    await createMessageWithStatusAndFiles(
-      {
-        Contenu_Message: value || null,
-        Horodatage: createMsg,
-        ID_Message: messageId,
-        ID_Conversation: discussionId,
-        ID_Expediteur: accountId,
+    await createMessage({
+      newMessage: {
+        contenuMessage: value,
+        horodatage: createMsg,
+        idConversation: discussionId,
+        idExpediteur: accountId,
+        idMessage: messageId,
       },
-      {},
-      fileMap
-    );
+      filesData: fileMap,
+      statusData: {
+        dateEnvoye: null,
+        dateLu: null,
+        dateReçu: null,
+        idStatutLecture: 1,
+        idMessage: messageId,
+      },
+    });
 
     eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
   } catch (error) {

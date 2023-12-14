@@ -1,20 +1,19 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { TouchableOpacity, useColorScheme } from 'react-native';
+import { useDebouncedApi } from '../../Utilis/hook/debounce';
 import { horizontalScale, moderateScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
+import { SQuery } from '../../managementState';
+import useToggleStore from '../../managementState/client/preference';
 import {
   AccountInterface,
   MessageInterface,
   PostInterface,
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
-import { View } from '../Themed';
-import { TouchableOpacity } from 'react-native';
 import { TextLight } from '../StyledText';
-import { SQuery } from '../../managementState';
-import useToggleStore from '../../managementState/client/preference';
-import { useDebouncedApi } from '../../Utilis/hook/debounce';
+import { View } from '../Themed';
 const CommentFooter = ({
   data,
   user,
@@ -34,14 +33,44 @@ const CommentFooter = ({
   const { primaryColour } = useToggleStore((state) => state);
   const [statPos, setStatPos] = React.useState(data.statPost);
 
-  const sendLike = async () => {
-    try {
-      await SQuery.service('post', 'statPost', {
+  // Remove the listener when you are done
+  useEffect(() => {
+    const refreshState = async () => {
+      let dataStatPost = await SQuery.service('post', 'statPost', {
         postId: data._id,
         like: !statPos['isLiked'],
       });
+
+      setStatPos(() => {
+        return {
+          comments: dataStatPost.response?.comments || 0,
+          likes: dataStatPost.response?.likes || 0,
+          isLiked: dataStatPost.response?.isLiked || false,
+          shares: dataStatPost.response?.shares || 0,
+          totalCommentsCount: dataStatPost.response?.totalCommentsCount || 0,
+        };
+      });
+    };
+    refreshState();
+  }, [navigation.isFocused()]);
+
+  const sendLike = async () => {
+    try {
+      let dataStatPost = await SQuery.service('post', 'statPost', {
+        postId: data._id,
+        like: !statPos['isLiked'],
+      });
+      setStatPos(() => {
+        return {
+          comments: dataStatPost.response?.comments || 0,
+          likes: dataStatPost.response?.likes || 0,
+          isLiked: dataStatPost.response?.isLiked || false,
+          shares: dataStatPost.response?.shares || 0,
+          totalCommentsCount: dataStatPost.response?.totalCommentsCount || 0,
+        };
+      });
     } catch (error) {
-      console.log(error, 'like');
+      console.error(error, 'like');
     }
   };
   const [_value, func] = useDebouncedApi(sendLike, 2000);

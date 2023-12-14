@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { SQuery } from '../..';
 import { mergeArrayData } from '../../../Utilis/functions/utlisSquery';
-import { ArrayData, ArrayDataInit, FileType } from '../../../lib/SQueryClient';
+import { ArrayData, FileType, getArrayDataInit } from '../../../lib/SQueryClient';
 import { PostInterface } from '../Descriptions';
 import { useAuthStore } from '../auth';
 
@@ -10,29 +10,35 @@ type surveySchema = {
   delay: number;
 };
 
-type quarterPostSchema = {
-  listPost: ArrayData<PostInterface>;
-  loadindGetData: boolean;
-  loadingPublish: boolean;
-
-  publishPost: (data: {
-    value?: string;
-    accountId: string | undefined;
-    files?: FileType[];
-    type: string;
-    surveyOptions?: surveySchema;
-  }) => void;
-  getListPost: (page: number) => void;
+export type TypePostSchema = 'Thread' | 'supervisorThread';
+type PublishSchema = {
+  value?: string;
+  accountId: string | undefined;
+  files?: FileType[];
+  type: string;
+  surveyOptions?: surveySchema;
 };
-
-export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
-  listPost: ArrayDataInit,
-  loadindGetData: false,
+type quarterPostSchema = {
+  listPostNeighbors: ArrayData<PostInterface>;
+  listPostSupervisor: ArrayData<PostInterface>;
+  loadindGetDataSupervisor: boolean;
+  loadindGetDataNeighbors: boolean;
+  loadingPublish: boolean;
+  publishPost: (data: PublishSchema, typePost: TypePostSchema) => void;
+  getListPost: (page: number, typePost: TypePostSchema) => void;
+};
+export const useThreadPostStore = create<quarterPostSchema, any>((set) => ({
+  listPostNeighbors: getArrayDataInit(),
+  listPostSupervisor: getArrayDataInit(),
+  loadindGetDataNeighbors: false,
+  loadindGetDataSupervisor: false,
   loadingPublish: false,
-  getListPost: async (page: number) => {
+  getListPost: async (page: number, typePost: TypePostSchema) => {
+    const typeCheck = typePost === 'Thread' ? 'listPostNeighbors' : 'listPostSupervisor';
+    const typeLoad = typePost === 'Thread' ? 'loadindGetDataNeighbors' : 'loadindGetDataSupervisor';
     set(() => {
       return {
-        loadindGetData: true,
+        [typeLoad]: true,
       };
     });
     const quarterId = useAuthStore.getState().quarter?._id;
@@ -41,7 +47,7 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
 
     const quarter = await SQuery.newInstance('quarter', { id: quarterId });
 
-    const Thread = await quarter?.Thread;
+    const Thread = typePost === 'Thread' ? await quarter?.Thread : await quarter?.supervisorThread;
 
     if (!Thread) return;
 
@@ -52,26 +58,26 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         if (!postId) return;
         set(() => {
           return {
-            loadindGetData: true,
+            [typeLoad]: true,
           };
         });
         const post = await SQuery.newInstance('post', { id: postId });
 
         post?.when(
           'refresh',
-          (obj) => {
-            let oldState: PostInterface;
+          (newPost) => {
+            let oldPost: PostInterface;
             set((state) => {
               const newState = { ...state };
 
-              let index = newState.listPost.items.findIndex((item) => item._id === post.$id);
+              let index = newState[typeCheck].items.findIndex((item) => item._id === post.$id);
               if (index !== -1) {
-                oldState = newState.listPost.items[index];
+                oldPost = newState[typeCheck].items[index];
               }
               return {
-                listPost: mergeArrayData(
-                  newState.listPost,
-                  { ...newState.listPost, items: [{ ...oldState, ...obj }] },
+                [typeCheck]: mergeArrayData(
+                  newState[typeCheck],
+                  { ...newState[typeCheck], items: [{ ...oldPost, ...newPost }] },
                   true
                 ),
               };
@@ -84,8 +90,8 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         set((state) => {
           let ArrayPos = [post.$cache];
           return {
-            listPost: mergeArrayData(state.listPost, { ...state.listPost, items: ArrayPos }, true),
-            loadindGetData: false,
+            [typeCheck]: mergeArrayData(state[typeCheck], { ...state[typeCheck], items: ArrayPos }, true),
+            [typeLoad]: false,
           };
         });
       },
@@ -100,6 +106,7 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         },
       },
     });
+    console.log('posts', posts, typePost);
     if (!posts) return;
     await Promise.all(
       posts.items.map(async (item) => {
@@ -107,18 +114,17 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
         post?.when(
           'refresh',
           (obj) => {
-            console.log('🚀 ~ file: postQuarter.ts:107 ~ posts.items.map ~ obj:', obj);
             let oldState: PostInterface;
             set((state) => {
               const newState = { ...state };
-              let index = newState.listPost.items.findIndex((i) => i._id === post.$id);
+              let index = newState[typeCheck].items.findIndex((i) => i._id === post.$id);
               if (index !== -1) {
-                oldState = newState.listPost.items[index];
+                oldState = newState[typeCheck].items[index];
               }
               return {
-                listPost: mergeArrayData(
-                  newState.listPost,
-                  { ...newState.listPost, items: [{ ...oldState, ...obj }] },
+                [typeCheck]: mergeArrayData(
+                  newState[typeCheck],
+                  { ...newState[typeCheck], items: [{ ...oldState, ...obj }] },
                   true
                 ),
               };
@@ -131,13 +137,13 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
     if (posts) {
       set((state) => {
         return {
-          listPost: mergeArrayData(state.listPost, posts),
-          loadindGetData: false,
+          [typeCheck]: mergeArrayData(state[typeCheck], posts),
+          [typeLoad]: false,
         };
       });
     }
   },
-  publishPost: async (data) => {
+  publishPost: async (data: PublishSchema, typePost: TypePostSchema) => {
     set(() => {
       return {
         loadingPublish: true,
@@ -152,7 +158,7 @@ export const useQuarterPostStore = create<quarterPostSchema, any>((set) => ({
 
     const quarter = await SQuery.newInstance('quarter', { id: quarterId });
 
-    const Thread = await quarter?.Thread;
+    const Thread = await quarter?.[typePost];
 
     await Thread?.update({
       addNew: [

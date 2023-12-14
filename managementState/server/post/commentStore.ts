@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { SQuery } from '../..';
+import { mergeArrayData } from '../../../Utilis/functions/utlisSquery';
 import { FileType } from '../../../lib/SQueryClient';
 import { PostInterface } from '../Descriptions';
-import { ArrayData, ArrayDataInit } from './../../../lib/SQueryClient';
-import { mergeArrayData } from '../../../Utilis/functions/utlisSquery';
+import { ArrayData, getArrayDataInit } from './../../../lib/SQueryClient';
 
 // export async function setCommentPost(data: {
 //   postId: string;
@@ -43,7 +43,7 @@ type surveySchema = {
 };
 
 type CommentPostSchema = {
-  commentList: Record<string, ArrayData<PostInterface>> | undefined;
+  commentList: Record<string, ArrayData<PostInterface>>;
   loadingComment: boolean;
   initComment: () => void;
   getComments: (postId: string, page?: number) => Promise<void>;
@@ -68,9 +68,8 @@ type CommentPostSchema = {
 };
 
 export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
-  commentList: undefined,
+  commentList: {},
   loadingComment: false,
-
   getComments: async (postId: string, page: number | undefined) => {
     set(() => ({
       loadingComment: true,
@@ -94,7 +93,7 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
             set((state) => {
               const newState = { ...state };
               if (!newState.commentList) {
-                newState.commentList = { [postId]: { ...ArrayDataInit, items: [] } };
+                newState.commentList = { [postId]: { ...getArrayDataInit(), items: [] } };
               }
               let index = newState.commentList[postId].items.findIndex((item) => item._id === commentId);
               if (index !== -1) {
@@ -117,7 +116,7 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
           let ArrayPos = [post.$cache];
           const newState = { ...state };
           if (!newState.commentList) {
-            newState.commentList = { [postId]: { ...ArrayDataInit, items: [] } };
+            newState.commentList = { [postId]: { ...getArrayDataInit(), items: [] } };
           }
           return {
             commentList: {
@@ -155,9 +154,9 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
             set((state) => {
               const newState = { ...state };
               if (!newState.commentList) {
-                newState.commentList = { [postId]: { ...ArrayDataInit, items: [] } };
+                newState.commentList = { [postId]: { ...getArrayDataInit(), items: [] } };
               }
-              let index = newState.commentList[postId].items.findIndex((item) => item._id === commentInstance.$id);
+              let index = newState?.commentList[postId].items.findIndex((item) => item._id === commentInstance.$id);
               if (index !== -1) {
                 oldState = newState.commentList[postId].items[index];
               }
@@ -180,7 +179,7 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
       set((state) => {
         const newState = { ...state };
         if (!newState.commentList) {
-          newState.commentList = { [postId]: { ...ArrayDataInit, items: [] } };
+          newState.commentList = { [postId]: { ...getArrayDataInit(), items: [] } };
         }
         return {
           //@ts-ignore

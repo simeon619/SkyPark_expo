@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect, useNavigationState } from '@react-navigation/native';
 import {
   ActivityIndicator,
   BackHandler,
@@ -14,31 +15,30 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { pickImage } from '../../Utilis/functions/media/media';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import { TextLight, TextMedium } from '../../components/StyledText';
+import CommentText from '../../components/comment/CommentText';
+import PostFooter from '../../components/post/PostFooter';
+import PostMedia from '../../components/post/PostMedia';
+import PostSurvey from '../../components/post/PostSurvey';
 import MediaComponent from '../../components/postDetail/MediaComponent';
 import PostHeader from '../../components/postDetail/PostHeader';
 import TextComponent from '../../components/postDetail/TextComponent';
+import SurveyComponent from '../../components/utilis/SurveyComponent';
+import Colors from '../../constants/Colors';
+import useToggleStore from '../../managementState/client/preference';
 import {
   AccountInterface,
   MessageInterface,
   PostInterface,
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
-import { useFocusEffect, useNavigationState } from '@react-navigation/native';
-import { pickImage } from '../../Utilis/functions/media/media';
-import CommentText from '../../components/comment/CommentText';
-import PostFooter from '../../components/post/PostFooter';
-import PostMedia from '../../components/post/PostMedia';
-import Colors from '../../constants/Colors';
-import useToggleStore from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
 import { useCommentPostStore } from '../../managementState/server/post/commentStore';
+import { useSurveyStore } from '../../managementState/server/post/surveyStore';
 import { PostType } from '../../types/PostType';
 import { NavigationStackProps } from '../../types/navigation';
-import PostSurvey from '../../components/post/PostSurvey';
-import { useSurveyStore } from '../../managementState/server/post/surveyStore';
-import SurveyComponent from '../../components/utilis/SurveyComponent';
 
 type userSchema = {
   account: AccountInterface;
@@ -70,9 +70,8 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
 
   const [data, setData] = useState<PostInterface[]>([]);
 
-  const [isInputFocused, setInputFocused] = useState(commentable);
+  const [isInputFocused, setInputFocused] = useState(Boolean(commentable));
   const [text, setText] = useState('');
-  // const [commentList, setCommentList] = useState<ArrayData<PostInterface>>({ ...ArrayDataInit, items: [] });
 
   const { height } = useWindowDimensions();
   const colorScheme = useColorScheme();
@@ -208,7 +207,14 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
         keyExtractor={keyExtractor}
         ListHeaderComponent={listHeaderComponent}
         stickyHeaderHiddenOnScroll={true}
-        refreshControl={<RefreshControl refreshing={loadingComment} onRefresh={() => getData(1)} />}
+        refreshControl={
+          <RefreshControl
+            colors={[primaryColour]}
+            progressBackgroundColor={'#444'}
+            refreshing={loadingComment}
+            onRefresh={() => getData(1)}
+          />
+        }
         scrollEventThrottle={20}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.6}

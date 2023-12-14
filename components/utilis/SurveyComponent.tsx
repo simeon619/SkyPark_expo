@@ -23,7 +23,6 @@ const SurveyComponent = ({
 
   const [hasVoted, setHasVoted] = useState(true);
 
-  console.log('🚀 ~ file: SurveyComponent.tsx:27 ~ dataSurvey:', dataSurvey);
 
   const computeTotal = () => {
     if (dataSurvey) {
@@ -39,7 +38,6 @@ const SurveyComponent = ({
       labelId: item._id,
       postId: postId,
     });
-    console.log('🚀 ~ file: SurveyComponent.tsx:40 ~ handleVote ~ dataSurveyA:', dataSurveyA);
   };
 
   return (

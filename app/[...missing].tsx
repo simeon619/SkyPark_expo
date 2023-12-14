@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Text, View } from '../components/Themed';
 import { Link } from '@react-navigation/native';
 const Stack = createStackNavigator();
-export default function NotFoundScreen({ navigation }: { navigation: any }) {
+export default function NotFoundScreen() {
   return (
     <>
       <Stack.Navigator children={null} />

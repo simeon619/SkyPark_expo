@@ -21,7 +21,6 @@ import {
 import { DarkTheme, DefaultTheme, NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Font from 'expo-font';
-import * as Linking from 'expo-linking';
 import { useCallback, useEffect, useState } from 'react';
 import { View, useColorScheme } from 'react-native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -31,24 +30,24 @@ import '../Utilis/hook/onlineRefresh';
 import { useAuthStore } from '../managementState/server/auth';
 
 import { SplashScreen } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { createTable, dropAllTables } from '../Utilis/models/Chat/database';
 import { TextLight } from '../components/StyledText';
 import Forum from './forum';
 import GroupActivity from './groupActivity';
 import ItemGroup from './groupActivity/ItemGroup';
+import Search from './pageModal/Search';
 import ViewerImage from './pageModal/ViewerImage';
 import DetailPost from './pageModal/detailPost';
 import discussion from './pageModal/discussion';
 import Profile from './profile';
+import ProfileSettings from './profile/Settings';
 import Login from './register/Login';
 import Signup from './register/Signup';
 import CheckProfile from './settings/CheckProfile';
 import TabLayout from './tabs/layout';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator();
-const prefix = Linking.createURL('/');
 export default function RootLayout() {
   // SplashScreen.preventAutoHideAsync();
   const [appIsReady, setAppIsReady] = useState(false);
@@ -125,15 +124,6 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { isAuth } = useAuthStore((state) => state);
 
-  useEffect(() => {
-    const deleteDb = async () => {
-      await createTable();
-      // dropAllTables();
-    };
-
-    deleteDb();
-  }, []);
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -146,25 +136,32 @@ function RootLayoutNav() {
                   screenOptions={{
                     headerShown: false,
                   }}
-                  initialRouteName="Bottomtabs"
+                  // initialRouteName="Bottomtabs"
                 >
                   {isAuth ? (
                     <>
+                      <Stack.Screen name="CheckProfile" component={CheckProfile} />
                       <Stack.Screen name="Bottomtabs" component={TabLayout} />
                       <Stack.Screen
                         name="ViewerImage"
                         component={ViewerImage}
                         options={{
                           headerShown: false,
+                          animation: 'fade',
                         }}
                       />
-                      <Stack.Screen name="Profile" component={Profile} options={{ animation: 'slide_from_bottom' }} />
+                      <Stack.Screen name="Profile" component={Profile} options={{ animation: 'slide_from_left' }} />
+                      <Stack.Screen
+                        name="ProfileSettings"
+                        component={ProfileSettings}
+                        options={{ animation: 'fade' }}
+                      />
                       <Stack.Screen name="Discussion" component={discussion} />
-                      <Stack.Screen name="CheckProfile" component={CheckProfile} />
                       <Stack.Screen name="GroupActivity" component={GroupActivity} />
                       <Stack.Screen name="ItemGroup" component={ItemGroup} />
                       <Stack.Screen name="Forum" component={Forum} />
                       <Stack.Screen name="DetailPost" component={DetailPost} />
+                      <Stack.Screen name="Search" component={Search} options={{ animation: 'simple_push' }} />
                     </>
                   ) : (
                     <>
@@ -187,4 +184,3 @@ function RootLayoutNav() {
     </GestureHandlerRootView>
   );
 }
- 

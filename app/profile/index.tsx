@@ -6,13 +6,14 @@ import { ImageBackground, Pressable, TouchableOpacity, useColorScheme, useWindow
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { icons } from '../../Utilis/data';
+import { removeValue } from '../../Utilis/functions/localStorage';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import { TextLight, TextMedium, TextRegular, TextSemiBold, TextThinItalic } from '../../components/StyledText';
 import { ScrollView, View } from '../../components/Themed';
 import MediaComponent from '../../components/utilis/MediaComponent';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import Colors from '../../constants/Colors';
-import { LARGE_PIC_USER, SMALL_PIC_USER } from '../../constants/Value';
+import { LARGE_PIC_USER } from '../../constants/Value';
 import useToggleStore from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
 import { NavigationStackProps } from '../../types/navigation';
@@ -25,8 +26,8 @@ const Profile = ({ navigation, route }: NavigationStackProps) => {
   const colorScheme = useColorScheme();
 
   const iconActivity = [
-    { url: require('../../assets/icon/reunion.png'), name: 'reunion' },
-    { url: require('../../assets/icon/exercer.png'), name: 'exercer' },
+    { url: require('../../assets/icon/reunion.png'), name: 'Groups' },
+    { url: require('../../assets/icon/exercer.png'), name: 'Forum' },
     { url: require('../../assets/icon/monde.png'), name: 'map' },
   ];
 
@@ -195,12 +196,12 @@ const Profile = ({ navigation, route }: NavigationStackProps) => {
           style={{
             flexDirection: 'row',
             // flexWrap: 'wrap',
-            justifyContent: 'center',
+            justifyContent: 'space-around',
             // gap: moderateScale(20),
             marginTop: verticalScale(10),
             ...shadow(10),
-            paddingVertical: verticalScale(15),
-            marginHorizontal: horizontalScale(20),
+            paddingTop: verticalScale(10),
+            marginHorizontal: horizontalScale(35),
             borderRadius: 20,
           }}
         >
@@ -211,7 +212,7 @@ const Profile = ({ navigation, route }: NavigationStackProps) => {
                 style={{
                   fontSize: moderateScale(12),
                   color: '#aaa',
-                  paddingVertical: verticalScale(10),
+                  // paddingVertical: verticalScale(10),
                 }}
               >
                 {icon.name}
@@ -326,13 +327,6 @@ const Profile = ({ navigation, route }: NavigationStackProps) => {
                 _id: index.toString(),
               };
             });
-
-            //   {
-            //     url: string;
-            //     size: number;
-            //     extension: string;
-            //     _id: string;
-            // }
             if (mediaProfileState[key].selected) {
               return <MediaComponent media={media} key={key} caption="" />;
             }
@@ -401,7 +395,12 @@ const Profile = ({ navigation, route }: NavigationStackProps) => {
               borderRadius: moderateScale(10),
             }}
             onPress={() => {
-              fetchDisconnect();
+              const disco = async () => {
+                await removeValue('profile');
+                await fetchDisconnect();
+              };
+
+              disco();
             }}
           >
             <TextRegular style={{ fontSize: moderateScale(17), textAlign: 'center', color: '#444' }}>

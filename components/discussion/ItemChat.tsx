@@ -1,18 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { memo, useCallback, useEffect, useState } from 'react';
-import { TouchableOpacity, View, useColorScheme } from 'react-native';
-import { formatMessageDate } from '../../Utilis/date';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { TouchableOpacity, View } from 'react-native';
+import { getTypeFile } from '../../Utilis/functions/media/extension';
 import { horizontalScale, moderateScale } from '../../Utilis/metrics';
 import { MessageWithFileAndStatus, getMessages } from '../../Utilis/models/Chat/messageReposotory';
 import { UserSchema } from '../../Utilis/models/Chat/userRepository';
-import Colors from '../../constants/Colors';
-import useToggleStore, { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
+import { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
 import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
-import { TextLight, TextMedium, TextRegular, TextRegularItalic } from '../StyledText';
+import { TextLight, TextMedium, TextRegular } from '../StyledText';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
-import { useNavigation } from '@react-navigation/native';
-import { getTypeFile } from '../../Utilis/functions/media/extension';
 
 const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
   const { ctxMenu } = useMenuDiscussionIsOpen((state) => state);
@@ -22,12 +20,12 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
 
   useEffect(() => {
     const handleReiveMessage = async () => {
-      let messages = (await getMessages(1, 1, conversation.ID_Conversation))[0];
+      let messages = (await getMessages(1, 1, conversation.idConversation))[0];
       setLastMessge(messages);
     };
-    eventEmitter.on(EventMessageType.receiveMessage + conversation.ID_Conversation, handleReiveMessage);
+    eventEmitter.on(EventMessageType.receiveMessage + conversation.idConversation, handleReiveMessage);
     return () => {
-      eventEmitter.removeListener(EventMessageType.receiveMessage + conversation.ID_Conversation, handleReiveMessage);
+      eventEmitter.removeListener(EventMessageType.receiveMessage + conversation.idConversation, handleReiveMessage);
     };
   }, []);
 
@@ -35,14 +33,13 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
 
   useEffect(() => {
     const initLastMessage = async () => {
-      let message = await getMessages(1, 1, conversation.ID_Conversation);
+      let message = await getMessages(1, 1, conversation.idConversation);
       setLastMessge(message[0]);
     };
 
     initLastMessage();
   });
 
-  const colorScheme = useColorScheme();
   const handleCurrentConversation = (InfoUserConv: UserSchema) => {
     if (InfoUserConv) {
       //@ts-ignore
@@ -64,7 +61,7 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
         // borderBottomWidth: 1,
       }}
     >
-      <ImageProfile image={conversation?.Url_Pic} size={moderateScale(55)} />
+      <ImageProfile image={conversation?.urlPic} size={moderateScale(55)} />
 
       <View
         style={{
@@ -74,7 +71,7 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
           justifyContent: 'space-between',
         }}
       >
-        <TextRegular style={{ fontSize: moderateScale(16) }}>{conversation?.Nom_Utilisateur}</TextRegular>
+        <TextRegular style={{ fontSize: moderateScale(16) }}>{conversation?.nomUtilisateur}</TextRegular>
         <ViewLastMessage last={lastMessage} />
       </View>
       <View
@@ -90,10 +87,10 @@ const ItemChat = ({ conversation }: { conversation: UserSchema }) => {
             fontSize: moderateScale(12),
           }}
         >
-          {Boolean(lastMessage?.Date_Envoye) && formatMessageDate(lastMessage?.Date_Envoye || 0)}
+          {/* {Boolean(lastMessage?.statusData.dateEnvoye) && formatMessageDate(lastMessage?.statusData.dateEnvoye || 0)} */}
         </TextMedium>
 
-        {!(lastMessage?.ID_Expediteur == account?._id) && (
+        {!(lastMessage?.newMessage.idExpediteur == account?._id) && (
           <></>
           // <TextMedium
           //   style={{
@@ -142,26 +139,30 @@ const ViewLastMessage = ({ last }: { last: MessageWithFileAndStatus | undefined 
   return (
     <>
       <View style={{ flexDirection: 'row' }}>
-        {whatIconStatus({ send: last.Date_Envoye, received: last.Date_Reçu, seen: last.Date_Lu })}
+        {whatIconStatus({
+          send: last.statusData.dateEnvoye,
+          received: last.statusData.dateReçu,
+          seen: last.statusData.dateLu,
+        })}
 
         <View style={{ flexDirection: 'row' }}>
-          <TextLight numberOfLines={1}>{last.Contenu_Message}</TextLight>
+          <TextLight numberOfLines={1}>{last.newMessage.contenuMessage}</TextLight>
 
-          {getTypeFile(last?.files?.[0]?.extension) === 'image' && (
+          {getTypeFile(last?.filesData?.[0]?.extension) === 'image' && (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               <Ionicons name="image" size={18} color="grey" />
               <TextLight> Photo</TextLight>
             </View>
           )}
 
-          {getTypeFile(last?.files?.[0]?.extension) === 'video' && (
+          {getTypeFile(last?.filesData?.[0]?.extension) === 'video' && (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               <Ionicons name="videocam" size={20} color="grey" />
               <TextLight>Video</TextLight>
             </View>
           )}
 
-          {getTypeFile(last?.files?.[0]?.extension) === 'audio' && (
+          {getTypeFile(last?.filesData?.[0]?.extension) === 'audio' && (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               <Ionicons name="mic" size={20} color="blue" />
               <TextLight>Audio</TextLight>

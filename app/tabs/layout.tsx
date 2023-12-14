@@ -1,15 +1,15 @@
 import { Entypo } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import { BottomFabBar } from 'sim-bottom-tab';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { BottomFabBar } from 'sim-bottom-tab';
+import Home from '.';
 import { shadow, verticalScale } from '../../Utilis/metrics';
 import useToggleStore from '../../managementState/client/preference';
-import Home from '.';
 import DiscusionTabScreen from './discussions';
+import NotificationTabScreen from './notification';
 import PostTabScreen from './post';
 import UserTabScreen from './user';
-import NotificationTabScreen from './notification';
 
 export default function TabLayout() {
   const { primaryColourLight } = useToggleStore((state) => state);
@@ -25,19 +25,7 @@ export default function TabLayout() {
         tabBarActiveBackgroundColor: primaryColourLight,
       }}
       tabBar={(props) => (
-        <BottomFabBar
-          mode={'default'}
-          focusedButtonStyle={{ ...shadow(90) }}
-          bottomBarContainerStyle={[
-            {
-              // position: "absolute",
-              // bottom: 0,
-              // left: 0,
-              // right: 0,
-            },
-          ]}
-          {...props}
-        />
+        <BottomFabBar mode={'default'} focusedButtonStyle={{ ...shadow(90) }} bottomBarContainerStyle={[]} {...props} />
       )}
     >
       <Tab.Screen

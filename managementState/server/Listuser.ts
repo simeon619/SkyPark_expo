@@ -2,11 +2,9 @@ import { create } from 'zustand';
 import { SQuery } from '..';
 
 import { getChannel, getDiscussionId } from '../../Utilis/functions/utlisSquery';
-import { createPrivateConversation } from '../../Utilis/models/Chat/messageReposotory';
 import { addUser } from '../../Utilis/models/Chat/userRepository';
 import { AccountInterface, ProfileInterface, QuarterInterface } from './Descriptions';
 import { useAuthStore } from './auth';
-const ENTREPRISE_ID = '64d60c4a6412118d1809846c';
 type ListUserSchema = {
   listAccount: (
     | {
@@ -23,18 +21,6 @@ type ListUserSchema = {
 export const useListUserStore = create<ListUserSchema, any>((set) => ({
   listAccount: [],
   listQuarter: [],
-  // setListQuarter: async () => {
-  //   let entreprise = await SQuery.newInstance('entreprise', { id: ENTREPRISE_ID });
-  //   if (!entreprise) return;
-
-  //   let Quarter = await entreprise.quarters;
-
-  //   const ArrayData = await Quarter?.page();
-
-  //   set(() => ({
-  //     listQuarter: ArrayData?.items,
-  //   }));
-  // },
 }));
 
 export const setListAccount = async () => {
@@ -54,7 +40,7 @@ export const setListAccount = async () => {
   });
 
   if (res.error) res.error;
-
+  //@ts-ignore
   let CollectedUser = res.response?.items || [];
 
   let ListAccount = await Promise.all(
@@ -66,27 +52,29 @@ export const setListAccount = async () => {
   );
 
   let proccess = ListAccount.map(async (A) => {
+    const discussionId = await getDiscussionId(A?.account._id);
     let success = await createUserPromise(
       A?.account._id || '',
       A?.account.name || '',
-      A?.profile.imgProfile[0]?.url || ''
+      A?.profile.imgProfile[0]?.url || '',
+      discussionId || ''
     );
     if (success) {
-      const discussionId = await getDiscussionId(A?.account._id);
       await getChannel(discussionId);
       return 1;
     }
     return 0;
   });
 
-  function createUserPromise(userId: string, name: string, profile: string) {
+  function createUserPromise(userId: string, name: string, profile: string, discussionId: string) {
     return new Promise<number>(async (resolve, reject) => {
       try {
         await addUser({
-          ID_Utilisateur: userId,
-          Nom_Utilisateur: name,
-          Url_Pic: profile,
-          Last_Seen: new Date().getTime(),
+          idUtilisateur: userId,
+          nomUtilisateur: name,
+          urlPic: profile,
+          lastSeen: new Date().getTime(),
+          idConversation: discussionId,
         });
         resolve(1);
       } catch (error) {

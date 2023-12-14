@@ -17,20 +17,32 @@ export const sendMessage = async (data: { value?: string; accountId: string | un
   let createMsg = Date.now();
   storeMessages(discussionId, [
     {
-      Contenu_Message: value || null,
-      ID_Conversation: discussionId,
-      ID_Expediteur: accountId,
-      ID_Message: uuuid,
-      Date_Envoye: null,
-      Date_Reçu: null,
-      Date_Lu: null,
-      files,
-      Horodatage: createMsg,
+      newMessage: {
+        idMessage: uuuid,
+        contenuMessage: value || null,
+        horodatage: createMsg,
+        idConversation: discussionId,
+        idExpediteur: accountId,
+      },
+      statusData: {
+        dateEnvoye: null,
+        dateReçu: null,
+        dateLu: null,
+        idMessage: uuuid,
+        idStatutLecture: 1,
+      },
+      filesData: files.map((file) => ({
+        ...file,
+        extension: file.type.split('/')[1],
+        uri: file.uri,
+        url: null,
+        buffer: null,
+      })),
     },
   ]);
 
   try {
-    await putMessageLocal(files, value, discussionId, accountId, uuuid, createMsg);
+    await putMessageLocal(files, value || null, discussionId, accountId, uuuid, createMsg);
     await sendServer(discussionId, accountId, uuuid, files, value);
   } catch (error) {
     console.error('Error sending message2:', error);

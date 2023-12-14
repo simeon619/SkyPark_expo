@@ -1,61 +1,33 @@
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
+  ActivityIndicator,
   DimensionValue,
   Image,
-  ImageProgressEventDataIOS,
+  ImageLoadEventData,
   NativeSyntheticEvent,
-  useWindowDimensions,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { horizontalScale, verticalScale } from '../../Utilis/metrics';
 import { HOST } from '../../constants/Value';
 import { UrlData } from '../../lib/SQueryClient';
-import { TextLight } from '../StyledText';
 import { View } from '../Themed';
 import ShadowImage from './ShadowImage';
-import { TouchableWithoutFeedback } from 'react-native';
 
 const GAP_MEDIA = 10;
 const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
   if (!media) {
     return null;
   }
-
-  const navigation = useNavigation();
   const numberMedia = media?.length;
 
-  const ImageComponent = ({ uri, width, height }: { uri: string; width: DimensionValue; height: DimensionValue }) => {
-    return (
-      <TouchableWithoutFeedback
-        onPress={() => {
-          //@ts-ignore
-          navigation.navigate('ViewerImage', { uri, caption });
-        }}
-      >
-        <Image
-          style={{ width, height }}
-          source={{ uri }}
-          onProgress={handleImageLoad}
-
-          // priority={'high'}
-          // transition={0}
-          // allowDownscaling={true}
-          // cachePolicy={'disk'}
-        />
-      </TouchableWithoutFeedback>
-    );
-  };
-
-  const handleImageLoad = (event: NativeSyntheticEvent<ImageProgressEventDataIOS>) => {};
-
-  const { height } = useWindowDimensions();
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       {numberMedia === 1 && (
         <ShadowImage
-          ratioHeight={1}
+          ratioHeight={0}
           ratioWidth={100}
-          children={<ImageComponent uri={HOST + media[0].url} width={'100%'} height={'100%'} />}
+          children={<ImageComponent height={'auto'} width={'100%'} uri={HOST + media[0].url} caption={caption || ''} />}
         />
       )}
       {numberMedia === 2 && (
@@ -65,7 +37,9 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
               key={index}
               ratioHeight={1}
               ratioWidth={48.5}
-              children={<ImageComponent uri={HOST + media[index].url} width={'100%'} height={'100%'} />}
+              children={
+                <ImageComponent uri={HOST + media[index].url} width={'100%'} height={'100%'} caption={caption || ''} />
+              }
             />
           ))}
         </View>
@@ -81,7 +55,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
           <ShadowImage
             ratioHeight={1.4}
             ratioWidth={100}
-            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} />}
+            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} caption={caption || ''} />}
           />
           <View
             style={{
@@ -95,7 +69,9 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
                 key={index}
                 ratioHeight={2}
                 ratioWidth={48.5}
-                children={<ImageComponent uri={media[index].url} width={'100%'} height={'100%'} />}
+                children={
+                  <ImageComponent uri={media[index].url} width={'100%'} height={'100%'} caption={caption || ''} />
+                }
               />
             ))}
           </View>
@@ -103,17 +79,25 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
       )}
 
       {numberMedia === 4 && (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: verticalScale(GAP_MEDIA) }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            rowGap: verticalScale(GAP_MEDIA),
+            // justifyContent: 'space-between',
+          }}
+        >
           <ShadowImage
             ratioHeight={1.4}
             ratioWidth={100}
-            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} />}
+            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} caption={caption || ''} />}
           />
           <View
             style={{
               flexDirection: 'row',
               flexWrap: 'nowrap',
               columnGap: horizontalScale(GAP_MEDIA),
+              justifyContent: 'space-between',
             }}
           >
             {[1, 2, 3].map((index) => (
@@ -121,7 +105,9 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
                 key={index}
                 ratioHeight={2.5}
                 ratioWidth={31.5}
-                children={<ImageComponent uri={media[index].url} width={'100%'} height={'100%'} />}
+                children={
+                  <ImageComponent uri={media[index].url} width={'100%'} height={'100%'} caption={caption || ''} />
+                }
               />
             ))}
           </View>
@@ -131,3 +117,52 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
   );
 };
 export default MediaComponent;
+
+const ImageComponent = memo(
+  ({
+    uri,
+    width,
+    height,
+    caption,
+  }: {
+    uri: string;
+    width: DimensionValue;
+    height: DimensionValue;
+    caption: string;
+  }) => {
+    const [aspectRatio, setAspectRatio] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const navigation = useNavigation();
+
+    const handleImageLoad = useCallback((event: NativeSyntheticEvent<ImageLoadEventData>) => {
+      setLoading(true);
+      const { width, height } = event.nativeEvent.source;
+      const imageAspectRatio = width / (height || 1);
+      setAspectRatio(imageAspectRatio);
+      setLoading(false);
+    }, []);
+
+    return (
+      <TouchableWithoutFeedback
+        style={{ width: '100%', height: '100%' }}
+        onPress={() => {
+          //@ts-ignore
+          navigation.navigate('ViewerImage', { uri, caption });
+        }}
+      >
+        {loading ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#0000ff" />
+          </View>
+        ) : (
+          <Image
+            style={{ aspectRatio, width, height }}
+            source={{ uri }}
+            onLoad={handleImageLoad}
+            progressiveRenderingEnabled
+          />
+        )}
+      </TouchableWithoutFeedback>
+    );
+  }
+);

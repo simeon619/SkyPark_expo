@@ -96,20 +96,22 @@ export type ArrayData<I extends InstanceInterface> = {
   prevPage: number | null;
   nextPage: number | null;
 };
-export const ArrayDataInit = {
-  added: [],
-  removed: [],
-  items: [],
-  totalItems: 0,
-  limit: 20,
-  totalPages: 0,
-  page: 1,
-  pagingCounter: 0,
-  hasPrevPage: false,
-  hasNextPage: false,
-  prevPage: null,
-  nextPage: null,
-} as ArrayData<any>;
+export const getArrayDataInit = () => {
+  return {
+    added: [],
+    removed: [],
+    items: [],
+    totalItems: 0,
+    limit: 20,
+    totalPages: 0,
+    page: 1,
+    pagingCounter: 0,
+    hasPrevPage: false,
+    hasNextPage: false,
+    prevPage: null,
+    nextPage: null,
+  } as ArrayData<any>;
+};
 type Service = {
   send:
     | {
@@ -481,7 +483,6 @@ export function createSQueryFrom<
           Result[key] = [];
           const model = await SQuery.createModel(key);
           for (const cache of cacheArray) {
-            console.log(cache);
             const instance = await model.newInstance({
               cache,
             });

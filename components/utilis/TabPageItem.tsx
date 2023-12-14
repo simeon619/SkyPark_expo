@@ -1,6 +1,6 @@
 import React from 'react';
 import { moderateScale } from '../../Utilis/metrics';
-import { TextThin } from '../StyledText';
+import { TextExtraLightItalic, TextThin } from '../StyledText';
 import { View } from '../Themed';
 
 const TabPageItem = ({ children, focused }: { children: any; focused: boolean }) => {
@@ -11,22 +11,19 @@ const TabPageItem = ({ children, focused }: { children: any; focused: boolean })
       style={[
         {
           alignSelf: 'flex-start',
-          // backgroundColor: focused ? "red" : "#0000",
-          // borderRadius: 80,
-          // paddingHorizontal: 5,
+
         },
       ]}
     >
-      <TextThin
+      <TextExtraLightItalic
         style={{
           fontSize: moderateScale(16),
           textAlign: 'left',
-
           opacity: focused ? 1 : 0.4,
         }}
       >
         {children}
-      </TextThin>
+      </TextExtraLightItalic>
     </View>
   );
 };

@@ -1,25 +1,18 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View as ViewNatif,
-} from 'react-native';
+import React, { useState } from 'react';
+import { KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, View as ViewNatif } from 'react-native';
 //@ts-ignore
+import { useNavigation } from '@react-navigation/native';
 import InsetShadow from 'react-native-inset-shadow';
 import { MagicModalPortal, magicModal } from 'react-native-magic-modal';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import useToggleStore, { useBlurSurvey, useDaysSurvey, useTypeForm } from '../../managementState/client/preference';
+import { useAuthStore } from '../../managementState/server/auth';
+import { useQuarterPostStore } from '../../managementState/server/post/postThread';
 import { TextLight, TextRegular } from '../StyledText';
 import { View } from '../Themed';
-import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
-import { useNavigation } from '@react-navigation/native';
-import { useAuthStore } from '../../managementState/server/auth';
 
 const SurveyForm = ({ text, setText }: { text: string; setText: React.Dispatch<React.SetStateAction<string>> }) => {
   const { primaryColour, primaryColourLight } = useToggleStore((state) => state);

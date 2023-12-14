@@ -11,6 +11,7 @@ import { horizontalScale, moderateScale } from '../Utilis/metrics';
 import { TextMediumItalic } from './StyledText';
 import { HOST } from '../constants/Value';
 
+// https://www.youtube.com/watch?v=1UmepETPGJI  tuto for playing audio
 const InstanceAudio = ({ voiceUrl, voiceUri }: { voiceUrl: string | undefined; voiceUri: string | undefined }) => {
   const [sound, setSound] = useState<Audio.Sound>();
   const [isPlay, setIsPlay] = useState<boolean>(false);

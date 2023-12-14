@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AccountInterface,
   MessageInterface,
   PostInterface,
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
-import { getInfoAccount, getMessagePost } from '../../managementState/server/post/postQuarter';
+import { getInfoAccount, getMessagePost } from '../../managementState/server/post/postThread';
 
 export const useInfoUserPost = ({ accountId }: { accountId: string | undefined }) => {
   const [infoUser, setInfoUser] = useState<{

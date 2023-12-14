@@ -1,7 +1,7 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Dimensions, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { horizontalScale, moderateScale } from '../../Utilis/metrics';
@@ -12,8 +12,6 @@ import Colors from '../../constants/Colors';
 import useToggleStore from '../../managementState/client/preference';
 import CieGestion from '../pagePost/CieGestion';
 import Neighbor from '../pagePost/Neighbor';
-import { useListUserStore } from '../../managementState/server/Listuser';
-import { NavigationStackProps } from '../../types/navigation';
 
 const Home = () => {
   const { primaryColour } = useToggleStore((state) => state);

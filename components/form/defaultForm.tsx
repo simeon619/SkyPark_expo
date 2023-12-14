@@ -1,4 +1,5 @@
 import { AntDesign } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import { Pressable, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
@@ -6,19 +7,17 @@ import { Dropdown } from 'react-native-element-dropdown';
 import Animated, { BounceInDown, BounceOutDown, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
+import { FileType } from '../../lib/SQueryClient';
 import useToggleStore, { useTypeForm } from '../../managementState/client/preference';
+import { useAuthStore } from '../../managementState/server/auth';
+import { useQuarterPostStore } from '../../managementState/server/post/postThread';
 import ImageRatio from '../ImgRatio';
 import { TextLight, TextRegular } from '../StyledText';
 import { ScrollView, View } from '../Themed';
-import { useQuarterPostStore } from '../../managementState/server/post/postQuarter';
-import { useAuthStore } from '../../managementState/server/auth';
-import { FileType } from '../../lib/SQueryClient';
-import { useNavigation } from '@react-navigation/native';
 
 const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<React.SetStateAction<string>> }) => {
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
-  //   const isExpanded = useSharedValue(true);
   interface ImageItem {
     uri: string;
   }

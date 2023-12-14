@@ -35,7 +35,7 @@ export default {
     messageColourLight: '#7285E5',
     primaryColourLight: '#E6D6F8',
     primaryColour: '#A85DFD',
-    secondaryColour: '##EA9093',
+    secondaryColour: '#EA9093',
     secondaryColourLight: '#E8BBBE',
     tint: tintColorDark,
     tabIconDefault: '#ccc',

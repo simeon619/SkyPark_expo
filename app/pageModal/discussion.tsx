@@ -1,30 +1,29 @@
 import { Ionicons } from '@expo/vector-icons';
 
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { AndroidSoftInputModes, KeyboardController, KeyboardGestureArea } from 'react-native-keyboard-controller';
-import Animated, { FadeInDown, FadeInUp, FadeOutUp, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { FadeInUp, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatMessageDate } from '../../Utilis/date';
 import { useTelegramTransitions } from '../../Utilis/hooksKeyboard';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 
+import { getTypeFile } from '../../Utilis/functions/media/extension';
 import { MessageWithFileAndStatus, getMessages } from '../../Utilis/models/Chat/messageReposotory';
 import { UserSchema } from '../../Utilis/models/Chat/userRepository';
 import ImageRatio from '../../components/ImgRatio';
+import InstanceAudio from '../../components/InstanceAudio';
 import { TextRegular, TextRegularItalic } from '../../components/StyledText';
 import { View } from '../../components/Themed';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import InputMessage from '../../components/utilis/simpleComponent/inputMessage';
 import Colors from '../../constants/Colors';
+import { useTempMsgStore } from '../../managementState/client/tempMessage';
 import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
 import { NavigationStackProps } from '../../types/navigation';
-import { useTempMsgStore } from '../../managementState/client/tempMessage';
-import InstanceAudio from '../../components/InstanceAudio';
-import { TouchableWithoutFeedback } from 'react-native';
-import { getTypeFile } from '../../Utilis/functions/media/extension';
 
 type Action = { type: 'addMessage' | 'updateMessage'; messages: MessageWithFileAndStatus[] };
 
@@ -32,7 +31,7 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
   const colorSheme = useColorScheme();
 
   const user = route.params as any as { data: UserSchema };
-  const discussions = user.data.ID_Conversation || '';
+  const discussions = user.data.idConversation || '';
   const [pageNumber, setPageNumber] = useState(0);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
   const itemsPerPage = 10;
@@ -45,7 +44,7 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
   const messagesArray = useMemo(() => {
     if (messages && messages[discussions]) {
       return Object.values(messages[discussions]).sort((a, b) => {
-        return b.Horodatage - a.Horodatage;
+        return b.newMessage.horodatage - a.newMessage.horodatage;
       });
     }
     return [];
@@ -57,16 +56,16 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
 
   useEffect(() => {
     const handleMessageReceived = async () => {
-      const messages = await getMessages(1, 1, user.data.ID_Conversation);
+      const messages = await getMessages(1, 1, user.data.idConversation);
       if (messages && discussions) {
         setMsg({ [discussions]: messages });
       }
     };
 
-    eventEmitter.on(EventMessageType.receiveMessage + user.data.ID_Conversation, handleMessageReceived);
+    eventEmitter.on(EventMessageType.receiveMessage + user.data.idConversation, handleMessageReceived);
 
     return () => {
-      eventEmitter.removeListener(EventMessageType.receiveMessage + user.data.ID_Conversation, handleMessageReceived);
+      eventEmitter.removeListener(EventMessageType.receiveMessage + user.data.idConversation, handleMessageReceived);
     };
   }, []);
 
@@ -74,7 +73,7 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
     if (!hasMoreMessages) {
       return;
     }
-    const newMessages = await getMessages(pageNumber, itemsPerPage, user.data.ID_Conversation);
+    const newMessages = await getMessages(pageNumber, itemsPerPage, user.data.idConversation);
     if (newMessages.length === 0) {
       setHasMoreMessages(false);
       return;
@@ -160,10 +159,10 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
                 <Ionicons name="arrow-back" size={28} color="black" style={{ paddingHorizontal: horizontalScale(7) }} />
               </TouchableOpacity>
 
-              <ImageProfile size={moderateScale(50)} image={user.data.Url_Pic} />
+              <ImageProfile size={moderateScale(50)} image={user.data.urlPic} />
               <View>
                 <TextRegular style={{ fontSize: moderateScale(15) }} numberOfLines={1}>
-                  {user.data.Nom_Utilisateur}
+                  {user.data.nomUtilisateur}
                 </TextRegular>
                 <TextRegular
                   numberOfLines={1}
@@ -171,7 +170,7 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
                     color: Colors[colorSheme ?? 'light'].messageColourLight,
                   }}
                 >
-                  en ligne a {formatMessageDate(user.data.Last_Seen)}
+                  en ligne a {formatMessageDate(user.data.lastSeen || 0)}
                 </TextRegular>
               </View>
             </View>
@@ -229,11 +228,11 @@ const Discussion = ({ route, navigation }: NavigationStackProps) => {
           </View>
         </Animated.View>
       </KeyboardGestureArea>
-      <InputMessage telegram={telegram} accountId={user.data.ID_Utilisateur} />
+      <InputMessage telegram={telegram} accountId={user.data.idUtilisateur} />
     </View>
   );
 };
-const keyExtractor = (item: MessageWithFileAndStatus) => item.ID_Message;
+const keyExtractor = (item: MessageWithFileAndStatus) => item.newMessage.idMessage;
 const renderItem = ({ item }: { item: MessageWithFileAndStatus }) => {
   return <MessageItem item={item} />;
 };
@@ -249,7 +248,7 @@ const listFooterComponent = () => {
 const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
   const { account } = useAuthStore((state) => state);
 
-  let right = item?.ID_Expediteur !== account?._id;
+  let right = item?.newMessage.idExpediteur !== account?._id;
 
   const whatIconStatus = ({
     send,
@@ -297,7 +296,7 @@ const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
             backgroundColor: '#0000',
           }}
         >
-          {item?.Contenu_Message ? (
+          {item?.newMessage.contenuMessage ? (
             <View
               style={[
                 right
@@ -324,15 +323,15 @@ const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
                   padding: moderateScale(7),
                 }}
               >
-                {item?.Contenu_Message}
+                {item?.newMessage.contenuMessage}
               </TextRegular>
             </View>
           ) : (
-            item?.files?.map((file, i) => {
+            item?.filesData?.map((file, i) => {
               if (getTypeFile(file.extension) === 'image')
-                return <ImageRatio uri={file.uri} url={file.url} key={i} ratio={2.5} />;
+                return <ImageRatio uri={file.uri} url={file.url || undefined} key={i} ratio={2.5} />;
               if (getTypeFile(file.extension) === 'audio')
-                return <InstanceAudio voiceUrl={file.url} voiceUri={file.uri} key={i} />;
+                return <InstanceAudio voiceUrl={file.url || undefined} voiceUri={file.uri} key={i} />;
             })
           )}
         </View>
@@ -345,11 +344,11 @@ const MessageItem = ({ item }: { item: MessageWithFileAndStatus }) => {
           }}
         >
           {whatIconStatus({
-            received: item?.Date_Reçu,
-            seen: item?.Date_Lu,
-            send: item?.Date_Envoye,
+            received: item?.statusData.dateReçu,
+            seen: item?.statusData.dateLu,
+            send: item?.statusData.dateEnvoye,
           })}
-          {formatMessageDate(item?.Horodatage || 0)}
+          {formatMessageDate(item?.newMessage.horodatage || 0)}
         </TextRegularItalic>
       </Pressable>
     </Animated.View>

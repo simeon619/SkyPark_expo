@@ -8,7 +8,7 @@ const setStringValue = async (key: string, value: string) => {
   try {
     await AsyncStorage.setItem(key, value);
   } catch (e) {
-    console.log('Error storing cookie:', e);
+    console.info('Error storing cookie:', e);
   }
 };
 const getMyStringValue = async (key: string) => {

@@ -4,9 +4,10 @@ import BottomSheet, {
   useBottomSheetSpringConfigs,
 } from '@gorhom/bottom-sheet';
 
+import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { TouchableWithoutFeedback, useColorScheme, useWindowDimensions } from 'react-native';
+import { TouchableOpacity, TouchableWithoutFeedback, useColorScheme, useWindowDimensions } from 'react-native';
 import Animated, { interpolateColor, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
@@ -14,8 +15,6 @@ import { useAuthStore } from '../../managementState/server/auth';
 import { TextExtraLightItalic, TextRegular } from '../StyledText';
 import { View } from '../Themed';
 import { InputBottomSheet } from './input';
-import { TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
 export const BottomSheetComponent = ({
   BtranslateY,
@@ -132,7 +131,7 @@ export const BottomSheetComponent = ({
         <InputBottomSheet
           defaultyValue="u1"
           name="password"
-          placeholder="Entrez Mot de passe "
+          placeholder="Entrez Mot de passe"
           securePassword={true}
           control={control}
         />
@@ -150,23 +149,34 @@ export const BottomSheetComponent = ({
         </View>
 
         <TouchableWithoutFeedback
-          style={{
-            alignSelf: 'center',
-            backgroundColor: Colors[colorScheme ?? 'light'].primaryColour,
-            paddingVertical: verticalScale(5),
-            paddingHorizontal: horizontalScale(30),
-            borderRadius: 20,
-            marginTop: verticalScale(25),
-          }}
+          style={
+            {
+              // alignSelf: 'center',
+              // backgroundColor: Colors[colorScheme ?? 'light'].primaryColour,
+              // paddingVertical: verticalScale(5),
+              // paddingHorizontal: horizontalScale(50),
+              // borderRadius: 20,
+              // marginTop: verticalScale(25),
+              // width: '50%',
+            }
+          }
           // disabled={loading}
           onPress={() => {
-            fetchLogin({ email: getValues('email'), password: getValues('password') });
+            const connect = async () => {
+              await fetchLogin({ email: getValues('email'), password: getValues('password') });
+            };
+
+            connect();
           }}
         >
           <TextRegular
             style={{
-              fontSize: moderateScale(16),
+              fontSize: moderateScale(20),
               color: Colors[colorScheme ?? 'light'].overLay,
+              backgroundColor: Colors[colorScheme ?? 'light'].primaryColour,
+              textAlign: 'center',
+              marginHorizontal: horizontalScale(60),
+              borderRadius: 20,
             }}
           >
             Connexion

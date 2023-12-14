@@ -10,7 +10,7 @@ function useDebouncedApi<T>(apiFunction: () => Promise<T>, delay: number): [T | 
           setApiData(data);
         })
         .catch((error: any) => {
-          console.log(error);
+          console.error(error);
           setApiData(undefined);
         });
     }, delay),

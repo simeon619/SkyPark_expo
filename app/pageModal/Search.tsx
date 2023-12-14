@@ -1,25 +1,24 @@
+import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { View } from '../../components/Themed';
+import Colors from '../../constants/Colors';
+
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
-import React from 'react';
-import { Pressable, TouchableOpacity, useColorScheme, useWindowDimensions, View } from 'react-native';
-import Colors from '../../constants/Colors';
-import { SMALL_PIC_USER } from '../../constants/Value';
+import { TextInput, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
+import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import useToggleStore from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
-import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
-import { TextThin } from '../StyledText';
-import ImageProfile from './simpleComponent/ImageProfile';
 
-const HeaderHome = () => {
+const Search = () => {
   const { width } = useWindowDimensions();
   const colorScheme = useColorScheme();
   const { primaryColour } = useToggleStore((state) => state);
 
   const { profile } = useAuthStore((state) => state);
   const navigation = useNavigation();
-
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }}>
       <View
         style={{
           width,
@@ -50,11 +49,10 @@ const HeaderHome = () => {
           />
         </TouchableOpacity>
 
-        <Pressable
-          onPress={() => {
-            //@ts-ignore
-            navigation.navigate('Search');
-          }}
+        <TextInput
+          placeholder="Search..."
+          placeholderTextColor={Colors[colorScheme ?? 'light'].overLay}
+          autoFocus
           style={{
             flex: 1,
             flexDirection: 'row',
@@ -66,10 +64,12 @@ const HeaderHome = () => {
             borderBottomColor: Colors[colorScheme ?? 'light'].overLay,
             backgroundColor: primaryColour,
             paddingHorizontal: horizontalScale(10),
+            fontSize: moderateScale(17),
+            color: 'white',
             paddingVertical: verticalScale(5),
           }}
-        >
-          <Image
+        />
+        {/* <Image
             source={require('../../assets/icon/search.png')}
             style={{
               width: moderateScale(22),
@@ -77,27 +77,20 @@ const HeaderHome = () => {
               tintColor: Colors[colorScheme ?? 'light'].overLay,
             }}
             transition={200}
-          />
-          <TextThin
-            style={{
-              color: Colors[colorScheme ?? 'light'].overLay,
-              fontSize: moderateScale(16),
-            }}
-          >
-            Search
-          </TextThin>
-        </Pressable>
-        <TouchableOpacity
+          /> */}
+
+        {/* </TextInput> */}
+        {/* <TouchableOpacity
           onPress={() => {
             //@ts-ignore
             navigation.navigate('ProfileSettings');
           }}
         >
           <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 2} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
-      {/* <ActionButtonForm /> */}
-    </>
+    </SafeAreaView>
   );
 };
-export default HeaderHome;
+
+export default Search;

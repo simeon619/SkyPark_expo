@@ -19,26 +19,7 @@ export const useTempMsgStore = create<StateSchema, any>(
     (set) => ({
       messages: {},
       isClear: false,
-      // setMsg: (value) => {
-      //   set((state) => {
-      //     let discId = Object.keys(value)[0];
-      //     let ArrayMessages = Object.values(value[discId]);
-      //     const newObjet: Record<string, MessageWithFileAndStatus> = {};
-      //     const stateMsg = { ...state.messages };
-      //     let discs = stateMsg[discId];
-      //     ArrayMessages.forEach((message) => {
-      //       let msgId = message.ID_Message;
-      //       newObjet[msgId] = message;
-      //       if (discs[msgId]) {
-      //         delete discs[msgId];
-      //       }
-      //     });
-      //     return {
-      //       messages: { [discId]: { ...newObjet, ...discs } },
-      //       isClear: true,
-      //     };
-      //   });
-      // },
+
       setMsg: (value) => {
         set((state) => {
           const newState = { ...state };
@@ -46,7 +27,7 @@ export const useTempMsgStore = create<StateSchema, any>(
           const incomingMessages = value[discId];
           const existingMessages = newState.messages?.[discId] || {};
           incomingMessages.forEach((message) => {
-            existingMessages[message.ID_Message] = message;
+            existingMessages[message.newMessage.idMessage] = message;
           });
           newState.messages = { [discId]: existingMessages };
           newState.isClear = true;

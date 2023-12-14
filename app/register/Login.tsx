@@ -12,7 +12,6 @@ import { moderateScale, verticalScale } from '../../Utilis/metrics';
 import { TextSemiBold } from '../../components/StyledText';
 import Colors from '../../constants/Colors';
 import { BottomSheetComponent } from '../../components/register/BottomSheet';
-import { NavigationStackProps } from '../../types/navigation';
 
 const Login = () => {
   const colorScheme = useColorScheme();

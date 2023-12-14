@@ -2,9 +2,17 @@ import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { Text, TouchableOpacity, TouchableWithoutFeedback, useColorScheme, useWindowDimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  useColorScheme,
+  useWindowDimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getMyStringValue, setStringValue } from '../../Utilis/functions/localStorage';
 import { pickImage } from '../../Utilis/functions/media/media';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import { TextExtraLight, TextLight, TextRegular } from '../../components/StyledText';
@@ -15,15 +23,27 @@ import { LARGE_PIC_USER } from '../../constants/Value';
 import { useAuthStore } from '../../managementState/server/auth';
 import { usePatchUser } from '../../managementState/server/updateUser';
 import { NavigationStackProps } from '../../types/navigation';
-
-const CheckProfile = ({ navigation, route }: NavigationStackProps) => {
+const CheckProfile = ({ navigation }: NavigationStackProps) => {
   const { width, height } = useWindowDimensions();
   const colorScheme = useColorScheme();
+  const [loading, setLoading] = useState(true);
 
   const { profile, account, address } = useAuthStore((state) => state);
   const { setProfile } = usePatchUser();
-  // const [image, setImage] = useState<string[]>([]);
 
+  useEffect(() => {
+    const checkIsFirstTime = async () => {
+      const value = await getMyStringValue('profile');
+      if (value) {
+        navigation.replace('Bottomtabs');
+      } else {
+        await setStringValue('profile', profile?._id || '88888');
+        setLoading(false);
+      }
+    };
+
+    checkIsFirstTime();
+  }, []);
   const icon = {
     email: require('../../assets/images/email.png'),
     building: require('../../assets/images/building.svg'),
@@ -99,145 +119,159 @@ const CheckProfile = ({ navigation, route }: NavigationStackProps) => {
   };
 
   function next(): void {
-    navigation.navigate('Bottomtabs');
+    navigation.replace('Bottomtabs');
   }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <StatusBar backgroundColor="#EDEDED" />
-      <View
-        lightColor="#EDEDED"
-        style={{
-          width,
-          height: height * 0.35,
-          borderBottomLeftRadius: moderateScale(40),
-          borderBottomRightRadius: moderateScale(40),
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: verticalScale(10),
-        }}
-      >
-        <TouchableWithoutFeedback
-          onPress={async () => {
-            try {
-              let images = await pickImage({ numberImages: 1 });
-              let pre = images?.map((item) => {
-                return item;
-              });
-
-              if (images && images.length !== 0 && profile?._id) {
-                setProfile(
-                  {
-                    _id: profile?._id,
-                  },
-                  { imgProfile: pre }
-                );
-              }
-            } catch (error) {
-              console.error(error);
-            }
-          }}
-        >
-          <ImageProfile image={profile?.imgProfile[0]?.url} size={LARGE_PIC_USER + 5} />
-        </TouchableWithoutFeedback>
-        <TextLight
-          style={{
-            fontSize: moderateScale(20),
-            color: Colors[colorScheme ?? 'light'].greyDark,
-          }}
-        >
-          Bienvenue {account?.name}
-        </TextLight>
-        <TextLight
-          style={{
-            fontSize: moderateScale(17),
-            backgroundColor: Colors[colorScheme ?? 'light'].primaryColourLight,
-            ...shadow(10),
-            color: Colors[colorScheme ?? 'light'].primaryColour,
-            paddingVertical: verticalScale(2),
-            paddingHorizontal: horizontalScale(9),
-            borderRadius: 40,
-          }}
-        >
-          {account?.status}
-        </TextLight>
+      {loading ? (
         <View
-          lightColor="#0000"
-          darkColor="#0000"
           style={{
-            position: 'absolute',
-            zIndex: 80,
-            bottom: 0,
-            flexDirection: 'row',
+            flex: 1,
             justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          {Stiker({ key: 'porte', value: String(address?.etage ?? '00') })}
-          {Stiker({ key: 'building', value: String(address?.etage ?? '00') })}
-          {Stiker({ key: 'padiezd', value: String(address?.room ?? '00') })}
+          <ActivityIndicator size="large" color={Colors[colorScheme ?? 'light'].primaryColour} />
         </View>
-      </View>
-      <ScrollView
-        lightColor="#EDEDED"
-        darkColor="#EDEDED"
-        style={{
-          height: height * 0.35,
-          zIndex: -1,
-          borderTopLeftRadius: moderateScale(40),
-          borderTopRightRadius: moderateScale(40),
-          marginTop: verticalScale(5),
-          paddingTop: verticalScale(70),
-          paddingHorizontal: horizontalScale(20),
-          columnGap: verticalScale(10),
-        }}
-      >
-        {infoProfile({ service: 'email', value: account?.email ?? '' })}
-        {infoProfile({ service: 'telephone', value: account?.telephone ?? '' })}
-        {infoProfile({ service: 'location', value: address?.city ?? '' })}
-        {infoProfile({ service: 'building', value: address?.description ?? '' })}
-      </ScrollView>
-      <View
-        lightColor="#0000"
-        darkColor="#0000"
-        style={{
-          position: 'absolute',
-          bottom: verticalScale(-90),
-          justifyContent: 'flex-end',
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => next()}
-          style={{
-            // alignSelf: 'center',
-            backgroundColor: Colors[colorScheme ?? 'light'].primaryColour,
-            paddingVertical: verticalScale(5),
-            paddingHorizontal: horizontalScale(30),
-            borderRadius: 20,
-            marginTop: verticalScale(45),
-            alignSelf: 'flex-end',
-            zIndex: 99,
-            position: 'absolute',
-            top: verticalScale(45),
-            right: horizontalScale(35),
-            // ...style,
-          }}
-        >
-          <TextRegular
+      ) : (
+        <>
+          <View
+            lightColor="#EDEDED"
             style={{
-              fontSize: moderateScale(15),
-              color: Colors[colorScheme ?? 'light'].overLay,
-              textTransform: 'capitalize',
+              width,
+              height: height * 0.35,
+              borderBottomLeftRadius: moderateScale(40),
+              borderBottomRightRadius: moderateScale(40),
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: verticalScale(10),
             }}
           >
-            Continuer
-          </TextRegular>
-        </TouchableOpacity>
-        <Image
-          source={require('../../assets/images/Vector2.svg')}
-          style={{ width: 375, height: 272 }}
-          contentFit="contain"
-        />
-      </View>
+            <TouchableWithoutFeedback
+              onPress={async () => {
+                try {
+                  let images = await pickImage({ numberImages: 1 });
+                  let pre = images?.map((item) => {
+                    return item;
+                  });
+
+                  if (images && images.length !== 0 && profile?._id) {
+                    setProfile(
+                      {
+                        _id: profile?._id,
+                      },
+                      { imgProfile: pre }
+                    );
+                  }
+                } catch (error) {
+                  console.error(error);
+                }
+              }}
+            >
+              <ImageProfile image={profile?.imgProfile[0]?.url} size={LARGE_PIC_USER + 5} />
+            </TouchableWithoutFeedback>
+            <TextLight
+              style={{
+                fontSize: moderateScale(20),
+                color: Colors[colorScheme ?? 'light'].greyDark,
+              }}
+            >
+              Bienvenue {account?.name}
+            </TextLight>
+            <TextLight
+              style={{
+                fontSize: moderateScale(17),
+                backgroundColor: Colors[colorScheme ?? 'light'].primaryColourLight,
+                ...shadow(10),
+                color: Colors[colorScheme ?? 'light'].primaryColour,
+                paddingVertical: verticalScale(2),
+                paddingHorizontal: horizontalScale(9),
+                borderRadius: 40,
+              }}
+            >
+              {account?.status}
+            </TextLight>
+            <View
+              lightColor="#0000"
+              darkColor="#0000"
+              style={{
+                position: 'absolute',
+                zIndex: 80,
+                bottom: 0,
+                flexDirection: 'row',
+                justifyContent: 'center',
+              }}
+            >
+              {Stiker({ key: 'porte', value: String(address?.etage ?? '00') })}
+              {Stiker({ key: 'building', value: String(address?.etage ?? '00') })}
+              {Stiker({ key: 'padiezd', value: String(address?.room ?? '00') })}
+            </View>
+          </View>
+          <ScrollView
+            lightColor="#EDEDED"
+            darkColor="#EDEDED"
+            style={{
+              height: height * 0.35,
+              zIndex: -1,
+              borderTopLeftRadius: moderateScale(40),
+              borderTopRightRadius: moderateScale(40),
+              marginTop: verticalScale(5),
+              paddingTop: verticalScale(70),
+              paddingHorizontal: horizontalScale(20),
+              columnGap: verticalScale(10),
+            }}
+          >
+            {infoProfile({ service: 'email', value: account?.email ?? '' })}
+            {infoProfile({ service: 'telephone', value: account?.telephone ?? '' })}
+            {infoProfile({ service: 'location', value: address?.city ?? '' })}
+            {infoProfile({ service: 'building', value: address?.description ?? '' })}
+          </ScrollView>
+          <View
+            lightColor="#0000"
+            darkColor="#0000"
+            style={{
+              position: 'absolute',
+              bottom: verticalScale(-90),
+              justifyContent: 'flex-end',
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => next()}
+              style={{
+                // alignSelf: 'center',
+                backgroundColor: Colors[colorScheme ?? 'light'].primaryColour,
+                paddingVertical: verticalScale(5),
+                paddingHorizontal: horizontalScale(30),
+                borderRadius: 20,
+                marginTop: verticalScale(45),
+                alignSelf: 'flex-end',
+                zIndex: 99,
+                position: 'absolute',
+                top: verticalScale(45),
+                right: horizontalScale(35),
+                // ...style,
+              }}
+            >
+              <TextRegular
+                style={{
+                  fontSize: moderateScale(15),
+                  color: Colors[colorScheme ?? 'light'].overLay,
+                  textTransform: 'capitalize',
+                }}
+              >
+                Continuer
+              </TextRegular>
+            </TouchableOpacity>
+            <Image
+              source={require('../../assets/images/Vector2.svg')}
+              style={{ width: 375, height: 272 }}
+              contentFit="contain"
+            />
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 };

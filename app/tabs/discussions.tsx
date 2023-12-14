@@ -108,7 +108,7 @@ const DiscusionTabScreen = () => {
               },
             }}
           />
-          <Tab.Screen
+          {/* <Tab.Screen
             name="Compagnie de Gestion"
             component={CieGestion}
             options={{
@@ -116,7 +116,7 @@ const DiscusionTabScreen = () => {
                 return <TabPageItem children={children} focused={focused} />;
               },
             }}
-          />
+          /> */}
           <Tab.Screen
             name="Appels"
             component={Call}

@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { horizontalScale, moderateScale } from '../../Utilis/metrics';
-import useToggleStore from '../../managementState/client/preference';
-import { TextLight } from '../StyledText';
 import { Pressable } from 'react-native';
+import { horizontalScale, moderateScale } from '../../Utilis/metrics';
+import { TextLight } from '../StyledText';
 
+import { useNavigation } from '@react-navigation/native';
 import {
   AccountInterface,
   MessageInterface,
   PostInterface,
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
-import { useNavigation } from '@react-navigation/native';
-import { useCommentPostStore } from '../../managementState/server/post/commentStore';
-import { ArrayDataInit } from '../../lib/SQueryClient';
+
 let EXCEED_LIMIT = 10;
 
 const TextComment = ({

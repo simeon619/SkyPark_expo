@@ -12,6 +12,8 @@ import Colors from '../../constants/Colors';
 import { SMALL_PIC_USER, formTextPlaceholder } from '../../constants/Value';
 import { useBlurSurvey, useTypeForm } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
+import { useFocusEffect } from '@react-navigation/native';
+import ActionButtonForm from '../../components/utilis/ActionButtonForm';
 
 const PostTabScreen = () => {
   const colorScheme = useColorScheme();
@@ -25,9 +27,9 @@ const PostTabScreen = () => {
   const { profile } = useAuthStore((state) => state);
 
   const { width, height } = useWindowDimensions();
-  useEffect(() => {
+  useFocusEffect(() => {
     refInput.current?.focus();
-  }, []);
+  });
   return (
     <SafeAreaView
       style={{
@@ -36,13 +38,15 @@ const PostTabScreen = () => {
       }}
     >
       <BlurView style={[{ zIndex: blurSurvey }, StyleSheet.absoluteFill]} />
+      <ActionButtonForm />
+
       <View
         style={[
           {
             borderRadius: 25,
             backgroundColor: Colors[colorScheme ?? 'light'].background,
             marginHorizontal: horizontalScale(15),
-            marginTop: verticalScale(15),
+            marginTop: verticalScale(3),
             paddingTop: verticalScale(15),
             ...shadow(5),
             overflow: 'hidden',
@@ -94,7 +98,6 @@ const PostTabScreen = () => {
         <DefaultForm text={text} setText={setText} />
         <SurveyForm text={text} setText={setText} />
       </View>
-      {/* <TimePickerSurvey /> */}
     </SafeAreaView>
   );
 };

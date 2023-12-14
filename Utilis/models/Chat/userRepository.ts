@@ -1,89 +1,67 @@
-import { db } from './database';
+import { Conversation, getContentFile, saveContentFile } from './database';
 
 export interface UserSchema {
-  ID_Utilisateur: string;
-  ID_Conversation?: string;
-  Nom_Utilisateur: string;
-  Url_Pic?: string;
-  Last_Seen: number;
+  idUtilisateur: string;
+  idConversation: string;
+  nomUtilisateur: string;
+  urlPic?: string;
+  lastSeen: number;
 }
 
-export const addUser = (newUser: UserSchema) => {
-  const { ID_Utilisateur, Nom_Utilisateur, Url_Pic, Last_Seen } = newUser;
-  return new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      const query = `
-    INSERT INTO Utilisateurs (ID_Utilisateur, Nom_Utilisateur, Url_Pic, Last_Seen)
-    VALUES ('${ID_Utilisateur}', '${Nom_Utilisateur}', ${Url_Pic ? `'${Url_Pic}'` : 'null'}, ${Last_Seen})
-  `;
+export const addUser = async (newUser: UserSchema) => {
+  const FileUser = await getContentFile('Utilisateur');
 
-      tx.executeSql(
-        query,
-        [],
-        (_, result) => {
-          if (result.rowsAffected > 0) {
-            console.log('Utilisateur ajouté avec succès.', result.rows.item(0));
-            resolve(1);
-          } else {
-            console.log("Échec de l'ajout de l'utilisateur.");
-            resolve(0);
-          }
-        },
-        (_, error) => {
-          console.log("Erreur lors de l'ajout de l'utilisateur :", error);
-          resolve(0);
-        }
-      );
-    });
-  });
+  let users: UserSchema[] = JSON.parse(FileUser);
+
+  let userExist = users.find((u) => u.idUtilisateur === newUser.idUtilisateur);
+
+  if (!userExist) {
+    users.push(newUser);
+    saveContentFile('Utilisateur', JSON.stringify(users));
+    console.info('Utilisateur ajouté avec succès.');
+  }
 };
 
-export const readUser = (userID: string): Promise<UserSchema | null> => {
-  return new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      const query = `SELECT 
-      Utilisateurs.*,
-      Conversations.ID_Conversation AS ID_Conversation 
-      FROM Utilisateurs
-      LEFT JOIN Conversations ON Utilisateurs.ID_Utilisateur = Conversations.ID_DESTINATAIRE
-      WHERE ID_Utilisateur = ?`;
+export const readUser = async (userID: string): Promise<UserSchema | null> => {
+  const FileUser = await getContentFile('Utilisateur');
 
-      tx.executeSql(query, [userID], (_, result) => {
-        if (result.rows.length > 0) {
-          resolve(result.rows.item(0));
-        } else {
-          resolve(null);
-        }
-      });
-    });
-  });
+  const convs = await getContentFile('Conversation');
+
+  let users: UserSchema[] = JSON.parse(FileUser);
+
+  let conversations: Conversation[] = JSON.parse(convs);
+
+  let userExist = users.find((u) => u.idUtilisateur === userID);
+
+  let convExist = conversations.find((c) => c.idDestinataire === userID);
+
+  if (!userExist || !convExist) {
+    return null;
+  }
+
+  return { ...userExist, idUtilisateur: convExist.idConversation };
 };
 
-export const getAllUsers = (pageNumber: number, itemsPerPage: number): Promise<UserSchema[]> => {
+export const getAllUsers = async (pageNumber: number, itemsPerPage: number) => {
   const offset = (pageNumber - 1) * itemsPerPage;
+  let userExist: UserSchema[] = [];
 
-  const query = `SELECT 
-    Utilisateurs.*,
-    Conversations.ID_Conversation AS ID_Conversation 
-    FROM Utilisateurs 
-    LEFT JOIN Conversations ON Utilisateurs.ID_Utilisateur = Conversations.ID_DESTINATAIRE  LIMIT ? OFFSET ?`;
+  const FileUser = await getContentFile('Utilisateur');
+  if (!FileUser) return [];
+  const convs = await getContentFile('Conversation');
+  let conversations: Conversation[] = JSON.parse(convs);
 
-  return new Promise((resolve) => {
-    db.transaction((tx) => {
-      tx.executeSql(query, [itemsPerPage, offset], (_, result) => {
-        if (result.rows.length > 0) {
-          const users: UserSchema[] = [];
-
-          for (let i = 0; i < result.rows.length; i++) {
-            users.push(result.rows.item(i));
-          }
-          resolve(users);
-        } else {
-          resolve([]);
-        }
-      });
+  let users: UserSchema[] = JSON.parse(FileUser);
+  if (Array.isArray(users)) {
+    userExist = users?.slice(offset, itemsPerPage).map((u) => {
+      let convExist = conversations.find((c) => c.idDestinataire === u.idUtilisateur);
+      return { ...u, ID_Conversation: convExist?.idConversation };
     });
-  });
+  } else {
+    console.error("FileUser n'est pas un tableau.");
+  }
+
+  return userExist;
 };
 
 // let u = await readUser("")

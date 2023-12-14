@@ -1,4 +1,4 @@
-import { addWeeks, isPast, isTomorrow, isWithinInterval, isYesterday, nextMonday } from 'date-fns';
+import { addWeeks, isPast, isTomorrow, isWithinInterval, isYesterday } from 'date-fns';
 import isThisYear from 'date-fns/esm/isThisYear';
 import isToday from 'date-fns/esm/isToday';
 import format from 'date-fns/format';
@@ -15,7 +15,7 @@ export const calculeDate = (times: any) => {
   });
   return time;
 };
-export const formatMessageDate = (timestamp: number) => {
+export const formatMessageDate = (timestamp: number = 0) => {
   const messageDate = new Date(timestamp);
 
   let formattedDate;

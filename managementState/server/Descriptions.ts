@@ -654,6 +654,7 @@ export const Descriptions = {
       type: String,
       required: true as const,
     },
+
     description: {
       type: String,
       required: true as const,
@@ -830,6 +831,12 @@ export const Descriptions = {
       {
         type: String,
         ref: 'supervisor' as const,
+      },
+    ],
+    supervisorThread: [
+      {
+        type: String,
+        ref: 'post' as const,
       },
     ],
     Thread: [
@@ -1256,6 +1263,7 @@ export const CacheValues = {
     city: '',
     buildings: [],
     supervisors: [],
+    supervisorThread: [],
     Thread: [],
     activities: [],
     __createdAt: 0,

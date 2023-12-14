@@ -21,7 +21,6 @@ const ImageRatio = ({ uri, ratio, url }: { uri?: string | undefined; ratio: numb
         aspectRatio: aspectRatio,
       }}
       onLoad={handleImageLoad}
-      // transition={150}
     />
   );
 };

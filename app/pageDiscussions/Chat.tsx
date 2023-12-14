@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList, useColorScheme } from 'react-native';
 import { verticalScale } from '../../Utilis/metrics';
 
+import { RefreshControl } from 'react-native';
 import { UserSchema, getAllUsers } from '../../Utilis/models/Chat/userRepository';
 import ItemChat from '../../components/discussion/ItemChat';
 import Colors from '../../constants/Colors';
 import { setListAccount } from '../../managementState/server/Listuser';
-import { RefreshControl } from 'react-native';
 
 const Chat = () => {
   // const { listAccount, setListAccount } = useListUserStore((state) => state);
@@ -37,7 +37,7 @@ const Chat = () => {
       setUsers((prev) => {
         const newObjet: Record<string, UserSchema> = {};
         newUsers.forEach((user) => {
-          newObjet[user.ID_Utilisateur] = user;
+          newObjet[user.idUtilisateur] = user;
         });
         return {
           ...prev,
@@ -56,7 +56,7 @@ const Chat = () => {
     <FlatList
       style={{ flex: 1 }}
       data={usersArray}
-      keyExtractor={(item) => item.ID_Utilisateur}
+      keyExtractor={(item) => item.idUtilisateur}
       onEndReached={loadMoreUsers}
       refreshControl={<RefreshControl refreshing={false} onRefresh={fetchUsers} />}
       onEndReachedThreshold={0.5}
