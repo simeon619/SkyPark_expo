@@ -8,7 +8,7 @@ export const createConversation = async (conv: Conversation) => {
   if (!convExist) {
     convs.push(conv);
     saveContentFile('Conversation', JSON.stringify(convs));
-    console.log('conv ajouté avec succès.');
+    // console.log('conv ajouté avec succès.');
   } else {
     console.log("Échec de l'ajout de l'conv.");
   }
@@ -43,7 +43,6 @@ export const createConversation = async (conv: Conversation) => {
 // };
 export type MessageWithFileAndStatus = { newMessage: Message; statusData: StatutLecture; filesData: File[] };
 
-type FileType = Partial<File>;
 export const createMessage = async (data: MessageWithFileAndStatus) => {
   const { newMessage } = data;
   let FileMessages = await getContentFile('Message');

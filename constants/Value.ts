@@ -7,7 +7,7 @@ export const MEDIUM_PIC_USER = 70;
 export const LARGE_PIC_USER = 80;
 export const SMALL_PIC_USER = 35;
 
-export const HOST = 'http://192.168.1.13:3500';
+export const HOST = 'http://192.168.1.11:3500';
 export const DB_NAME = 'simeon.db';
 export const LIMIT_TRANSACTION = 20;
 

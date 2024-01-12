@@ -10,7 +10,7 @@ import Colors from '../../constants/Colors';
 import { FileType } from '../../lib/SQueryClient';
 import useToggleStore, { useTypeForm } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
-import { useQuarterPostStore } from '../../managementState/server/post/postThread';
+import { useThreadPostStore } from '../../managementState/server/post/postThread';
 import ImageRatio from '../ImgRatio';
 import { TextLight, TextRegular } from '../StyledText';
 import { ScrollView, View } from '../Themed';
@@ -33,7 +33,7 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
     };
   }, [IconName]);
 
-  const { publishPost } = useQuarterPostStore((state) => state);
+  const { publishPost } = useThreadPostStore((state) => state);
   const { account } = useAuthStore((state) => state);
 
   const data = [
@@ -111,7 +111,7 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
   async function handlePost() {
     let type = prepareImage?.length === 0 ? '1' : '2';
 
-    publishPost({ accountId: account?._id, type: type, files: prepareImage, value: text });
+    publishPost({ accountId: account?._id, type: type, files: prepareImage, value: text } , "Thread");
     setPrepareImage([]);
     setImages([]);
     setText('');

@@ -968,10 +968,12 @@ export const Descriptions = {
     ],
   },
   favorites: {
-    folders: [
+    elements: [
       {
-        type: String,
-        ref: 'folder' as const,
+        type: {
+          id: '',
+          modelName: '',
+        },
       },
     ],
     _id: {
@@ -1162,8 +1164,7 @@ export const CacheValues = {
     __parentList: [],
   } as DiscussionInterface,
   favorites: {
-    folders: [],
-    likeList: [],
+    elements: [],
     _id: '',
     __createdAt: 0,
     __updatedAt: 0,
@@ -1417,7 +1418,7 @@ export interface PostInterface {
   }[];
 }
 export interface FavoritesInterface {
-  folders: string[];
+  elements: string[];
   _id: string;
   __createdAt: number;
   __updatedAt: number;

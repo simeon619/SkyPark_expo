@@ -14,7 +14,7 @@ import Colors from '../../constants/Colors';
 import useToggleStore, { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
 import Call from '../pageDiscussions/Call';
 import Chat from '../pageDiscussions/Chat';
-import CieGestion from '../pageDiscussions/CieGestion';
+
 const DiscusionTabScreen = () => {
   const { primaryColour } = useToggleStore((state) => state);
   const { toggleValue } = useMenuDiscussionIsOpen((state) => state);
@@ -108,15 +108,6 @@ const DiscusionTabScreen = () => {
               },
             }}
           />
-          {/* <Tab.Screen
-            name="Compagnie de Gestion"
-            component={CieGestion}
-            options={{
-              tabBarLabel({ focused, children }) {
-                return <TabPageItem children={children} focused={focused} />;
-              },
-            }}
-          /> */}
           <Tab.Screen
             name="Appels"
             component={Call}

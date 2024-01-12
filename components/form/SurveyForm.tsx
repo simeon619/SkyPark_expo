@@ -2,15 +2,15 @@ import { FontAwesome } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, TextInput, TouchableOpacity, View as ViewNatif } from 'react-native';
-//@ts-ignore
 import { useNavigation } from '@react-navigation/native';
+//@ts-ignore
 import InsetShadow from 'react-native-inset-shadow';
 import { MagicModalPortal, magicModal } from 'react-native-magic-modal';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import useToggleStore, { useBlurSurvey, useDaysSurvey, useTypeForm } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
-import { useQuarterPostStore } from '../../managementState/server/post/postThread';
+import { useThreadPostStore } from '../../managementState/server/post/postThread';
 import { TextLight, TextRegular } from '../StyledText';
 import { View } from '../Themed';
 
@@ -18,7 +18,8 @@ const SurveyForm = ({ text, setText }: { text: string; setText: React.Dispatch<R
   const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
   const { setBlurSurvey } = useBlurSurvey((state) => state);
   const { IconName } = useTypeForm((state) => state);
-  const { publishPost } = useQuarterPostStore((state) => state);
+  //@ts-ignore
+  const { publishPost } = useThreadPostStore((state) => state);
   const { account } = useAuthStore((state) => state);
 
   const hideForm = useAnimatedStyle(() => {
@@ -85,7 +86,7 @@ const SurveyForm = ({ text, setText }: { text: string; setText: React.Dispatch<R
         delay: 1000 * 60 * 60 * 24 * daysSurvey,
         options: [...labels],
       },
-    });
+    }, "Thread");
     setText('');
     navigation.goBack();
   };
@@ -106,7 +107,6 @@ const SurveyForm = ({ text, setText }: { text: string; setText: React.Dispatch<R
           borderRadius: 10,
         }}
       >
-        {/* <TouchableWithoutFeedback onPress={handleModalPress}> */}
         <View>
           {timesSurveyDays.map(({ d }, i) => (
             <ViewNatif

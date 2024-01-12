@@ -24,7 +24,11 @@ export function mergeArrayData<T extends InstanceInterface>(
   ArrayNewDataItems.forEach((newItem) => {
     if (!uniqueIds.has(newItem._id)) {
       uniqueIds.add(newItem._id);
-      ArrayExistingItems?.push(newItem);
+      if (ArrayExistingItems.length === 1) {
+        ArrayExistingItems?.unshift(newItem);
+      } else {
+        ArrayExistingItems?.push(newItem);
+      }
     } else if (isUpdated) {
       const index = ArrayExistingItems.findIndex((item) => item._id === newItem._id);
       if (index !== -1) {

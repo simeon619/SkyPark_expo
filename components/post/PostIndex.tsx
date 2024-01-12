@@ -62,6 +62,7 @@ const PostIndex = ({
       refreshControl={<RefreshControl refreshing={loadindGetData} onRefresh={() => fetchData()} />}
       scrollEventThrottle={500}
       onEndReached={() => handleLoadMore()}
+      showsVerticalScrollIndicator={false}
       // maxToRenderPerBatch={5}
       removeClippedSubviews={true}
       onEndReachedThreshold={0.6}
@@ -93,5 +94,5 @@ const renderItem = ({ item }: { item: PostInterface }) => {
   }
 };
 
-const keyExtractor = (item: PostInterface, index: number) => index.toString();
+const keyExtractor = (_item: PostInterface, index: number) => index.toString();
 export default PostIndex;

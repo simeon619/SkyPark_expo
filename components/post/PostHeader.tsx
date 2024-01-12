@@ -1,21 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { Pressable, TouchableOpacity, useColorScheme } from 'react-native';
+import { Pressable, TouchableWithoutFeedback, useColorScheme } from 'react-native';
 import { formatPostDate } from '../../Utilis/date';
-import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
+import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
 import { SMALL_PIC_USER } from '../../constants/Value';
-import { TextLight, TextRegular } from '../StyledText';
-import { View } from '../Themed';
 import {
   AccountInterface,
   MessageInterface,
   PostInterface,
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
+import { TextLight, TextRegular } from '../StyledText';
+import { View } from '../Themed';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
-import { useNavigation, useNavigationState } from '@react-navigation/native';
-import { TouchableWithoutFeedback } from 'react-native';
+
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
+import { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
+import ItemMenu from '../discussion/ItemMenu';
 
 const PostHeader = ({
   data,
@@ -33,6 +36,8 @@ const PostHeader = ({
 }) => {
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
+  const { toggleValue } = useMenuDiscussionIsOpen((state) => state);
+
   const nameUser = user?.account.name || 'user' + Math.ceil(Math.random() * 80000000);
   const typePost = (type: string) => {
     if (type === '1') {
@@ -118,9 +123,28 @@ const PostHeader = ({
           </TextRegular>
         </Pressable>
       </View>
-      <TouchableOpacity style={{ marginLeft: horizontalScale(1) }}>
-        <Ionicons name="ellipsis-vertical" size={24} color={Colors[colorScheme ?? 'light'].greyDark} />
-      </TouchableOpacity>
+      <TouchableWithoutFeedback style={{ marginLeft: horizontalScale(1) }}>
+        <Menu onClose={toggleValue} onOpen={toggleValue}>
+          <MenuTrigger
+            children={<Ionicons name="ellipsis-vertical" size={24} color={Colors[colorScheme ?? 'light'].greyDark} />}
+          />
+          <MenuOptions
+            optionsContainerStyle={{
+              borderRadius: moderateScale(20),
+              width: 'auto',
+              paddingHorizontal: horizontalScale(15),
+              ...shadow(92),
+            }}
+          >
+            <MenuOption onSelect={() => alert(`Delete`)}>
+              <ItemMenu value="Favourite" />
+            </MenuOption>
+            <MenuOption onSelect={() => alert(`Delete`)}>
+              <ItemMenu value="Supprimer" />
+            </MenuOption>
+          </MenuOptions>
+        </Menu>
+      </TouchableWithoutFeedback>
     </View>
   );
 };

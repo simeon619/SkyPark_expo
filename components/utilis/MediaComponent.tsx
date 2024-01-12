@@ -6,131 +6,40 @@ import {
   Image,
   ImageLoadEventData,
   NativeSyntheticEvent,
-  TouchableWithoutFeedback,
+  Pressable,
+  useWindowDimensions,
 } from 'react-native';
-import { horizontalScale, verticalScale } from '../../Utilis/metrics';
 import { HOST } from '../../constants/Value';
 import { UrlData } from '../../lib/SQueryClient';
 import { View } from '../Themed';
-import ShadowImage from './ShadowImage';
+import { moderateScale, shadow } from '../../Utilis/metrics';
+import { TextLight } from '../StyledText';
 
-const GAP_MEDIA = 10;
 const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
   if (!media) {
     return null;
   }
   const numberMedia = media?.length;
 
-  return (
-    <View style={{ flex: 1, alignItems: 'center' }}>
-      {numberMedia === 1 && (
-        <ShadowImage
-          ratioHeight={0}
-          ratioWidth={100}
-          children={<ImageComponent height={'auto'} width={'100%'} uri={HOST + media[0].url} caption={caption || ''} />}
-        />
-      )}
-      {numberMedia === 2 && (
-        <View style={{ flexDirection: 'row', columnGap: horizontalScale(GAP_MEDIA) }}>
-          {[0, 1].map((index) => (
-            <ShadowImage
-              key={index}
-              ratioHeight={1}
-              ratioWidth={48.5}
-              children={
-                <ImageComponent uri={HOST + media[index].url} width={'100%'} height={'100%'} caption={caption || ''} />
-              }
-            />
-          ))}
-        </View>
-      )}
-      {numberMedia === 3 && (
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            rowGap: verticalScale(GAP_MEDIA),
-          }}
-        >
-          <ShadowImage
-            ratioHeight={1.4}
-            ratioWidth={100}
-            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} caption={caption || ''} />}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'nowrap',
-              columnGap: horizontalScale(GAP_MEDIA),
-            }}
-          >
-            {[1, 2].map((index) => (
-              <ShadowImage
-                key={index}
-                ratioHeight={2}
-                ratioWidth={48.5}
-                children={
-                  <ImageComponent uri={media[index].url} width={'100%'} height={'100%'} caption={caption || ''} />
-                }
-              />
-            ))}
-          </View>
-        </View>
-      )}
+  switch (numberMedia) {
+    case 1:
+      return <OnePicture uri={media[0].url} caption={caption} />;
+    case 2:
+      return <TwoPictures uri={[media[0].url, media[1].url]} caption={caption} />;
+    // case 3:
+    //   return <ThreePictures uri={[media[0].url, media[1].url, media[2].url]} caption={caption} />;
 
-      {numberMedia === 4 && (
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            rowGap: verticalScale(GAP_MEDIA),
-            // justifyContent: 'space-between',
-          }}
-        >
-          <ShadowImage
-            ratioHeight={1.4}
-            ratioWidth={100}
-            children={<ImageComponent uri={media[0].url} width={'100%'} height={'100%'} caption={caption || ''} />}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'nowrap',
-              columnGap: horizontalScale(GAP_MEDIA),
-              justifyContent: 'space-between',
-            }}
-          >
-            {[1, 2, 3].map((index) => (
-              <ShadowImage
-                key={index}
-                ratioHeight={2.5}
-                ratioWidth={31.5}
-                children={
-                  <ImageComponent uri={media[index].url} width={'100%'} height={'100%'} caption={caption || ''} />
-                }
-              />
-            ))}
-          </View>
-        </View>
-      )}
-    </View>
-  );
+    case 4:
+      return <FourPictures uri={[media[0].url, media[1].url, media[2].url, media[3].url]} caption={caption} />;
+    default:
+      return <TextLight>Composant par défaut</TextLight>;
+  }
 };
 export default MediaComponent;
 
 const ImageComponent = memo(
-  ({
-    uri,
-    width,
-    height,
-    caption,
-  }: {
-    uri: string;
-    width: DimensionValue;
-    height: DimensionValue;
-    caption: string;
-  }) => {
-    const [aspectRatio, setAspectRatio] = useState(0);
+  ({ uri, caption, width }: { uri: string; width?: DimensionValue; height?: DimensionValue; caption: string }) => {
+    const [aspectRatio, setAspectRatio] = useState(1);
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
@@ -143,8 +52,7 @@ const ImageComponent = memo(
     }, []);
 
     return (
-      <TouchableWithoutFeedback
-        style={{ width: '100%', height: '100%' }}
+      <Pressable
         onPress={() => {
           //@ts-ignore
           navigation.navigate('ViewerImage', { uri, caption });
@@ -155,14 +63,127 @@ const ImageComponent = memo(
             <ActivityIndicator size="large" color="#0000ff" />
           </View>
         ) : (
-          <Image
-            style={{ aspectRatio, width, height }}
-            source={{ uri }}
-            onLoad={handleImageLoad}
-            progressiveRenderingEnabled
-          />
+          <Image style={{ width, aspectRatio, alignSelf: 'center' }} source={{ uri }} onLoad={handleImageLoad} />
         )}
-      </TouchableWithoutFeedback>
+      </Pressable>
     );
   }
 );
+
+const ImageComponent1 = memo(({ uri, caption }: { uri: string; caption: string }) => {
+  const navigation = useNavigation();
+  return (
+    <Pressable
+      onPress={() => {
+        //@ts-ignore
+        navigation.navigate('ViewerImage', { uri, caption });
+      }}
+    >
+      <Image style={{ width: '100%', height: '100%', alignSelf: 'center' }} source={{ uri }} />
+    </Pressable>
+  );
+});
+
+export const OnePicture = ({ uri, caption }: { uri: string; caption: string | undefined }) => {
+  const { height } = useWindowDimensions();
+  return (
+    <View style={{ flex: 1, flexWrap: 'wrap', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        // key={index}
+        style={{
+          width: '99%',
+          maxHeight: height * 0.62,
+          overflow: 'hidden',
+          borderRadius: moderateScale(20),
+          ...shadow(5),
+        }}
+      >
+        <ImageComponent
+          height={'100%'}
+          width={'100%'}
+          uri={uri.includes('http') ? uri : HOST + uri}
+          caption={caption || ''}
+        />
+      </View>
+    </View>
+  );
+};
+
+export const TwoPictures = ({ uri, caption }: { uri: string[]; caption: string | undefined }) => {
+  const { height } = useWindowDimensions();
+
+  return (
+    <View style={{ flex: 1, flexWrap: 'wrap', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+      {uri.map((url, index) => (
+        <View
+          key={index}
+          style={{
+            width: '48%',
+            maxHeight: height * 0.42,
+            overflow: 'hidden',
+            borderRadius: moderateScale(20),
+            ...shadow(5),
+          }}
+        >
+          <ImageComponent
+            height={'100%'}
+            width={'100%'}
+            uri={url.includes('http') ? url : HOST + url}
+            caption={caption || ''}
+          />
+        </View>
+      ))}
+    </View>
+  );
+};
+
+export const FourPictures = ({ uri, caption }: { uri: string[]; caption: string | undefined }) => {
+  const { height } = useWindowDimensions();
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        flexWrap: 'wrap',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 5,
+      }}
+    >
+      <View
+        // key={index}
+        style={{
+          width: '99%',
+          maxHeight: height * 0.2,
+          overflow: 'hidden',
+          borderRadius: moderateScale(20),
+          ...shadow(5),
+        }}
+      >
+        <ImageComponent1 uri={uri[0].includes('http') ? uri[0] : HOST + uri[0]} caption={caption || ''} />
+      </View>
+
+      {[1, 2, 3].map((_url, index) => (
+        <View
+          key={index}
+          style={{
+            width: '31%',
+            height: height * 0.15,
+            maxHeight: height * 0.2,
+            overflow: 'hidden',
+            borderRadius: moderateScale(20),
+            ...shadow(5),
+            flex: 1,
+            flexDirection: 'column',
+          }}
+        >
+          <ImageComponent1
+            uri={uri[index + 1].includes('http') ? uri[index + 1] : HOST + uri[index + 1]}
+            caption={caption || ''}
+          />
+        </View>
+      ))}
+    </View>
+  );
+};

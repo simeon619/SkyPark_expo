@@ -1,7 +1,6 @@
-import React, { Suspense } from 'react';
-import { moderateScale, shadow } from '../../Utilis/metrics';
+import React from 'react';
 import { View, useWindowDimensions } from 'react-native';
-import { TextBlack } from '../StyledText';
+import { moderateScale, shadow } from '../../Utilis/metrics';
 
 const ShadowImage = ({
   children,
@@ -17,7 +16,7 @@ const ShadowImage = ({
     <View
       style={{
         width: `${ratioWidth - 1}%`,
-        alignSelf: 'center',
+        // alignSelf: 'center',
         height: ratioHeight === 0 ? 'auto' : height * (0.4 / ratioHeight),
         maxHeight: height / 1.5,
         overflow: 'hidden',

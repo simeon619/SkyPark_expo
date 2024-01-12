@@ -106,7 +106,6 @@ export const useThreadPostStore = create<quarterPostSchema, any>((set) => ({
         },
       },
     });
-    console.log('posts', posts, typePost);
     if (!posts) return;
     await Promise.all(
       posts.items.map(async (item) => {
