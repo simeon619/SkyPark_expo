@@ -6,7 +6,7 @@ import { TextLight } from '../StyledText';
 import { ScrollView, View } from '../Themed';
 
 const TimePickerSurvey = () => {
-  const { primaryColourLight, primaryColour } = useToggleStore((state) => state);
+  const { primaryColour } = useToggleStore((state) => state);
   const { setDaysSurvey, daysSurvey } = useDaysSurvey();
 
   const timesSurveyDays = [{ d: 1 }, { d: 2 }, { d: 3 }, { d: 4 }, { d: 5 }, { d: 6 }, { d: 7 }];
@@ -51,7 +51,7 @@ const TimePickerSurvey = () => {
               }}
             />
             <TextLight style={{ fontSize: moderateScale(17), paddingTop: verticalScale(5) }}>
-              <TextLight> {d} </TextLight>
+              <TextLight> {d}</TextLight>
               <TextLight>jour{d > 1 ? 's' : ''} </TextLight>{' '}
             </TextLight>
           </View>

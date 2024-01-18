@@ -1,12 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import { Image } from 'expo-image';
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { TouchableOpacity, useColorScheme } from 'react-native';
 import { iconsStat } from '../../Utilis/data';
 import { useDebouncedApi } from '../../Utilis/hook/debounce';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
-import { SQuery } from '../../managementState';
 import useToggleStore from '../../managementState/client/preference';
 import {
   AccountInterface,
@@ -15,6 +14,7 @@ import {
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
 import { Text, View } from '../Themed';
+import { useStatPost } from '../../Utilis/hook/statPost';
 
 const PostFooter = ({
   data,
@@ -30,67 +30,12 @@ const PostFooter = ({
       }
     | undefined;
 }) => {
-  const [statPos, setStatPos] = useState(data.statPost);
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const { primaryColour } = useToggleStore((state) => state);
 
-  useEffect(() => {
-    const refreshState = async () => {
-      let dataStatPost = await SQuery.service('post', 'statPost', {
-        postId: data._id,
-        like: !statPos['isLiked'],
-      });
-
-      setStatPos(() => {
-        return {
-          comments: dataStatPost.response?.comments || 0,
-          likes: dataStatPost.response?.likes || 0,
-          isLiked: dataStatPost.response?.isLiked || false,
-          shares: dataStatPost.response?.shares || 0,
-          totalCommentsCount: dataStatPost.response?.totalCommentsCount || 0,
-        };
-      });
-    };
-    refreshState();
-  }, []);
-  const sendLike = async () => {
-    try {
-      let dataStatPost = await SQuery.service('post', 'statPost', {
-        postId: data._id,
-        like: !statPos['isLiked'],
-      });
-
-      setStatPos(() => {
-        return {
-          comments: dataStatPost.response?.comments || 0,
-          likes: dataStatPost.response?.likes || 0,
-          isLiked: dataStatPost.response?.isLiked || false,
-          shares: dataStatPost.response?.shares || 0,
-          totalCommentsCount: dataStatPost.response?.totalCommentsCount || 0,
-        };
-      });
-    } catch (error) {
-      console.error(error, 'like');
-    }
-  };
+  const { sendLike, statPos, toogleLike } = useStatPost({ data: data.statPost, postId: data._id });
   const [_value, func] = useDebouncedApi(sendLike, 1000);
-
-  const toogleLike = useCallback((statPos: typeof data.statPost) => {
-    setStatPos(() => {
-      return {
-        ...statPos,
-        likes: statPos['isLiked'] ? statPos['likes'] - 1 : statPos['likes'] + 1,
-        isLiked: !statPos['isLiked'],
-      };
-    });
-  }, []);
-
-  useEffect(() => {
-    if (data.statPost) {
-      setStatPos(data.statPost);
-    }
-  }, [data.statPost]);
 
   const actionComment = (actionName: string) => {
     switch (actionName) {
@@ -100,15 +45,30 @@ const PostFooter = ({
         const messageUser = JSON.stringify(message);
         //@ts-ignore
         navigation.navigate(`DetailPost`, { dataPost, infoUser, messageUser, id: data._id, commentable: true });
+        return;
       }
-      case 'shares':
-        return 'Share';
+      case 'shares': {
+        //@ts-ignore
+        navigation.navigate(`SharePost`, { postId: data._id });
+        // magicModal.show(SharePost, {
+        //   useNativeDriver: true,
+        //   animationIn: 'slideInUp',
+        //   animationOut: 'slideOutDown',
+        //   animationInTiming: 600,
+        //   animationOutTiming: 600,
+        //   backdropTransitionOutTiming: 500,
+        //   backdropOpacity: 0,
+        //   useNativeDriverForBackdrop: true,
+        // });
+        return;
+      }
       case 'likes': {
         const setLike = async () => {
           toogleLike(statPos);
           func();
         };
         setLike();
+        return;
       }
     }
   };

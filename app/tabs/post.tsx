@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
@@ -14,19 +14,69 @@ import { useBlurSurvey, useTypeForm } from '../../managementState/client/prefere
 import { useAuthStore } from '../../managementState/server/auth';
 import { useFocusEffect } from '@react-navigation/native';
 import ActionButtonForm from '../../components/utilis/ActionButtonForm';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { TextBold, TextMedium } from '../../components/StyledText';
+import { useListUserStore } from '../../managementState/server/Listuser';
 
 const PostTabScreen = () => {
   const colorScheme = useColorScheme();
   const [heightInput, setHeightInput] = useState(40);
-
+  const size = useSharedValue(100);
   const { blurSurvey } = useBlurSurvey((state) => state);
   const { IconName } = useTypeForm((state) => state);
   const refInput = React.useRef<TextInput>(null);
   const [text, setText] = useState('');
+  const [correspondance, setCorrespondance] = useState('');
 
   const { profile } = useAuthStore((state) => state);
+  const { listAccount, getListAccount } = useListUserStore();
 
   const { width, height } = useWindowDimensions();
+  const filteredAccount = useMemo(() => {
+    if (!correspondance) {
+      return listAccount;
+    }
+    return listAccount.filter((acc) => {
+      return acc?.account.name.includes(correspondance.substring(2, correspondance.length));
+    });
+  }, [listAccount, correspondance]);
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      width: withTiming(size.value > 0 ? width * 0.6 : 0, { duration: 450, easing: Easing.inOut(Easing.ease) }), // size.value > 0 ? width * 0.6 : 0,
+      height: size.value * filteredAccount.length,
+      opacity: withTiming(size.value > 0 ? 1 : 0, { duration: 250, easing: Easing.inOut(Easing.ease) }), // size.value > 0 ? 1 : 0,
+    };
+  });
+  useEffect(() => {
+    const regex = /\s@[\w]*\S$/i;
+    if (!startAnimation) {
+      return;
+    }
+    if (regex.test(text)) {
+      if (text.startsWith('@')) {
+        setText((v) => ' ' + v);
+      }
+      let coresp = text.match(regex)!;
+      setCorrespondance(coresp[0]);
+      startAnimation(40);
+    } else {
+      startAnimation(0);
+    }
+  }, [text]);
+  useEffect(() => {
+    getListAccount();
+  }, []);
+
+  const onTextChange = (value: string) => {
+    setText(() => {
+      return value ? ' ' + value.trimStart() : value;
+    });
+  };
+
+  const startAnimation = (newSize: number) => {
+    size.value = withTiming(newSize, { duration: 250, easing: Easing.inOut(Easing.ease) });
+  };
+
   useFocusEffect(() => {
     refInput.current?.focus();
   });
@@ -63,13 +113,9 @@ const PostTabScreen = () => {
             style={{
               alignSelf: 'center',
             }}
-            onPress={() => {
-              // navigation.navigate('');
-            }}
           >
             <ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 10} />
           </TouchableOpacity>
-
           <TextInput
             multiline={true}
             numberOfLines={2}
@@ -78,7 +124,7 @@ const PostTabScreen = () => {
             }}
             ref={refInput}
             value={text}
-            onChangeText={setText}
+            onChangeText={onTextChange}
             textAlignVertical="bottom"
             placeholder={formTextPlaceholder(IconName)}
             style={{
@@ -97,6 +143,48 @@ const PostTabScreen = () => {
         </View>
         <DefaultForm text={text} setText={setText} />
         <SurveyForm text={text} setText={setText} />
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              zIndex: 99,
+              top: Math.min(7 + heightInput, height * 0.3),
+              left: 70,
+              backgroundColor: '#fff9',
+              borderWidth: 1,
+              borderColor: '#1112',
+              borderRadius: 10,
+              padding: 5,
+            },
+            animatedStyle,
+          ]}
+        >
+          {filteredAccount?.map((acc, i) => {
+            return (
+              <TouchableOpacity
+                key={i}
+                onPress={() => setCorrespondance(`@${acc?.account.name}`)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  paddingVertical: 3,
+                }}
+              >
+                <ImageProfile size={0} image={undefined} />
+                <ImageProfile size={25} image={acc?.profile.imgProfile[0]?.url} />
+
+                <TextMedium
+                  style={{ fontSize: moderateScale(15), color: Colors[colorScheme ?? 'light'].text, paddingLeft: 5 }}
+                  key={i}
+                  numberOfLines={1}
+                >
+                  {acc?.account.name}
+                </TextMedium>
+              </TouchableOpacity>
+            );
+          })}
+        </Animated.View>
       </View>
     </SafeAreaView>
   );

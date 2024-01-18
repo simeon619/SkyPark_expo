@@ -297,6 +297,6 @@ const DetailPost = ({ navigation, route }: NavigationStackProps) => {
   );
 };
 
-const keyExtractor = (item: PostInterface, index: number) => item._id;
+const keyExtractor = (item: PostInterface) => item._id;
 
 export default DetailPost;

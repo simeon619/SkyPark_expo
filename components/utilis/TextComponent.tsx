@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { moderateScale } from '../../Utilis/metrics';
+import React, { useMemo, useState } from 'react';
+import { horizontalScale, moderateScale } from '../../Utilis/metrics';
 import useToggleStore from '../../managementState/client/preference';
-import { TextLight } from '../StyledText';
-import { Pressable, TouchableOpacity } from 'react-native';
+import { TextLight, TextRegular, TextRegularItalic } from '../StyledText';
+import { Pressable } from 'react-native';
 
 import {
   AccountInterface,
@@ -29,17 +29,13 @@ const TextComponent = ({
     | undefined;
 }) => {
   if (!message?.text) return null;
-  const [moreText, setMoreText] = useState(false);
+  const [moreText] = useState(false);
   const navigation = useNavigation();
 
   const [textIsExpandable, setTextIsExpandable] = useState(false);
   const { primaryColour } = useToggleStore((state) => state);
 
-  const toggleMoreText = () => {
-    setMoreText((prev) => !prev);
-  };
-
-  useEffect(() => {
+  useMemo(() => {
     setTextIsExpandable(message?.text.length > EXCEED_LIMIT);
   }, [message?.text]);
   function handleGoToDetail(): void {
@@ -52,19 +48,20 @@ const TextComponent = ({
   return (
     <View>
       <Pressable onPress={handleGoToDetail}>
-        <TextLight
-          numberOfLines={textIsExpandable ? (moreText ? undefined : 3) : undefined}
+        <TextRegular
+          numberOfLines={textIsExpandable ? (moreText ? undefined : 2) : undefined}
           style={{
-            fontSize: moderateScale(15),
-            // textAlign: "left",
-            // paddingHorizontal: horizontalScale(10),
+            fontSize: moderateScale(14),
+            paddingHorizontal: horizontalScale(10),
           }}
         >
           {message?.text}
-        </TextLight>
+        </TextRegular>
         {textIsExpandable && (
-          <TextLight style={{ fontSize: moderateScale(15), color: primaryColour }}>
-            {moreText ? 'Voir Moins' : 'Voir Plus'}
+          <TextLight
+            style={{ fontSize: moderateScale(14), color: primaryColour, paddingHorizontal: horizontalScale(10) }}
+          >
+            voir plus
           </TextLight>
         )}
       </Pressable>

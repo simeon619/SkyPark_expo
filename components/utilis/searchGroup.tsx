@@ -8,9 +8,9 @@ import useToggleStore from '../../managementState/client/preference';
 import { View } from '../Themed';
 import { TextInput } from 'react-native';
 
-const SearchGroup = () => {
+const SearchGroup = ({ setText }: { setText: (text: string) => void }) => {
   const colorScheme = useColorScheme();
-  const { primaryColourLight, primaryColour } = useToggleStore((state) => state);
+  const { primaryColourLight } = useToggleStore((state) => state);
   const data = [
     { label: 'Post---Neighborhodd', value: '2' },
     { label: 'Post---Building', value: '3' },
@@ -34,6 +34,7 @@ const SearchGroup = () => {
       >
         <TextInput
           placeholder={'Search Groups'}
+          onChangeText={(text) => setText(text)}
           style={{
             flex: 1,
             fontSize: moderateScale(15),

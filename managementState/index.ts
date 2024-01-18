@@ -11,7 +11,7 @@ export const SQuery = createSQueryFrom(Descriptions, CacheValues, Controller, {
   socket: socket,
   async getCookie() {
     const cookie = await getMyStringValue('@cookie');
-    console.info('🚀 ~ file: index.ts:15 ~ getCookie ~ cookie:', cookie);
+    // console.info('🚀 ~ file: index.ts:15 ~ getCookie ~ cookie:', cookie);
     if (cookie)
       socket.io.opts.extraHeaders = {
         ...socket.io.opts.extraHeaders,
@@ -21,7 +21,7 @@ export const SQuery = createSQueryFrom(Descriptions, CacheValues, Controller, {
   },
 
   async setCookie(cookie) {
-    console.info({ cookie });
+    // console.info({ cookie });
     removeValue('@cookie');
     try {
       setStringValue('@cookie', cookie);

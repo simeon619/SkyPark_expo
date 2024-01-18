@@ -78,15 +78,18 @@ const SurveyForm = ({ text, setText }: { text: string; setText: React.Dispatch<R
         label: option,
       };
     });
-    publishPost({
-      accountId: account?._id,
-      type: '3',
-      value: text,
-      surveyOptions: {
-        delay: 1000 * 60 * 60 * 24 * daysSurvey,
-        options: [...labels],
+    publishPost(
+      {
+        accountId: account?._id,
+        type: '3',
+        value: text,
+        surveyOptions: {
+          delay: 1000 * 60 * 60 * 24 * daysSurvey,
+          options: [...labels],
+        },
       },
-    }, "Thread");
+      'Thread'
+    );
     setText('');
     navigation.goBack();
   };
@@ -139,7 +142,6 @@ const SurveyForm = ({ text, setText }: { text: string; setText: React.Dispatch<R
             </ViewNatif>
           ))}
         </View>
-        {/* </TouchableWithoutFeedback> */}
       </LinearGradient>
     );
   };

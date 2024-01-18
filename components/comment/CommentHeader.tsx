@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, TouchableOpacity, useColorScheme } from 'react-native';
 import { formatPostDate } from '../../Utilis/date';
@@ -67,7 +67,8 @@ const CommentHeader = ({
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'center',
+          alignItems: 'flex-start',
+          paddingTop: verticalScale(5),
           flex: 1,
           columnGap: horizontalScale(7),
         }}
@@ -86,14 +87,11 @@ const CommentHeader = ({
                 numberOfLines={2}
                 style={{
                   color: Colors[colorScheme ?? 'light'].greyDark,
-                  fontSize: moderateScale(15),
+                  fontSize: moderateScale(14),
                   // paddingTop: horizontalScale(1),
                 }}
               >
-                <TextLight
-                  numberOfLines={1}
-                  style={{ color: Colors[colorScheme ?? 'light'].text, fontSize: moderateScale(15) }}
-                >
+                <TextLight numberOfLines={1} style={{ color: Colors[colorScheme ?? 'light'].text }}>
                   {nameUser.length > 20 ? `${nameUser.slice(0, 20)}...` : nameUser}{' '}
                   <TextLight style={{ color: Colors[colorScheme ?? 'light'].greyDark }}>en reponse a</TextLight>
                   <TextLight style={{ color: primaryColour }}> @{postParent}</TextLight>
@@ -111,9 +109,7 @@ const CommentHeader = ({
           </TextRegular>
         </Pressable>
       </View>
-      <TouchableOpacity style={{ marginLeft: horizontalScale(1) }}>
-        <Ionicons name="ellipsis-vertical" size={24} color={Colors[colorScheme ?? 'light'].greyDark} />
-      </TouchableOpacity>
+      <TouchableOpacity style={{ marginLeft: horizontalScale(1) }}></TouchableOpacity>
     </View>
   );
 };

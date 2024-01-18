@@ -427,7 +427,7 @@ export const Descriptions = {
     targets: [
       {
         type: String,
-        ref: 'user' as const, /////
+        ref: 'account' as const, /////
       },
     ],
     status: {
@@ -524,6 +524,10 @@ export const Descriptions = {
       type: String,
       ref: 'favorites' as const,
     },
+    historique: {
+      type: String,
+      ref: 'historique' as const,
+    },
     _id: {
       type: String,
     },
@@ -547,6 +551,14 @@ export const Descriptions = {
       type: String,
       ref: 'profile' as const,
       required: true as const,
+    },
+    listAbonne: [
+      {
+        type: String,
+      },
+    ],
+    listen: {
+      type: Boolean,
     },
     channel: [
       {
@@ -974,6 +986,7 @@ export const Descriptions = {
           id: '',
           modelName: '',
         },
+        required: true,
       },
     ],
     _id: {
@@ -1059,6 +1072,27 @@ export const Descriptions = {
       type: Number,
     },
   },
+  historique: {
+    elements: [
+      {
+        type: {
+          id: '',
+          modelName: '',
+          mode: '',
+          value: '',
+        },
+      },
+    ],
+    _id: {
+      type: String,
+    },
+    __createdAt: {
+      type: Number,
+    },
+    __updatedAt: {
+      type: Number,
+    },
+  },
 } satisfies DescriptionsType;
 
 type CacheType = {
@@ -1094,6 +1128,7 @@ export const CacheValues = {
     userTarg: '',
     status: '',
     password: '',
+    historique: '',
     telephone: '',
     address: '',
     favorites: '',
@@ -1136,8 +1171,10 @@ export const CacheValues = {
     poster: '',
     channel: [],
     name: '',
+    listAbonne: [],
     description: '',
     icon: [],
+    listen: false,
     _id: '',
     __createdAt: 0,
     __updatedAt: 0,
@@ -1170,6 +1207,13 @@ export const CacheValues = {
     __updatedAt: 0,
     __parentList: [],
   } as FavoritesInterface,
+  historique: {
+    elements: [],
+    _id: '',
+    __createdAt: 0,
+    __updatedAt: 0,
+    __parentList: [],
+  } as HistoriqueInterface,
   message: {
     _id: '',
     account: '',
@@ -1280,6 +1324,7 @@ export const CacheValues = {
     __updatedAt: 0,
     __parentList: [],
   } as SupervisorInterface,
+
   test: {
     _id: '',
     simpleArray: [],
@@ -1418,7 +1463,23 @@ export interface PostInterface {
   }[];
 }
 export interface FavoritesInterface {
-  elements: string[];
+  elements: { id: string; modelName: string }[];
+  _id: string;
+  __createdAt: number;
+  __updatedAt: number;
+  __parentList: {
+    modelPath: string;
+    id: string;
+  }[];
+}
+
+export interface HistoriqueInterface {
+  elements: {
+    id: string;
+    modelName: 'post' | 'activity';
+    mode: 'like' | 'shared' | 'create' | 'listen';
+    value: string;
+  }[];
   _id: string;
   __createdAt: number;
   __updatedAt: number;
@@ -1440,6 +1501,8 @@ export interface DiscussionInterface {
 export interface ActivityInterface {
   poster: string;
   channel: string[];
+  listen: boolean;
+  listAbonne: string[];
   name: string;
   description: string;
   icon: UrlData[];
@@ -1578,6 +1641,7 @@ export interface AccountInterface {
   userTarg: string;
   status: string;
   password: string;
+  historique: string;
   telephone: string;
   address: string;
   favorites: string;

@@ -69,7 +69,6 @@ export const useThreadPostStore = create<quarterPostSchema, any>((set) => ({
             let oldPost: PostInterface;
             set((state) => {
               const newState = { ...state };
-
               let index = newState[typeCheck].items.findIndex((item) => item._id === post.$id);
               if (index !== -1) {
                 oldPost = newState[typeCheck].items[index];

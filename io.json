@@ -1,0 +1,47 @@
+[
+  {
+    "id": "659eaae6be5f9e6dee806d0a",
+    "modelName": "post",
+    "mode": "like",
+    "value": "true",
+    "data": {
+      "_id": "659eaae6be5f9e6dee806d0a",
+      "message": {
+        "_id": "659eaae6be5f9e6dee806d0b",
+        "account": "656ddaadbbebcd57396198bc",
+        "text": "Marcel a fait sa sieste de google jours à sa maman avec son frère qui fait sa chez ses copains de la salle à se coucher et apple et apple à se reposer de sa mère à son rythme à cause du boulot qui va avec qui elle est à se faire ",
+        "files": [
+          {
+            "url": "/fs/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWFsUGF0aCI6ImZzLzE3MDQ4OTcyNTQ2NjBfNjU5ZWFhZTZiZTVmOWU2ZGVlODA2ZDBjLmpwZWciLCJtb2RlbFBhdGgiOiJtZXNzYWdlIiwiaWQiOiI2NTllYWFlNmJlNWY5ZTZkZWU4MDZkMGIiLCJwcm9wZXJ0eSI6ImZpbGVzIiwiY3JlYXRlZEF0IjoxNzA0ODk3MjU0NjY0LCJpYXQiOjE3MDQ4OTcyNTR9.1xjxW1G3ssBRuIBWz-H3bEe6tYc7RiR48mb40hdIpPo.jpeg",
+            "size": 183440,
+            "extension": "jpeg",
+            "_id": "659eaae6be5f9e6dee806d0d"
+          }
+        ],
+        "targets": [],
+        "status": {
+          "send": 0,
+          "received": 0,
+          "seen": 0,
+          "_id": "659eaae6be5f9e6dee806d0e"
+        }
+      },
+      "type": "2",
+      "statPost": {
+        "likes": 0,
+        "comments": 0,
+        "shares": 0,
+        "commentsCount": 0,
+        "totalCommentsCount": 0,
+        "isLiked": false,
+        "_id": "659eaae6be5f9e6dee806d15"
+      },
+      "comments": [],
+      "__parentModel": "quarter_656ddaadbbebcd57396198b7_Thread_post",
+      "__createdAt": 1704897254908,
+      "__updatedAt": 1705156866650,
+      "__v": 10
+    },
+    "_id": "65a2a1158460aa830cb036bd"
+  }
+]

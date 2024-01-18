@@ -1,10 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { TouchableOpacity, useColorScheme } from 'react-native';
 import { useDebouncedApi } from '../../Utilis/hook/debounce';
 import { horizontalScale, moderateScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
-import { SQuery } from '../../managementState';
 import useToggleStore from '../../managementState/client/preference';
 import {
   AccountInterface,
@@ -14,6 +13,7 @@ import {
 } from '../../managementState/server/Descriptions';
 import { TextLight } from '../StyledText';
 import { View } from '../Themed';
+import { useStatPost } from '../../Utilis/hook/statPost';
 const CommentFooter = ({
   data,
   user,
@@ -31,62 +31,9 @@ const CommentFooter = ({
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const { primaryColour } = useToggleStore((state) => state);
-  const [statPos, setStatPos] = React.useState(data.statPost);
 
-  // Remove the listener when you are done
-  useEffect(() => {
-    const refreshState = async () => {
-      let dataStatPost = await SQuery.service('post', 'statPost', {
-        postId: data._id,
-        like: !statPos['isLiked'],
-      });
-
-      setStatPos(() => {
-        return {
-          comments: dataStatPost.response?.comments || 0,
-          likes: dataStatPost.response?.likes || 0,
-          isLiked: dataStatPost.response?.isLiked || false,
-          shares: dataStatPost.response?.shares || 0,
-          totalCommentsCount: dataStatPost.response?.totalCommentsCount || 0,
-        };
-      });
-    };
-    refreshState();
-  }, [navigation.isFocused()]);
-
-  const sendLike = async () => {
-    try {
-      let dataStatPost = await SQuery.service('post', 'statPost', {
-        postId: data._id,
-        like: !statPos['isLiked'],
-      });
-      setStatPos(() => {
-        return {
-          comments: dataStatPost.response?.comments || 0,
-          likes: dataStatPost.response?.likes || 0,
-          isLiked: dataStatPost.response?.isLiked || false,
-          shares: dataStatPost.response?.shares || 0,
-          totalCommentsCount: dataStatPost.response?.totalCommentsCount || 0,
-        };
-      });
-    } catch (error) {
-      console.error(error, 'like');
-    }
-  };
-  const [_value, func] = useDebouncedApi(sendLike, 2000);
-
-  const toogleLike = useCallback((statPos: typeof data.statPost) => {
-    setStatPos(() => {
-      return {
-        ...statPos,
-        likes: statPos['isLiked'] ? statPos['likes'] - 1 : statPos['likes'] + 1,
-        isLiked: !statPos['isLiked'],
-      };
-    });
-  }, []);
-  useEffect(() => {
-    setStatPos(data.statPost);
-  }, [data.statPost]);
+  const { sendLike, statPos, toogleLike } = useStatPost({ data: data.statPost, postId: data._id });
+  const [_value, func] = useDebouncedApi(sendLike, 1000);
 
   const action = {
     comments: 'comments',

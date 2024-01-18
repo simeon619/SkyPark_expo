@@ -1,5 +1,5 @@
 import { AntDesign } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import Animated from 'react-native-reanimated';
 import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
@@ -21,9 +21,6 @@ const SurveyComponent = ({
 }) => {
   if (!dataSurvey) return <></>;
 
-  const [hasVoted, setHasVoted] = useState(true);
-
-
   const computeTotal = () => {
     if (dataSurvey) {
       return dataSurvey.labels.reduce((a, b) => a + b.votes, 0);
@@ -31,10 +28,8 @@ const SurveyComponent = ({
     return 0;
   };
 
-  useEffect(() => {});
-
   const handleVote = async (item: LabelInterface) => {
-    const dataSurveyA = await SQuery.service('post', 'survey', {
+    await SQuery.service('post', 'survey', {
       labelId: item._id,
       postId: postId,
     });
@@ -57,15 +52,14 @@ const SurveyComponent = ({
       <TextLightItalic>{question}</TextLightItalic>
       {dataSurvey.labels.map((item, index, arr) => {
         const computeTotal = arr.reduce((a, b) => a + b.votes, 0);
-        let percentage = ((item.votes * 100) / computeTotal).toFixed(1);
+        let percentage = useMemo(() => ((item.votes * 100) / computeTotal).toFixed(1), [item.votes, computeTotal]);
         percentage = percentage === 'NaN' ? '0' : percentage;
 
         return (
           <TouchableOpacity key={index} onPress={() => handleVote(item)} style={{ paddingVertical: verticalScale(0) }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: horizontalScale(10) }}>
-              {hasVoted ? (
-                <TextLight style={{ fontSize: moderateScale(16), color: '#777' }}>{percentage} %</TextLight>
-              ) : null}
+              <TextLight style={{ fontSize: moderateScale(16), color: '#777' }}>{percentage} %</TextLight>
+
               <TextLight style={{ fontSize: moderateScale(15) }}>{item.label}</TextLight>
             </View>
             <View
@@ -82,12 +76,12 @@ const SurveyComponent = ({
                   aspectRatio: 1,
                   borderWidth: 1,
                   borderRadius: 50,
-                  backgroundColor: hasVoted ? '#3F21B8' : '#3F21B800',
+                  backgroundColor: '#3F21B8',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                {hasVoted ? <AntDesign name="check" size={moderateScale(15)} color="white" /> : null}
+                <AntDesign name="check" size={moderateScale(15)} color="white" />
               </View>
               <Animated.View
                 //@ts-ignore
@@ -111,7 +105,7 @@ const SurveyComponent = ({
           borderTopWidth: 1,
         }}
       >
-        <TextLight style={{ fontSize: moderateScale(15), opacity: hasVoted ? 1 : 0 }}>
+        <TextLight style={{ fontSize: moderateScale(15) }}>
           {computeTotal()} vote{computeTotal() > 1 ? 's' : ''}{' '}
         </TextLight>
         <TextLight>

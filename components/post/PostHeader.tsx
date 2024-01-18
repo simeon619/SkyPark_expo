@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, TouchableWithoutFeedback, useColorScheme } from 'react-native';
 import { formatPostDate } from '../../Utilis/date';
-import { horizontalScale, moderateScale, shadow, verticalScale } from '../../Utilis/metrics';
+import { horizontalScale, moderateScale, shadow } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
 import { SMALL_PIC_USER } from '../../constants/Value';
 import {
@@ -12,14 +12,14 @@ import {
   PostInterface,
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
-import { TextLight, TextRegular } from '../StyledText';
+import { TextMedium, TextMediumItalic, TextRegular, TextRegularItalic, TextSemiBold } from '../StyledText';
 import { View } from '../Themed';
 import ImageProfile from '../utilis/simpleComponent/ImageProfile';
 
 import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu';
 import { useMenuDiscussionIsOpen } from '../../managementState/client/preference';
 import ItemMenu from '../discussion/ItemMenu';
-
+import { useFavouritesStore } from '../../managementState/server/activityUser/favourites';
 const PostHeader = ({
   data,
   user,
@@ -37,7 +37,26 @@ const PostHeader = ({
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const { toggleValue } = useMenuDiscussionIsOpen((state) => state);
+  const { setListPostFavourites, removePostFavourites, ownfavoritres } = useFavouritesStore();
 
+  const [isFavorite, setisFavorite] = useState(false);
+
+  // if (ownfavoritres.includes(data._id)) {
+  //   setisFavorite(true);
+  // } else {
+  //   setisFavorite(false);
+  // }
+  // setisFavorite(ownfavoritres.includes(data._id));
+  const toggleFavorite = () => {
+    if (ownfavoritres.includes(data._id)) {
+      setisFavorite(false);
+      removePostFavourites({ id: data._id });
+    } else {
+      setListPostFavourites({ id: data._id });
+      setisFavorite(true);
+    }
+  };
+  useMemo(() => setisFavorite(ownfavoritres.includes(data._id)), [ownfavoritres, data._id]);
   const nameUser = user?.account.name || 'user' + Math.ceil(Math.random() * 80000000);
   const typePost = (type: string) => {
     if (type === '1') {
@@ -74,7 +93,6 @@ const PostHeader = ({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: verticalScale(5),
       }}
     >
       <View
@@ -82,7 +100,7 @@ const PostHeader = ({
           flexDirection: 'row',
           alignItems: 'center',
           flex: 1,
-          columnGap: horizontalScale(7),
+          columnGap: horizontalScale(2),
         }}
       >
         <ImageProfile size={SMALL_PIC_USER + 10} image={user?.profile.imgProfile[0]?.url} />
@@ -91,42 +109,47 @@ const PostHeader = ({
             style={{
               flexDirection: 'row',
               flex: 1,
-              columnGap: horizontalScale(7),
             }}
           >
             <View style={{ flexShrink: 0, alignSelf: 'flex-start' }}>
-              <TextLight
+              <TextRegular
                 numberOfLines={2}
                 style={{
                   color: Colors[colorScheme ?? 'light'].greyDark,
                   fontSize: moderateScale(15),
-                  paddingTop: horizontalScale(1),
                 }}
               >
-                <TextLight
+                <TextRegular
                   numberOfLines={1}
                   style={{ color: Colors[colorScheme ?? 'light'].text, fontSize: moderateScale(15) }}
                 >
                   {nameUser.length > 20 ? `${nameUser.slice(0, 20)}...` : nameUser}
-                </TextLight>{' '}
+                </TextRegular>{' '}
                 {typePost(data.type)}
-              </TextLight>
+              </TextRegular>
             </View>
           </View>
-          <TextRegular
+          <TextRegularItalic
             style={{
               color: Colors[colorScheme ?? 'light'].greyDark,
               fontSize: moderateScale(14),
             }}
           >
             {formatPostDate(data.__createdAt)}
-          </TextRegular>
+          </TextRegularItalic>
         </Pressable>
       </View>
       <TouchableWithoutFeedback style={{ marginLeft: horizontalScale(1) }}>
         <Menu onClose={toggleValue} onOpen={toggleValue}>
           <MenuTrigger
-            children={<Ionicons name="ellipsis-vertical" size={24} color={Colors[colorScheme ?? 'light'].greyDark} />}
+            children={
+              <AntDesign
+                name="ellipsis1"
+                size={28}
+                color={Colors[colorScheme ?? 'light'].greyDark}
+                style={{ transform: [{ rotate: '90deg' }] }}
+              />
+            }
           />
           <MenuOptions
             optionsContainerStyle={{
@@ -136,8 +159,8 @@ const PostHeader = ({
               ...shadow(92),
             }}
           >
-            <MenuOption onSelect={() => alert(`Delete`)}>
-              <ItemMenu value="Favourite" />
+            <MenuOption onSelect={() => toggleFavorite()}>
+              <ItemMenu value={isFavorite ? 'Supprimer des favoris' : 'Ajouter aux favoris'} />
             </MenuOption>
             <MenuOption onSelect={() => alert(`Delete`)}>
               <ItemMenu value="Supprimer" />

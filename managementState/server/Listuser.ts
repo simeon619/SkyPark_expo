@@ -3,7 +3,7 @@ import { SQuery } from '..';
 
 import { getChannel, getDiscussionId } from '../../Utilis/functions/utlisSquery';
 import { addUser } from '../../Utilis/models/Chat/userRepository';
-import { AccountInterface, ProfileInterface, QuarterInterface } from './Descriptions';
+import { AccountInterface, ProfileInterface } from './Descriptions';
 import { useAuthStore } from './auth';
 type ListUserSchema = {
   listAccount: (
@@ -13,14 +13,62 @@ type ListUserSchema = {
       }
     | undefined
   )[];
-  listQuarter: QuarterInterface[];
+  // listQuarter: QuarterInterface[];
+  getListAccount: () => void;
   // setListAccount: () => void;
   // setListQuarter: () => void;
 };
 
 export const useListUserStore = create<ListUserSchema, any>((set) => ({
   listAccount: [],
-  listQuarter: [],
+  // listQuarter: [],
+  getListAccount: async () => {
+    const quarterId = useAuthStore.getState().quarter?._id;
+    console.log('🚀 ~ getListAccount: ~ quarterId:', quarterId);
+    if (!quarterId) return;
+
+    try {
+      const res = await SQuery.service('app', 'childList', {
+        childModelPath: 'account',
+        parentModelPath: 'quarter',
+        parentId: quarterId,
+        pagging: {
+          page: 1,
+          limit: 100,
+          query: {},
+          select: '',
+          sort: {},
+        },
+      });
+
+      if (res.error) {
+        console.error(res.error); // Log the error for debugging
+        return;
+      }
+
+      //@ts-ignore
+      let collectedUser = res.response?.items || [];
+
+      let promises = collectedUser.map(async (account: AccountInterface) => {
+        try {
+          const profile = await SQuery.newInstance('profile', { id: account.profile });
+          if (!profile) throw new Error("Profile doesn't exist");
+          return { account, profile: profile?.$cache };
+        } catch (error) {
+          console.error(error); // Log the error for debugging
+          return null;
+        }
+      });
+
+      let listAccount = (await Promise.allSettled(promises))
+        .filter((result) => result.status === 'fulfilled')
+        .map((result: any) => result?.value as { account: AccountInterface; profile: ProfileInterface });
+
+      set({ listAccount });
+    } catch (error) {
+      console.error(error); // Log the error for debugging
+    }
+  },
 }));
 
 export const setListAccount = async () => {
@@ -43,13 +91,17 @@ export const setListAccount = async () => {
   //@ts-ignore
   let CollectedUser = res.response?.items || [];
 
-  let ListAccount = await Promise.all(
-    CollectedUser.map(async (account: AccountInterface) => {
+  let promises = CollectedUser.map(async (account: AccountInterface) => {
+    return new Promise(async (resolve, reject) => {
       const profile = await SQuery.newInstance('profile', { id: account.profile });
-      if (!profile) return;
-      return { account: account, profile: profile?.$cache };
-    })
-  );
+      if (!profile) reject();
+      resolve({ account: account, profile: profile?.$cache });
+    });
+  });
+
+  let ListAccount = (await Promise.allSettled(promises))
+    .filter((s) => s.status === 'fulfilled')
+    .map((s: any) => s?.value as { account: AccountInterface; profile: ProfileInterface });
 
   let proccess = ListAccount.map(async (A) => {
     const discussionId = await getDiscussionId(A?.account._id);

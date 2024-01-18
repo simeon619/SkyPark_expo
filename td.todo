@@ -1,2 +1,11 @@
- server renvoie pas les bons stat pôst
-  server ne cre pas dicusion 
+1/ gere le partage 
+getUSer /home/aegonjs/WorkSpeace/sky2/managementState/server/Listuser.ts at 29
+et call statPost
+
+2/ gere activite
+-cree les activite en tant que admin  addNew : [{name : "AGECELL"}]
+-recup arrayInstance des acitivite (await Quarter.activity  ) 
+
+3/ abonnement/desabonnement
+activity.listen = boolean
+let isFollowing =  activity.listen ? "abonner" : "desabonner"

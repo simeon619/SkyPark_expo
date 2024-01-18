@@ -85,23 +85,23 @@ export async function createInstanceFrom({
   });
   //////
   async function emitRefresh(properties?: any) {
-    let Objproperties: any = {};
+    // let Objproperties: any = {};
 
-    for (let index = 0; index < properties.length; index++) {
-      const property = properties[index];
-      Objproperties[property] = cache[property];
-    }
+    // for (let index = 0; index < properties.length; index++) {
+    //   const property = properties[index];
+    //   Objproperties[property] = cache[property];
+    // }
 
-    emiter.emit('refresh', Objproperties);
+    emiter.emit('refresh', cache);
 
     if (properties) {
       properties.forEach(async (p: any) => {
-        emiter.emit('refresh:' + p, Objproperties);
+        emiter.emit('refresh:' + p, cache);
       });
     } else {
       for (const p in description) {
         if (Object.hasOwnProperty.call(description, p)) {
-          emiter.emit('refresh:' + p, Objproperties);
+          emiter.emit('refresh:' + p, cache);
         }
       }
     }

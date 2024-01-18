@@ -75,6 +75,8 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
       loadingComment: true,
     }));
 
+    // SQuery.newInstance("account" , {})
+
     const post = await SQuery.newInstance('post', { id: postId });
     // if (!post) return;
     const comments = await post?.comments;
@@ -130,7 +132,7 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
           };
         });
       },
-      'listPost:update'
+      'listPost:update' + postId
     );
 
     let ArrayComment = await comments?.update({

@@ -13,7 +13,6 @@ import { HOST } from '../../constants/Value';
 import { UrlData } from '../../lib/SQueryClient';
 import { View } from '../Themed';
 import { moderateScale, shadow } from '../../Utilis/metrics';
-import { TextLight } from '../StyledText';
 
 const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; caption: string | undefined }) => {
   if (!media) {
@@ -32,7 +31,7 @@ const MediaComponent = ({ media, caption }: { media: UrlData[] | undefined; capt
     case 4:
       return <FourPictures uri={[media[0].url, media[1].url, media[2].url, media[3].url]} caption={caption} />;
     default:
-      return <TextLight>Composant par défaut</TextLight>;
+      return <></>;
   }
 };
 export default MediaComponent;
