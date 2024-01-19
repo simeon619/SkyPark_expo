@@ -2,11 +2,12 @@ import React from 'react';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import { TextLight } from '../StyledText';
 import { MessageInterface } from '../../managementState/server/Descriptions';
+import { handleTextFormat } from '../utilis/TextComponent';
 
 const TextComponent = ({
   message, // data,
-} // user,
-: {
+  // user,
+}: {
   message: MessageInterface | undefined;
   // data: PostInterface;
   // user:
@@ -26,7 +27,7 @@ const TextComponent = ({
         paddingTop: verticalScale(5),
       }}
     >
-      {message?.text}
+      {handleTextFormat(message?.text)}
     </TextLight>
   );
 };

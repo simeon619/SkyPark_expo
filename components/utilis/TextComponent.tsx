@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { horizontalScale, moderateScale } from '../../Utilis/metrics';
 import useToggleStore from '../../managementState/client/preference';
-import { TextLight, TextRegular, TextRegularItalic } from '../StyledText';
-import { Pressable } from 'react-native';
+import { TextLight, TextMedium, TextRegular, TextRegularItalic } from '../StyledText';
+import { Pressable, TouchableOpacity } from 'react-native';
 
 import {
   AccountInterface,
@@ -10,7 +10,7 @@ import {
   PostInterface,
   ProfileInterface,
 } from '../../managementState/server/Descriptions';
-import { useNavigation } from '@react-navigation/native';
+import { Link, useNavigation } from '@react-navigation/native';
 import { View } from '../Themed';
 let EXCEED_LIMIT = 50;
 
@@ -55,7 +55,7 @@ const TextComponent = ({
             paddingHorizontal: horizontalScale(10),
           }}
         >
-          {message?.text}
+          {handleTextFormat(message?.text)}
         </TextRegular>
         {textIsExpandable && (
           <TextLight
@@ -70,3 +70,23 @@ const TextComponent = ({
 };
 
 export default TextComponent;
+export const handleTextFormat = (inputText: string) => {
+  // const componentText  ="";
+  const words = inputText.split(' ');
+
+  const colorizedWords = words.map((word, index) =>
+    word.startsWith('@') ? (
+      <Link
+        to={{ screen: 'OtherProfile', params: { name: word.slice(1) } }}
+        key={index}
+        style={{ color: 'blue', fontSize: moderateScale(15) }}
+      >
+        {word}{' '}
+      </Link>
+    ) : (
+      `${word} `
+    )
+  );
+
+  return colorizedWords;
+};

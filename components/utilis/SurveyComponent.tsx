@@ -9,6 +9,7 @@ import { TouchableOpacity } from 'react-native';
 import { LabelInterface, SurveyInterface } from '../../managementState/server/Descriptions';
 import { SQuery } from '../../managementState';
 import { calculeDateEnd } from '../../Utilis/date';
+import { handleTextFormat } from './TextComponent';
 
 const SurveyComponent = ({
   dataSurvey,
@@ -49,7 +50,7 @@ const SurveyComponent = ({
       }}
     >
       {/* <TextComponent  /> */}
-      <TextLightItalic>{question}</TextLightItalic>
+      <TextLightItalic>{handleTextFormat(question || '')}</TextLightItalic>
       {dataSurvey.labels.map((item, index, arr) => {
         const computeTotal = arr.reduce((a, b) => a + b.votes, 0);
         let percentage = useMemo(() => ((item.votes * 100) / computeTotal).toFixed(1), [item.votes, computeTotal]);

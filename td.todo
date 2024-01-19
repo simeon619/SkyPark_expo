@@ -9,3 +9,36 @@ et call statPost
 3/ abonnement/desabonnement
 activity.listen = boolean
 let isFollowing =  activity.listen ? "abonner" : "desabonner"
+
+
+4/forum
+
+recent : SQuery.service("Trouve" , "recent", {
+    "limit" : 5,
+    "page" : 1 
+})
+
+popular : SQuery.service("Trouve" , "popular", {
+    "limit" : 5,
+    "page" : 1,
+    "index" :  "like" | "comments" | "shared"
+}),
+
+byAccount : SQuery.service("Trouve" , "byAccount", {
+    "account"? : 1,
+    "limit" : 5,
+    "page" : 1,
+    "withTheme"? : false
+})
+
+5/ recherche 
+
+SQuery.service("Trouve" , "les", {
+    "limit" : 5,
+    "page" : 1,
+    "value" : "pad1",
+    "index" :  "account" | "post" | "activity" 
+})
+
+
+​​

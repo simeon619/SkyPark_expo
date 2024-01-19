@@ -10,7 +10,7 @@ import DefaultForm from '../../components/form/defaultForm';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
 import Colors from '../../constants/Colors';
 import { SMALL_PIC_USER, formTextPlaceholder } from '../../constants/Value';
-import { useBlurSurvey, useTypeForm } from '../../managementState/client/preference';
+import useToggleStore, { useBlurSurvey, useTypeForm } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
 import { useFocusEffect } from '@react-navigation/native';
 import ActionButtonForm from '../../components/utilis/ActionButtonForm';
@@ -26,18 +26,30 @@ const PostTabScreen = () => {
   const { IconName } = useTypeForm((state) => state);
   const refInput = React.useRef<TextInput>(null);
   const [text, setText] = useState('');
+  const [mention, setMention] = useState('');
   const [correspondance, setCorrespondance] = useState('');
+  const { primaryColourLight } = useToggleStore((state) => state);
 
   const { profile } = useAuthStore((state) => state);
   const { listAccount, getListAccount } = useListUserStore();
 
   const { width, height } = useWindowDimensions();
+
+  useMemo(() => {
+    const regexDernierMotArobase = /@\w+\b/g;
+    const motMatches = text.match(regexDernierMotArobase);
+    if (motMatches) {
+      const lastWord = motMatches.pop()!;
+      const newtext = text.replace(lastWord, mention);
+      setText(newtext);
+    }
+  }, [mention]);
   const filteredAccount = useMemo(() => {
     if (!correspondance) {
       return listAccount;
     }
     return listAccount.filter((acc) => {
-      return acc?.account.name.includes(correspondance.substring(2, correspondance.length));
+      return acc?.account.name.toLowerCase().includes(correspondance.substring(2, correspondance.length).toLowerCase());
     });
   }, [listAccount, correspondance]);
   const animatedStyle = useAnimatedStyle(() => {
@@ -53,10 +65,8 @@ const PostTabScreen = () => {
       return;
     }
     if (regex.test(text)) {
-      if (text.startsWith('@')) {
-        setText((v) => ' ' + v);
-      }
       let coresp = text.match(regex)!;
+
       setCorrespondance(coresp[0]);
       startAnimation(40);
     } else {
@@ -69,7 +79,7 @@ const PostTabScreen = () => {
 
   const onTextChange = (value: string) => {
     setText(() => {
-      return value ? ' ' + value.trimStart() : value;
+      return value.startsWith('@') ? ' ' + value.trimStart() : value;
     });
   };
 
@@ -152,7 +162,7 @@ const PostTabScreen = () => {
               left: 70,
               backgroundColor: '#fff9',
               borderWidth: 1,
-              borderColor: '#1112',
+              borderColor: primaryColourLight,
               borderRadius: 10,
               padding: 5,
             },
@@ -163,7 +173,7 @@ const PostTabScreen = () => {
             return (
               <TouchableOpacity
                 key={i}
-                onPress={() => setCorrespondance(`@${acc?.account.name}`)}
+                onPress={() => setMention(`@${acc?.account.name}`)}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',

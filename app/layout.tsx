@@ -47,6 +47,7 @@ import Signup from './register/Signup';
 import CheckProfile from './settings/CheckProfile';
 import TabLayout from './tabs/layout';
 import SharePost from '../components/modal/SharePost';
+import OtherProfile from './profile/OtherProfile';
 
 const Stack = createNativeStackNavigator();
 export default function RootLayout() {
@@ -158,6 +159,7 @@ function RootLayoutNav() {
                         options={{ animation: 'fade' }}
                       />
                       <Stack.Screen name="Discussion" component={discussion} />
+                      <Stack.Screen name="OtherProfile" component={OtherProfile} />
                       <Stack.Screen name="GroupActivity" component={GroupActivity} />
                       <Stack.Screen name="ItemGroup" component={ItemGroup} />
                       <Stack.Screen name="Forum" component={Forum} />
