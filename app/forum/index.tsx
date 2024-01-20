@@ -10,13 +10,14 @@ import HeaderHome from '../../components/utilis/HeaderHome';
 import TabPageItem from '../../components/utilis/TabPageItem';
 import Colors from '../../constants/Colors';
 import useToggleStore from '../../managementState/client/preference';
-import Recent from './PageThree.tsx/Recent';
 import MyTheme from './pageOne.tsx/myTheme';
 import Response from './pageOne.tsx/response';
 import Stars from './pageOne.tsx/stars';
 import All from './pageTwo.tsx/all';
 import WaitResponse from './pageTwo.tsx/waitResponse';
-import { NavigationStackProps } from '../../types/navigation';
+import Likes from './PageThree.tsx/Likes';
+import Comments from './PageThree.tsx/Comments';
+import Shareble from './PageThree.tsx/Shareble';
 //@ts-ignore
 const SIZE_TEXT = 16;
 const Tabs_Forum = {
@@ -24,7 +25,7 @@ const Tabs_Forum = {
   two: 'Nouveau',
   three: 'Populaire',
 };
-const Forum = ({ navigation, route }: NavigationStackProps) => {
+const Forum = () => {
   const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
   const colorScheme = useColorScheme();
   const { width } = useWindowDimensions();
@@ -94,18 +95,22 @@ const Forum = ({ navigation, route }: NavigationStackProps) => {
     ],
     [Tabs_Forum.three]: [
       {
-        name: 'Recents',
-        component: Recent,
+        name: 'Like',
+        component: Likes,
       },
       {
-        name: 'Anciens',
-        component: Stars,
+        name: 'Commentaire',
+        component: Comments,
+      },
+      {
+        name: 'partages',
+        component: Shareble,
       },
     ],
   };
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <HeaderHome navigation={navigation} route={route} />
+      <HeaderHome />
       <View style={{ flex: 1, paddingHorizontal: horizontalScale(5) }}>
         <View>
           <View

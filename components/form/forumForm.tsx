@@ -1,10 +1,24 @@
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
-import { Pressable, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Pressable,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  useColorScheme,
+  useWindowDimensions,
+} from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import Animated, { BounceInDown, BounceOutDown, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, {
+  BounceInDown,
+  BounceOutDown,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { horizontalScale, moderateScale, verticalScale } from '../../Utilis/metrics';
 import Colors from '../../constants/Colors';
 import { FileType } from '../../lib/SQueryClient';
@@ -12,37 +26,88 @@ import useToggleStore, { useTypeForm } from '../../managementState/client/prefer
 import { useAuthStore } from '../../managementState/server/auth';
 import { useThreadPostStore } from '../../managementState/server/post/postThread';
 import ImageRatio from '../ImgRatio';
-import { TextLight, TextRegular } from '../StyledText';
+import { TextLight, TextMedium, TextRegular } from '../StyledText';
 import { ScrollView, View } from '../Themed';
+import ImageProfile from '../utilis/simpleComponent/ImageProfile';
+import { useListUserStore } from '../../managementState/server/Listuser';
 
-const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<React.SetStateAction<string>> }) => {
+const ForumForm = ({ text, setText }: { text: string; setText: React.Dispatch<React.SetStateAction<string>> }) => {
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   interface ImageItem {
     uri: string;
   }
+
+  const [contenu, setContenu] = useState<string>('');
   const [images, setImages] = useState<ImageItem[]>();
   const [prepareImage, setPrepareImage] = useState<FileType[]>();
   const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+  const [mention, setMention] = useState('');
+  const [correspondance, setCorrespondance] = useState('');
+  const refInput = React.useRef<TextInput>(null);
   const { IconName } = useTypeForm((state) => state);
+  const { listAccount } = useListUserStore();
+  const { publishPost } = useThreadPostStore((state) => state);
+
   const hideForm = useAnimatedStyle(() => {
     return {
-      display: IconName == 'Post' ? 'flex' : 'none',
-      opacity: withTiming(IconName == 'Post' ? 1 : 0),
+      display: IconName == 'Annonce' ? 'flex' : 'none',
+      opacity: withTiming(IconName == 'Annonce' ? 1 : 0),
     };
   }, [IconName]);
 
-  const { publishPost } = useThreadPostStore((state) => state);
   const { account } = useAuthStore((state) => state);
+  const size = useSharedValue(100);
+  const [heightInput, setHeightInput] = useState(40);
+  const replaceWord = () => {
+    const regexDernierMotArobase = /@\w+\b/g;
+    const motMatches = contenu.match(regexDernierMotArobase);
+    console.log('🚀 ~ replaceWord ~ motMatches:', motMatches);
+    if (motMatches && mention) {
+      const lastWord = motMatches.pop()!;
+      const newtext = contenu.replace(lastWord, mention);
+      setContenu(newtext);
+    }
+  };
 
-  const data = [
-    { label: 'Post---Neighborhodd', value: '2' },
-    { label: 'Post---Building', value: '3' },
-  ];
-  const [value, setValue] = useState<string>();
-  const [isFocus, setIsFocus] = useState(false);
-
+  const filteredAccount = useMemo(() => {
+    if (!correspondance) {
+      return listAccount;
+    }
+    return listAccount.filter((acc) => {
+      return acc?.account.name.toLowerCase().includes(correspondance.substring(2, correspondance.length).toLowerCase());
+    });
+  }, [listAccount, correspondance]);
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      width: withTiming(size.value > 0 ? width * 0.6 : 0, { duration: 450, easing: Easing.inOut(Easing.ease) }), // size.value > 0 ? width * 0.6 : 0,
+      height: size.value * filteredAccount.length,
+      opacity: withTiming(size.value > 0 ? 1 : 0, { duration: 250, easing: Easing.inOut(Easing.ease) }), // size.value > 0 ? 1 : 0,
+    };
+  });
+  useEffect(() => {
+    if (!startAnimation && !contenu) {
+      return;
+    }
+    const regex = /\s@[\w]*\S$/i;
+    replaceWord();
+    if (regex.test(contenu)) {
+      let coresp = contenu.match(regex)!;
+      setCorrespondance(coresp[0]);
+      startAnimation(40);
+    } else {
+      startAnimation(0);
+    }
+  }, [contenu]);
+  const startAnimation = (newSize: number) => {
+    size.value = withTiming(newSize, { duration: 250, easing: Easing.inOut(Easing.ease) });
+  };
+  const onTextChange = (value: string) => {
+    setContenu(() => {
+      return value.startsWith('@') ? ' ' + value.trimStart() : value;
+    });
+  };
   const pickGallery = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -74,7 +139,6 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
           let ext = fileName?.split('.').pop();
           let type = asset.type === 'image' ? `image/${ext}` : `video/${ext}`;
           let uri: string = asset.uri;
-
           if (base64 && fileName) {
             const preparedImage: FileType = {
               buffer: base64,
@@ -84,7 +148,6 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
               type,
               uri,
             };
-
             setPrepareImage((prevPrepareImage) => {
               if (prevPrepareImage && prevPrepareImage.length > 1) {
                 return [preparedImage, ...prevPrepareImage];
@@ -106,10 +169,17 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
       return prevPrepareImage?.filter((image) => image?.uri !== uri);
     });
   }
+  const showToast = () => {
+    ToastAndroid.show('Titre obligatoire', ToastAndroid.LONG);
+  };
 
   async function handlePost() {
+    if (!text) {
+      showToast();
+      return;
+    }
     let type = prepareImage?.length === 0 ? '1' : '2';
-    publishPost({ accountId: account?._id, type: type, files: prepareImage, value: text }, 'Thread');
+    publishPost({ accountId: account?._id, type: type, files: prepareImage, value: contenu, theme: text }, 'Thread');
     setPrepareImage([]);
     setImages([]);
     setText('');
@@ -217,51 +287,29 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
             paddingHorizontal: horizontalScale(10),
           }}
         >
-          <Dropdown
-            style={[
-              {
-                // height: 50,
-                borderColor: primaryColourLight,
-                borderWidth: 0.5,
-                borderRadius: 20,
-                paddingHorizontal: 8,
-              },
-              isFocus && { borderColor: primaryColourLight },
-            ]}
-            placeholderStyle={{
-              fontSize: 16,
-              fontFamily: 'Thin',
+          <TextInput
+            multiline={true}
+            numberOfLines={2}
+            onContentSizeChange={(e) => {
+              setHeightInput(e.nativeEvent.contentSize.height);
             }}
-            selectedTextStyle={{
-              fontSize: 16,
-              fontFamily: 'Thin',
+            ref={refInput}
+            value={contenu}
+            onChangeText={onTextChange}
+            textAlignVertical="bottom"
+            placeholder={'contenu de votre sujet (facultatif)'}
+            style={{
+              fontSize: moderateScale(15),
+              height: heightInput,
+              maxHeight: height * 0.3,
+              //   width: width * 0.7,
+              fontFamily: 'Light',
+              borderWidth: 1,
+              borderColor: '#1113',
+              paddingHorizontal: horizontalScale(20),
+              paddingVertical: verticalScale(10),
+              borderRadius: moderateScale(50),
             }}
-            iconStyle={{
-              width: 20,
-              height: 20,
-            }}
-            data={data}
-            maxHeight={200}
-            labelField="label"
-            valueField="value"
-            placeholder={!isFocus ? 'select Categorie' : '...'}
-            value={value}
-            onFocus={() => setIsFocus(true)}
-            onBlur={() => setIsFocus(false)}
-            onChange={(item) => {
-              setValue(item.value);
-              setIsFocus(false);
-            }}
-            renderLeftIcon={() => (
-              <AntDesign
-                style={{
-                  marginRight: 5,
-                }}
-                color={isFocus ? primaryColourLight : 'black'}
-                name="Safety"
-                size={20}
-              />
-            )}
           />
         </View>
 
@@ -301,8 +349,49 @@ const DefaultForm = ({ text, setText }: { text: string; setText: React.Dispatch<
           </TextRegular>
         </TouchableOpacity>
       </Animated.View>
+      <Animated.View
+        style={[
+          {
+            position: 'absolute',
+            zIndex: 99,
+            top: Math.min(50 + heightInput, height * 0.3),
+            left: 70,
+            backgroundColor: '#fff9',
+            borderWidth: 1,
+            borderColor: primaryColourLight,
+            borderRadius: 10,
+            padding: 5,
+          },
+          animatedStyle,
+        ]}
+      >
+        {filteredAccount?.map((acc, i) => {
+          return (
+            <TouchableOpacity
+              key={i}
+              onPress={() => setMention(`@${acc?.account.name}`)}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                paddingVertical: 3,
+              }}
+            >
+              <ImageProfile size={0} image={undefined} />
+              <ImageProfile size={25} image={acc?.profile.imgProfile[0]?.url} />
+              <TextMedium
+                style={{ fontSize: moderateScale(15), color: Colors[colorScheme ?? 'light'].text, paddingLeft: 5 }}
+                key={i}
+                numberOfLines={1}
+              >
+                {acc?.account.name}
+              </TextMedium>
+            </TouchableOpacity>
+          );
+        })}
+      </Animated.View>
     </>
   );
 };
 
-export default DefaultForm;
+export default ForumForm;

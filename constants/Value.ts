@@ -14,9 +14,11 @@ export const LIMIT_TRANSACTION = 20;
 export const formTextPlaceholder = (str: IconName) => {
   const account = useAuthStore((state) => state.account);
 
-  if (str === 'Vote' || str === 'Annonce') {
+  if (str === 'Vote') {
     return `Pose ta question, ${account?.name} !!`;
-  } else {
+  } else if (str === 'Post') {
     return `Quoi de neuf, ${account?.name}?`;
+  } else {
+    return `Titre du sujet, ${account?.name}`;
   }
 };

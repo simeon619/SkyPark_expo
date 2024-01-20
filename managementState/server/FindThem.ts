@@ -16,8 +16,9 @@ export type UserProfile = {
   telephone: string;
   userTarg: string;
 };
-interface Message {
+export interface MessagePost {
   _id: string;
+  __createdAt: number;
   account: {
     _id: string;
     email: string;
@@ -37,7 +38,7 @@ interface Message {
 export type Post = {
   _id: string;
   type: string;
-  message: Message;
+  message: MessagePost;
 };
 
 export type ActivityPost = {

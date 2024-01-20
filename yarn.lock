@@ -7473,10 +7473,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:9.0.6":
-  version: 9.0.6
-  resolution: "immer@npm:9.0.6"
-  checksum: 63aa88ad13a0ff360bc78aa442d9550a25fe3223c00e8239974509af2d68a8e68b63cbacb3c0772c2e88c62755fddd0039f6c913345d7a7b43cf5bb60376f2a4
+"immer@npm:^10.0.3":
+  version: 10.0.3
+  resolution: "immer@npm:10.0.3"
+  checksum: 282a4f8479a40f7d12b2b3243c095e3e892bf99058e2ffcdd6b8e9fd143e6a90f2717ab9b6c8b97c927ffb8054465c8f647056f41660dbfd672e240cf1063503
   languageName: node
   linkType: hard
 
@@ -12189,7 +12189,7 @@ __metadata:
     expo-status-bar: "npm:~1.6.0"
     expo-system-ui: "npm:~2.4.0"
     expo-web-browser: "npm:~12.3.2"
-    immer: "npm:9.0.6"
+    immer: "npm:^10.0.3"
     install: "npm:^0.13.0"
     jest: "npm:^29.2.1"
     jest-expo: "npm:~48.0.0"

@@ -16,6 +16,7 @@ type PublishSchema = {
   accountId: string | undefined;
   files?: FileType[];
   type: string;
+  theme?: string;
   surveyOptions?: surveySchema;
 };
 type quarterPostSchema = {
@@ -147,7 +148,7 @@ export const useThreadPostStore = create<quarterPostSchema, any>((set) => ({
         loadingPublish: true,
       };
     });
-    const { value, accountId, files, type, surveyOptions } = data;
+    const { value, accountId, files, type, surveyOptions, theme } = data;
 
     if (!accountId) return;
     const quarterId = useAuthStore.getState().quarter?._id;
@@ -168,6 +169,7 @@ export const useThreadPostStore = create<quarterPostSchema, any>((set) => ({
           },
           survey: surveyOptions,
           type,
+          theme,
         },
       ],
     });

@@ -1,11 +1,19 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { useListAllForum } from '../../../managementState/server/forum';
+import ForumIndex from '../../../components/post/ForumIndex';
 
 const All = () => {
+  const { getList, listAllForum, hasMoreAll, pageAll, loadingAll } = useListAllForum();
+
   return (
-    <View>
-      <Text>A</Text>
-    </View>
+    <ForumIndex
+      getList={getList}
+      // @ts-ignore
+      listForum={listAllForum}
+      hasMore={hasMoreAll}
+      pageNext={pageAll}
+      loading={loadingAll}
+    />
   );
 };
 

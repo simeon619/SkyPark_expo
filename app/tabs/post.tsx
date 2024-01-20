@@ -15,8 +15,9 @@ import { useAuthStore } from '../../managementState/server/auth';
 import { useFocusEffect } from '@react-navigation/native';
 import ActionButtonForm from '../../components/utilis/ActionButtonForm';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { TextBold, TextMedium } from '../../components/StyledText';
+import { TextMedium } from '../../components/StyledText';
 import { useListUserStore } from '../../managementState/server/Listuser';
+import ForumForm from '../../components/form/forumForm';
 
 const PostTabScreen = () => {
   const colorScheme = useColorScheme();
@@ -153,6 +154,7 @@ const PostTabScreen = () => {
         </View>
         <DefaultForm text={text} setText={setText} />
         <SurveyForm text={text} setText={setText} />
+        <ForumForm text={text} setText={setText} />
         <Animated.View
           style={[
             {
