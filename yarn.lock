@@ -2408,7 +2408,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gorhom/portal@npm:1.0.14":
+"@gorhom/portal@npm:1.0.14, @gorhom/portal@npm:^1.0.14":
   version: 1.0.14
   resolution: "@gorhom/portal@npm:1.0.14"
   dependencies:
@@ -12158,6 +12158,7 @@ __metadata:
     "@expo/config-plugins": "npm:~7.2.2"
     "@expo/vector-icons": "npm:^13.0.0"
     "@gorhom/bottom-sheet": "npm:^4"
+    "@gorhom/portal": "npm:^1.0.14"
     "@hookform/resolvers": "npm:^3.2.0"
     "@react-native-async-storage/async-storage": "npm:1.18.2"
     "@react-native-community/netinfo": "npm:9.3.10"

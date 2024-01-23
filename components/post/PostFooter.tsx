@@ -43,8 +43,10 @@ const PostFooter = ({
         const dataPost = JSON.stringify(data);
         const infoUser = JSON.stringify(user);
         const messageUser = JSON.stringify(message);
-        //@ts-ignore
-        navigation.navigate(`DetailPost`, { dataPost, infoUser, messageUser, id: data._id, commentable: true });
+        if (typeof data.message === 'string') {
+          //@ts-ignore
+          navigation.navigate(`DetailPost`, { dataPost, infoUser, messageUser, id: data._id, commentable: true });
+        }
         return;
       }
       case 'shares': {

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
-import { ForumType, PostForumType } from '../../managementState/server/forum';
 import ItemForum from '../utilis/ListItemForum';
+import { ByAccountResult } from '../../managementState/server/byAccount';
 
 const ForumIndex = ({
   getList,
@@ -11,7 +11,7 @@ const ForumIndex = ({
   loading,
 }: {
   getList: ({ page }: { page: number }) => Promise<void>;
-  listForum: Map<string, PostForumType>;
+  listForum: Map<string, ByAccountResult>;
   hasMore: boolean;
   pageNext: number;
   loading: boolean;
@@ -51,4 +51,4 @@ const ForumIndex = ({
 };
 
 export default ForumIndex;
-const keyExtractor = (_item: PostForumType, index: number) => index.toString();
+const keyExtractor = (_item: ByAccountResult, index: number) => index.toString();

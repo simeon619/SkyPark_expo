@@ -71,6 +71,8 @@ export const useCommentPostStore = create<CommentPostSchema, any>((set) => ({
   commentList: {},
   loadingComment: false,
   getComments: async (postId: string, page: number | undefined) => {
+    console.log('🚀 ~ getComments: ~ postId:', postId);
+    console.log('🚀 ~ getComments: ~ page:', page);
     set(() => ({
       loadingComment: true,
     }));

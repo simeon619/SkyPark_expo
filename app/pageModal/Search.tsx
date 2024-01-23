@@ -101,11 +101,49 @@ const Search = () => {
           <TextMedium style={{ color: '#000a', fontSize: moderateScale(16) }}>Post</TextMedium>
         )}
         {listPost && listPost.map((item) => <ItemSearchPost key={item._id} item={item} />)}
+
+        {listForum && listForum.length > 0 && (
+          <TextMedium style={{ color: '#000a', fontSize: moderateScale(16) }}>Forum</TextMedium>
+        )}
+        {listForum && listForum.map((item) => <ItemSearchForum key={item._id} item={item} />)}
       </ScrollView>
     </SafeAreaView>
   );
 };
 const ItemSearchPost = ({ item }: { item: Post }) => {
+  const navigation = useNavigation();
+  const { width } = useWindowDimensions();
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        //@ts-ignore
+      }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingBottom: verticalScale(10),
+        borderBottomWidth: 1,
+        borderBottomColor: '#1111',
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: horizontalScale(5) }}>
+        <MaterialIcons name="post-add" size={24} color="black" />
+        <TextMedium
+          numberOfLines={2}
+          style={{
+            color: 'black',
+            fontSize: moderateScale(14),
+            width: width - horizontalScale(100),
+          }}
+        >
+          {item.message.text}
+        </TextMedium>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const ItemSearchForum = ({ item }: { item: Post }) => {
   const navigation = useNavigation();
   const { width } = useWindowDimensions();
   return (
@@ -144,7 +182,7 @@ const ItemSearchAccount = ({ item }: { item: UserProfile }) => {
     <TouchableOpacity
       onPress={() => {
         //@ts-ignore
-        navigation.navigate('OtherProfile', { userId: item._id });
+        navigation.navigate('OtherProfile', { user: item });
       }}
       style={{
         flexDirection: 'row',

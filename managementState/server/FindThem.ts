@@ -3,6 +3,7 @@ import { combine } from 'zustand/middleware';
 import { SQuery } from '..';
 import { UrlData } from '../../lib/SQueryClient';
 import { ProfileInterface, CacheValues } from './Descriptions';
+import { AccountDBtype } from './byAccount';
 export type UserProfile = {
   _id: string;
   email: string;
@@ -50,8 +51,8 @@ const useFindThem = create(
   combine(
     {
       listActivity: [] as ActivityPost[],
-      listAccount: [] as UserProfile[],
-      listForum: [],
+      listAccount: [] as AccountDBtype[],
+      listForum: [] as Post[],
       listPost: [] as Post[],
     },
     (set) => ({

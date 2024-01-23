@@ -45,6 +45,12 @@ SQuery.service("Trouve" , "les", {
 for 19/01
 
 tri forum 6/10
-page otheruseer
+page otheruseer 6/10 (il manque le taguser)
 page forum 8/10
 page post 
+discussion
+settingprofile
+notification
+
+
+listen like share and comment tell your backend noga
