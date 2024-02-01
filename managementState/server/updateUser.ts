@@ -1,38 +1,72 @@
 import { create } from 'zustand';
 import { SQuery } from '..';
 import { FileType } from '../../lib/SQueryClient';
-import { AccountInterface, AddressInterface, ProfileInterface } from './Descriptions';
+import { useAuthStore } from './auth';
+import { combine } from 'zustand/middleware';
 
 interface userUpdateAction {
-  setProfile: (
-    newData: Partial<ProfileInterface> & { _id: string },
-    fileData?: { imgProfile?: FileType[]; banner?: FileType[] }
-  ) => Promise<void>;
-  setAdrress: (newData: Partial<AddressInterface> & { _id: string }) => Promise<void>;
-  setAccount: (newData: Partial<AccountInterface> & { _id: string }) => Promise<void>;
+	setProfile: (fileData?: { imgProfile?: FileType[]; banner?: FileType[] }) => Promise<void>;
+	setAdrress: (newData: { etage?: string; room?: string; city?: string }) => Promise<void>;
+	// setAccount: (newData: Partial<AccountInterface>) => Promise<void>;
 }
 
-export const usePatchUser = create<userUpdateAction>(() => ({
-  setProfile: async (newData, fileData) => {
-    let profile = await SQuery.newInstance('profile', { id: newData._id });
+// export const usePatchUser = create<userUpdateAction>(() => ({
+// 	setProfile: async (fileData) => {
+// 		const profileId = useAuthStore.getState().profile?._id!;
+// 		let profile = await SQuery.newInstance('profile', { id: profileId });
+// 		if (!profile) return;
+// 		profile.imgProfile = fileData?.imgProfile;
+// 	},
+// 	setAdrress: async (newData) => {
+// 		const addressId = useAuthStore.getState().address?._id!;
+// 		let address = await SQuery.newInstance('address', { id: addressId });
+// 		if (!address) throw new Error('address not found');
+// 		if (newData?.city) {
+// 			address.city = newData?.city;
+// 		}
+// 		if (newData?.room) {
+// 			address.etage = newData?.room;
+// 		}
+// 		if (newData?.etage) {
+// 			address.etage = newData?.etage;
+// 		}
+// 	},
+// }));
 
-    if (!profile) throw new Error('profile not found');
-    profile.update({ ...newData, ...fileData });
-  },
+// export const usePatchUser = create<userUpdateAction>(() => ({}))
 
-  setAdrress: async (newData) => {
-    let address = await SQuery.newInstance('address', { id: newData._id });
+export const usePatchUser = create(
+	combine({}, () => ({
+		setUpdateInfo: async (newData: {
+			etage?: string;
+			room?: string;
+			city?: string;
+			name?: string;
+			email?: string;
+			telephone?: string;
+			imgProfile?: FileType[];
+			banner?: FileType[];
+		}) => {
+			const addressId = useAuthStore.getState().address?._id!;
+			const profileId = useAuthStore.getState().profile?._id!;
+			const accountId = useAuthStore.getState().account?._id!;
 
-    if (!address) throw new Error('address not found');
+			const address = await SQuery.newInstance('address', { id: addressId });
+			const profile = await SQuery.newInstance('profile', { id: profileId });
+			const account = await SQuery.newInstance('account', { id: accountId });
 
-    address.update(newData);
-  },
+			if (!address || !profile || !account) {
+				throw new Error('Some data not found');
+			}
 
-  setAccount: async (newData) => {
-    let account = await SQuery.newInstance('account', { id: newData._id });
-
-    if (!account) throw new Error('account not found');
-    const accountNew = { ...newData, address: {}, profile: {}, favorites: {}, entreprise: {} };
-    account.update(accountNew);
-  },
-}));
+			if (newData?.telephone) account.telephone = newData.telephone;
+			if (newData?.email) account.email = newData.email;
+			if (newData?.name) account.name = newData.name;
+			if (newData?.banner) profile.banner = newData.banner;
+			if (newData?.imgProfile) profile.imgProfile = newData.imgProfile;
+			if (newData?.city) address.city = newData.city;
+			if (newData?.room) address.etage = newData.room;
+			if (newData?.etage) address.etage = newData.etage;
+		},
+	}))
+);

@@ -8,96 +8,116 @@ import PostMedia from './PostMedia';
 import PostSurvey from './PostSurvey';
 import PostText from './PostText';
 import { HistoriqueType } from '../../managementState/server/activityUser/Historique';
-import ImageProfile from '../utilis/simpleComponent/ImageProfile';
-import { LARGE_PIC_USER } from '../../constants/Value';
 import { ItemActivity } from '../utilis/ItemsActivity';
 import { useNavigation } from '@react-navigation/native';
 
 const PostIndexHistorique = ({
-  DATA,
-  loadData,
-  loadindGetData,
+	DATA,
+	loadData,
+	loadindGetData,
 }: {
-  DATA: HistoriqueType;
-  loadData: () => void;
-  loadindGetData: boolean;
+	DATA: HistoriqueType[];
+	loadData: () => void;
+	loadindGetData: boolean;
 }) => {
-  const navigation = useNavigation();
+	const navigation = useNavigation();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+	useEffect(() => {
+		fetchData();
+	}, []);
 
-  const fetchData = async () => {
-    try {
-      loadData();
-    } catch (error) {
-      console.error(error);
-    } finally {
-    }
-  };
-  const ListFooterComponent = useCallback(() => {
-    return (
-      <>
-        <View style={{ height: height * 0.05 }} />
-        {loadindGetData ? <ActivityIndicator size="small" /> : null}
-        <View style={{ height: height * 0.05 }} />
-      </>
-    );
-  }, []);
+	const fetchData = async () => {
+		try {
+			loadData();
+		} catch (error) {
+			console.error(error);
+		} finally {
+		}
+	};
+	const ListFooterComponent = useCallback(() => {
+		return (
+			<>
+				<View style={{ height: height * 0.05 }} />
+				{loadindGetData ? <ActivityIndicator size="small" /> : null}
+				<View style={{ height: height * 0.05 }} />
+			</>
+		);
+	}, []);
 
-  const { height } = useWindowDimensions();
-  return (
-    <FlatList
-      data={DATA}
-      renderItem={({ item }) => renderItem({ item, navigation })}
-      keyExtractor={keyExtractor}
-      refreshControl={<RefreshControl refreshing={loadindGetData} onRefresh={() => fetchData()} />}
-      scrollEventThrottle={500}
-      showsVerticalScrollIndicator={false}
-      removeClippedSubviews={true}
-      onEndReachedThreshold={0.6}
-      ListFooterComponent={ListFooterComponent}
-    />
-  );
+	const { height } = useWindowDimensions();
+	return (
+		<FlatList
+			data={DATA}
+			renderItem={({ item }) => <RenderItem item={item} navigation={navigation} />}
+			keyExtractor={keyExtractor}
+			scrollEventThrottle={500}
+			// refreshControl={<RefreshControl refreshing={loadindGetData} onRefresh={() => {}} />}
+			showsVerticalScrollIndicator={false}
+			removeClippedSubviews={true}
+			onEndReachedThreshold={0.6}
+			ListFooterComponent={ListFooterComponent}
+		/>
+	);
+};
+const actionMode = (mode: 'like' | 'create' | 'shared' | 'listen', value: string) => {
+	if (mode === 'listen') {
+		return value === 'true' ? 'rejoint' : 'quitter';
+	} else if (mode === 'create') {
+		return 'creer';
+	} else if (mode === 'shared') {
+		return 'partagez';
+	} else if (mode === 'like') {
+		return value === 'true' ? 'like' : 'dislike';
+	}
+};
+const RenderItem = ({ item, navigation }: { item: HistoriqueType; navigation: any }) => {
+	let renderedItem = null;
+	if (item.mode === 'listen') {
+		renderedItem = (
+			<View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+				<TextMedium>
+					Vous avez {actionMode(item.mode, item.value)} le groupe {item.activity.name}
+				</TextMedium>
+				<ItemActivity item={item.activity} navigation={navigation} />
+			</View>
+		);
+	} else {
+		switch (item.post.type) {
+			case PostType.TEXT:
+				renderedItem = (
+					<View>
+						<TextMedium>Vous avez {actionMode(item.mode, item.value)} ce post</TextMedium>
+						<PostText dataPost={item.post} />
+					</View>
+				);
+				break;
+			case PostType.T_MEDIA:
+				renderedItem = (
+					<View>
+						<TextMedium>Vous avez {actionMode(item.mode, item.value)} ce post</TextMedium>
+						<PostMedia dataPost={item.post} />
+					</View>
+				);
+				break;
+			case PostType.SURVEY:
+				renderedItem = (
+					<View>
+						<TextMedium>Vous avez {actionMode(item.mode, item.value)} ce post</TextMedium>
+						<PostSurvey dataPost={item.post} />
+					</View>
+				);
+				break;
+			default:
+				renderedItem = (
+					<TextMedium style={{ fontSize: moderateScale(25), textAlign: 'center' }}>
+						pas encore géré
+					</TextMedium>
+				);
+		}
+	}
+
+	return renderedItem;
 };
 
-const renderItem = ({ item, navigation }: { item: HistoriqueType[0]; navigation: any }) => {
-  if (item.mode === 'listen') {
-    return (
-      <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <TextMedium>
-          Vous avez {item.value === 'true' ? 'rejoint' : 'quitte'} le groupe {item.activity.name}
-        </TextMedium>
-        <ItemActivity item={item.activity} navigation={navigation} />
-      </View>
-    );
-  } else {
-    switch (item.post.type) {
-      case PostType.TEXT:
-        return (
-          <View>
-            <TextMedium>Vous avez {item.mode} ce post</TextMedium>
-            <PostText dataPost={item.post} />
-          </View>
-        );
-      case PostType.T_MEDIA:
-        return (
-          <View>
-            <TextMedium>Vous avez {item.mode} ce post</TextMedium>
-            <PostMedia dataPost={item.post} />
-          </View>
-        );
-      case PostType.SURVEY: {
-        return <PostSurvey dataPost={item.post} />;
-      }
-      // case PostType.GROUP_JOIN:
-      //   return <PostJoined dataPost={item} />;
-      default:
-        return <TextMedium style={{ fontSize: moderateScale(25), textAlign: 'center' }}>pas encore gerer</TextMedium>;
-    }
-  }
-};
-
-const keyExtractor = (_item: HistoriqueType[0], index: number) => index.toString();
+const keyExtractor = (item: HistoriqueType) => item.id;
 export default PostIndexHistorique;

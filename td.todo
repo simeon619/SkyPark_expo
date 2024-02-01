@@ -44,13 +44,18 @@ SQuery.service("Trouve" , "les", {
 ​​
 for 19/01
 
-tri forum 6/10
-page otheruseer 6/10 (il manque le taguser)
-page forum 8/10
-page post 
-discussion
-settingprofile
-notification
+page otheruseer 9/10 (opti)
+page forum 9/10
+page post 10/10
+discussion 9/10
+settingprofile 9/10
+historique 8/10 
+groupe activity  2/10
 
 
-listen like share and comment tell your backend noga
+
+
+tri forum 9.5/10  ***
+incoherence nom adresse  ***
+gestion des connexion
+notification 0/10

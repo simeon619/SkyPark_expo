@@ -1,10 +1,20 @@
 import React from 'react';
-import { View } from '../../../components/Themed';
-import ListItemForum from '../../../components/utilis/ListItemForum';
-import { FlatList } from 'react-native';
+import ForumIndex from '../../../components/post/ForumIndex';
+import { useMyForumList } from '../../../managementState/server/forum';
 
 const MyTheme = () => {
-  return <View style={{ flex: 1 }}>{/* <FlatList/> */}</View>;
+	const { getList, listForum, hasMore, page, loading } = useMyForumList();
+	return (
+		// <></>
+		<ForumIndex
+			getList={getList}
+			// @ts-ignore
+			listForum={listForum}
+			hasMore={hasMore}
+			pageNext={page}
+			loading={loading}
+		/>
+	);
 };
 
 export default MyTheme;

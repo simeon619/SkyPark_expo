@@ -33,7 +33,7 @@ import { MagicModalPortal } from 'react-native-magic-modal';
 import { MenuProvider } from 'react-native-popup-menu';
 import '../Utilis/hook/onlineRefresh';
 import { useAuthStore } from '../managementState/server/auth';
-
+import { ToastProvider } from 'react-native-toast-notifications';
 import { SplashScreen } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -55,6 +55,8 @@ import SharePost from '../components/modal/SharePost';
 import OtherProfile from './profile/OtherProfile';
 import PageForum from './forum/PageForum';
 import { PortalProvider } from '@gorhom/portal';
+import ProfileByTag from './profile/ProfileByTag';
+
 const Stack = createNativeStackNavigator();
 export default function RootLayout() {
 	// SplashScreen.preventAutoHideAsync();
@@ -130,75 +132,78 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
 	const colorScheme = useColorScheme();
-	const { isAuth } = useAuthStore((state) => state);
+	const isAuth = useAuthStore((state) => state.isAuth);
+	console.log('🚀 ~ RootLayoutNav ~ isAuth:', isAuth);
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<SafeAreaProvider>
 				<NavigationContainer fallback={<TextLight>Loading...</TextLight>}>
 					<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-						<KeyboardProvider>
-							<PortalProvider>
-								<MenuProvider>
-									<MagicModalPortal />
-									<Stack.Navigator
-										screenOptions={{
-											headerShown: false,
-										}}
-										// initialRouteName="Bottomtabs"
-									>
-										{isAuth ? (
-											<>
-												<Stack.Screen name="CheckProfile" component={CheckProfile} />
-												<Stack.Screen name="Bottomtabs" component={TabLayout} />
-												<Stack.Screen
-													name="ViewerImage"
-													component={ViewerImage}
-													options={{
-														headerShown: false,
-														animation: 'fade',
-													}}
-												/>
-												<Stack.Screen
-													name="Profile"
-													component={Profile}
-													options={{ animation: 'slide_from_left' }}
-												/>
-												<Stack.Screen
-													name="ProfileSettings"
-													component={ProfileSettings}
-													options={{ animation: 'fade' }}
-												/>
-												<Stack.Screen name="Discussion" component={discussion} />
-												<Stack.Screen name="PageForum" component={PageForum} />
-												<Stack.Screen name="OtherProfile" component={OtherProfile} />
-												<Stack.Screen name="GroupActivity" component={GroupActivity} />
-												<Stack.Screen name="ItemGroup" component={ItemGroup} />
-												<Stack.Screen name="Forum" component={Forum} />
-												<Stack.Screen name="DetailPost" component={DetailPost} />
-												<Stack.Screen name="SharePost" component={SharePost} />
-												<Stack.Screen
-													name="Search"
-													component={Search}
-													options={{ animation: 'simple_push' }}
-												/>
-											</>
-										) : (
-											<>
-												<Stack.Screen name="Login" component={Login} />
-												<Stack.Screen
-													name="Signup"
-													component={Signup}
-													options={{
-														presentation: 'card',
-													}}
-												/>
-											</>
-										)}
-									</Stack.Navigator>
-								</MenuProvider>
-							</PortalProvider>
-						</KeyboardProvider>
+						<ToastProvider>
+							<KeyboardProvider>
+								<PortalProvider>
+									<MenuProvider>
+										<MagicModalPortal />
+										<Stack.Navigator
+											screenOptions={{
+												headerShown: false,
+											}}
+										>
+											{isAuth ? (
+												<>
+													<Stack.Screen name="CheckProfile" component={CheckProfile} />
+													<Stack.Screen name="Bottomtabs" component={TabLayout} />
+													<Stack.Screen
+														name="ViewerImage"
+														component={ViewerImage}
+														options={{
+															headerShown: false,
+															animation: 'fade',
+														}}
+													/>
+													<Stack.Screen
+														name="Profile"
+														component={Profile}
+														options={{ animation: 'slide_from_left' }}
+													/>
+													<Stack.Screen
+														name="ProfileSettings"
+														component={ProfileSettings}
+														options={{ animation: 'fade' }}
+													/>
+													<Stack.Screen name="Discussion" component={discussion} />
+													<Stack.Screen name="PageForum" component={PageForum} />
+													<Stack.Screen name="OtherProfile" component={OtherProfile} />
+													<Stack.Screen name="ProfileByTag" component={ProfileByTag} />
+													<Stack.Screen name="GroupActivity" component={GroupActivity} />
+													<Stack.Screen name="ItemGroup" component={ItemGroup} />
+													<Stack.Screen name="Forum" component={Forum} />
+													<Stack.Screen name="DetailPost" component={DetailPost} />
+													<Stack.Screen name="SharePost" component={SharePost} />
+													<Stack.Screen
+														name="Search"
+														component={Search}
+														options={{ animation: 'simple_push' }}
+													/>
+												</>
+											) : (
+												<>
+													<Stack.Screen name="Login" component={Login} />
+													<Stack.Screen
+														name="Signup"
+														component={Signup}
+														options={{
+															presentation: 'card',
+														}}
+													/>
+												</>
+											)}
+										</Stack.Navigator>
+									</MenuProvider>
+								</PortalProvider>
+							</KeyboardProvider>
+						</ToastProvider>
 					</ThemeProvider>
 				</NavigationContainer>
 			</SafeAreaProvider>

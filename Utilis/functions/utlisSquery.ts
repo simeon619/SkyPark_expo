@@ -1,208 +1,246 @@
+import { ToastAndroid } from 'react-native';
 import { ArrayData, FileType, InstanceInterface } from '../../lib/SQueryClient';
 import { SQuery } from '../../managementState';
 import eventEmitter, { EventMessageType } from '../../managementState/event';
 import { useAuthStore } from '../../managementState/server/auth';
 import {
-  createConversation,
-  createMessage,
-  getConversationIdByDestinataire,
-  updateStatutMessage,
+	createConversation,
+	createMessage,
+	getConversationIdByDestinataire,
+	updateStatutMessage,
 } from '../models/Chat/messageReposotory';
+import Toast from 'react-native-toast-message';
 
 export function mergeArrayData<T extends InstanceInterface>(
-  existingData: ArrayData<T>,
-  newData: Partial<ArrayData<T>>,
-  isUpdated?: boolean
+	existingData: ArrayData<T>,
+	newData: Partial<ArrayData<T>>,
+	isUpdated?: boolean
 ) {
-  const ArrayExistingItems = existingData?.items ?? [];
-  // console.log('🚀 ~ file: utlisSquery.ts:18 ~ ArrayExistingItems:', ArrayExistingItems);
-  const ArrayNewDataItems = newData?.items ?? [];
-  // console.log('🚀 ~ file: utlisSquery.ts:20 ~ ArrayNewDataItems:', ArrayNewDataItems);
+	const ArrayExistingItems = existingData?.items ?? [];
+	// console.log('🚀 ~ file: utlisSquery.ts:18 ~ ArrayExistingItems:', ArrayExistingItems);
+	const ArrayNewDataItems = newData?.items ?? [];
+	// console.log('🚀 ~ file: utlisSquery.ts:20 ~ ArrayNewDataItems:', ArrayNewDataItems);
 
-  const uniqueIds = new Set(ArrayExistingItems.map((item) => item._id));
+	const uniqueIds = new Set(ArrayExistingItems.map((item) => item._id));
 
-  ArrayNewDataItems.forEach((newItem) => {
-    if (!uniqueIds.has(newItem._id)) {
-      uniqueIds.add(newItem._id);
-      if (ArrayExistingItems.length === 1) {
-        ArrayExistingItems?.unshift(newItem);
-      } else {
-        ArrayExistingItems?.push(newItem);
-      }
-    } else if (isUpdated) {
-      const index = ArrayExistingItems.findIndex((item) => item._id === newItem._id);
-      if (index !== -1) {
-        ArrayExistingItems[index] = newItem;
-      }
-    }
-  });
+	ArrayNewDataItems.forEach((newItem) => {
+		if (!uniqueIds.has(newItem._id)) {
+			uniqueIds.add(newItem._id);
+			if (ArrayNewDataItems.length === 1) {
+				ArrayExistingItems?.unshift(newItem);
+			} else {
+				ArrayExistingItems?.push(newItem);
+			}
+		} else if (isUpdated) {
+			const index = ArrayExistingItems.findIndex((item) => item._id === newItem._id);
+			if (index !== -1) {
+				ArrayExistingItems[index] = newItem;
+			}
+		}
+	});
 
-  return {
-    items: ArrayExistingItems,
-    hasNextPage: newData?.hasNextPage || false,
-    totalItems: newData?.totalItems || 0,
-    totalPages: newData?.totalPages || 0,
-    pagingCounter: newData?.pagingCounter || 0,
-    nextPage: newData?.nextPage || 0,
-    page: newData?.page || 0,
-    limit: newData?.limit || 0,
-    added: newData?.added || [],
-    removed: newData?.removed || [],
-    hasPrevPage: newData?.hasPrevPage || false,
-    prevPage: newData?.prevPage || 0,
-  };
+	return {
+		items: ArrayExistingItems,
+		hasNextPage: newData?.hasNextPage || false,
+		totalItems: newData?.totalItems || 0,
+		totalPages: newData?.totalPages || 0,
+		pagingCounter: newData?.pagingCounter || 0,
+		nextPage: newData?.nextPage || 0,
+		page: newData?.page || 0,
+		limit: newData?.limit || 0,
+		added: newData?.added || [],
+		removed: newData?.removed || [],
+		hasPrevPage: newData?.hasPrevPage || false,
+		prevPage: newData?.prevPage || 0,
+	};
 }
 
 export const getDiscussionId = async (receiverId: string | undefined) => {
-  if (!receiverId) return;
-  let discussionId = await getConversationIdByDestinataire(receiverId);
+	if (!receiverId) return;
+	let discussionId = await getConversationIdByDestinataire(receiverId);
 
-  if (!discussionId) {
-    try {
-      const res = await SQuery.service('messenger', 'createDiscussion', {
-        receiverAccountId: receiverId,
-      });
-      if (res.response?.id) {
-        await createConversation({
-          idConversation: res.response.id,
-          idDestinataire: receiverId,
-          typeConversation: 'private',
-          idGroupe: null,
-        });
-        discussionId = res.response.id;
-      } else {
-        console.error('Failed to create discussion:', res);
-      }
-    } catch (error) {
-      console.error('Error creating discussion:', error);
-    }
-  }
+	if (!discussionId) {
+		try {
+			const res = await SQuery.service('messenger', 'createDiscussion', {
+				receiverAccountId: receiverId,
+			});
+			console.log('🚀 ~ getDiscussionId ~ res:', res);
 
-  return discussionId;
+			if (res.response?.id) {
+				await createConversation({
+					idConversation: res.response.id,
+					idDestinataire: receiverId,
+					typeConversation: 'private',
+					idGroupe: null,
+				});
+				discussionId = res.response.id;
+			} else {
+				console.error('Failed to create discussion:', res);
+			}
+		} catch (error) {
+			console.error('Error creating discussion:', error);
+		}
+	}
+
+	return discussionId;
 };
 export const getChannel = async (discussionId: string | undefined | null) => {
-  if (!discussionId) return;
-  const discussion = await SQuery.newInstance('discussion', { id: discussionId });
+	if (!discussionId) return;
+	const discussion = await SQuery.newInstance('discussion', { id: discussionId });
 
-  const ArrayDiscussion = await discussion?.channel;
+	const ArrayDiscussion = await discussion?.channel;
 
-  ArrayDiscussion?.when(
-    'update',
-    async (obj) => {
-      let messageId = obj?.added[0];
+	ArrayDiscussion?.when(
+		'update',
+		async (obj) => {
+			let messageId = obj?.added[0];
 
-      if (!messageId) return;
+			if (!messageId) return;
 
-      let messageInstance = await SQuery.newInstance('message', { id: messageId });
+			let messageInstance = await SQuery.newInstance('message', { id: messageId });
 
-      if (!messageInstance) return;
+			if (!messageInstance) return;
 
-      let newMessage = messageInstance.$cache;
+			let newMessage = messageInstance.$cache;
 
-      if (newMessage.account !== useAuthStore.getState().account?._id) {
-        let files =
-          newMessage.files?.map((file) => {
-            return {
-              extension: file.extension,
-              size: file.size,
-              url: file.url,
-              buffer: null,
-            };
-          }) || [];
+			if (newMessage.account !== useAuthStore.getState().account?._id) {
+				let files =
+					newMessage.files?.map((file) => {
+						return {
+							extension: file.extension,
+							size: file.size,
+							url: file.url,
+							buffer: null,
+						};
+					}) || [];
 
-        await createMessage({
-          newMessage: {
-            contenuMessage: newMessage.text,
-            horodatage: newMessage.__createdAt,
-            idConversation: discussionId,
-            idExpediteur: newMessage.account,
-            idMessage: messageId,
-          },
-          filesData: files,
-          statusData: {
-            dateLu: null,
-            dateReçu: Date.now(),
-            dateEnvoye: newMessage.__createdAt,
-            idStatutLecture: 1,
-            idMessage: messageId,
-          },
-        });
-        eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
-      }
-    },
-    'receiveMessage:' + discussionId
-  );
-  return ArrayDiscussion;
+				await createMessage({
+					newMessage: {
+						contenuMessage: newMessage.text,
+						horodatage: newMessage.__createdAt,
+						idConversation: discussionId,
+						idExpediteur: newMessage.account,
+						idMessage: messageId,
+					},
+					filesData: files,
+					statusData: {
+						dateLu: null,
+						dateReçu: Date.now(),
+						dateEnvoye: newMessage.__createdAt,
+						idStatutLecture: 1,
+						idMessage: messageId,
+					},
+				});
+				eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+			}
+		},
+		'receiveMessage:' + discussionId
+	);
+	return ArrayDiscussion;
 };
 
 export const sendServer = async (
-  discussionId: string,
-  accountId: string,
-  messageId: string,
-  files?: FileType[],
-  value?: string
+	discussionId: string,
+	accountId: string,
+	messageId: string,
+	files?: FileType[],
+	value?: string
 ) => {
-  let channel = await getChannel(discussionId);
+	let channel = await getChannel(discussionId);
 
-  let messageAdd = await channel?.update({
-    addNew: [
-      {
-        account: accountId,
-        text: value,
-        files: files,
-      },
-    ],
-  });
+	let messageAdd = await channel?.update({
+		addNew: [
+			{
+				account: accountId,
+				text: value,
+				files: files,
+			},
+		],
+	});
 
-  if (messageAdd?.added[0]) {
-    let messageInstance = await SQuery.newInstance('message', { id: messageAdd?.added[0] });
+	if (messageAdd?.added[0]) {
+		let messageInstance = await SQuery.newInstance('message', { id: messageAdd?.added[0] });
 
-    if (!messageInstance) return;
+		if (!messageInstance) return;
 
-    updateStatutMessage({ idMessage: messageId, dateEnvoye: messageInstance?.__createdAt }, discussionId);
+		updateStatutMessage(
+			{ idMessage: messageId, dateEnvoye: messageInstance?.__createdAt },
+			discussionId
+		);
 
-    eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
-  }
+		eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+	}
 };
 export const putMessageLocal = async (
-  files: FileType[] | null,
-  value: string | null,
-  discussionId: string,
-  accountId: string,
-  messageId: string,
-  createMsg: number
+	files: FileType[] | null,
+	value: string | null,
+	discussionId: string,
+	accountId: string,
+	messageId: string,
+	createMsg: number
 ) => {
-  try {
-    let fileMap =
-      files?.map((file) => {
-        return {
-          ...file,
-          extension: file.type.split('/')[1],
-          uri: file.uri,
-          url: null,
-          buffer: null,
-        };
-      }) || [];
-    await createMessage({
-      newMessage: {
-        contenuMessage: value,
-        horodatage: createMsg,
-        idConversation: discussionId,
-        idExpediteur: accountId,
-        idMessage: messageId,
-      },
-      filesData: fileMap,
-      statusData: {
-        dateEnvoye: null,
-        dateLu: null,
-        dateReçu: null,
-        idStatutLecture: 1,
-        idMessage: messageId,
-      },
-    });
+	try {
+		let fileMap =
+			files?.map((file) => {
+				return {
+					...file,
+					extension: file.type.split('/')[1],
+					uri: file.uri,
+					url: null,
+					buffer: null,
+				};
+			}) || [];
+		await createMessage({
+			newMessage: {
+				contenuMessage: value,
+				horodatage: createMsg,
+				idConversation: discussionId,
+				idExpediteur: accountId,
+				idMessage: messageId,
+			},
+			filesData: fileMap,
+			statusData: {
+				dateEnvoye: null,
+				dateLu: null,
+				dateReçu: null,
+				idStatutLecture: 1,
+				idMessage: messageId,
+			},
+		});
 
-    eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
-  } catch (error) {
-    console.error('Error put in local message:', error);
-  }
+		eventEmitter.emit(EventMessageType.receiveMessage + discussionId);
+	} catch (error) {
+		console.error('Error put in local message:', error);
+	}
+};
+export const showToast = (message: string) => {
+	ToastAndroid.show(message, ToastAndroid.LONG);
+};
+export async function executeWithLimit(functionAsynchrone: () => Promise<any>, limit: number) {
+	try {
+		await Promise.race([
+			functionAsynchrone(),
+			new Promise((_, reject) =>
+				setTimeout(() => reject(new Error('La tâche a pris trop de temps.')), limit)
+			),
+		]);
+	} catch (e) {
+		console.error(e);
+	}
+}
+
+export const showToastInfo = (message: string) => {
+	Toast.show({
+		type: 'info',
+		text1: 'Hello 👋',
+		text2: message,
+		text1Style: {
+			fontSize: 16,
+		},
+		text2Style: {
+			fontSize: 16,
+		},
+		swipeable: true,
+		autoHide: true,
+	});
 };

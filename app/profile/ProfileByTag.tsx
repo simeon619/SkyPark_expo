@@ -21,38 +21,54 @@ import {
 	useListpostOtherAccount,
 } from '../../managementState/server/byAccount';
 import ImageProfile from '../../components/utilis/simpleComponent/ImageProfile';
-import { LARGE_PIC_USER } from '../../constants/Value';
+import { HOST, LARGE_PIC_USER } from '../../constants/Value';
 import { PostInterface } from '../../managementState/server/Descriptions';
 import { PostType } from '../../types/PostType';
 import PostText from '../../components/post/PostText';
 import PostMedia from '../../components/post/PostMedia';
 import PostSurvey from '../../components/post/PostSurvey';
-import { Ionicons } from '@expo/vector-icons';
+import { useFindAccountByTag } from '../../managementState/server/FindThem';
+import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { createDiscussion } from '../../managementState/server/Listuser';
-import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../managementState/server/auth';
 
-const OtherProfile = ({ route }: { route: any }) => {
-	const { user } = route.params as { user: AccountDBtype };
+const ProfileByTag = ({ route }: { route: any }) => {
 	const { primaryColour } = useToggleStore((state) => state);
-	const { getList, hasMore, listForum, loading, page, clearList } = useListpostOtherAccount();
-	const accountId = useAuthStore.getState().account?._id;
 	const colorScheme = useColorScheme();
+	const { userTag } = route.params as { userTag: string };
+	const { getAccount } = useFindAccountByTag();
+	const [user, setUser] = React.useState<AccountDBtype | null>(null);
+	const { getList, hasMore, listForum, loading, page } = useListpostOtherAccount();
+	const navigationState = useNavigationState((state) => state);
 	const navigation = useNavigation();
-	useEffect(() => {
-		fetchData(1);
-		return () => {
-			clearList();
-		};
-	}, []);
+	const accountId = useAuthStore.getState().account?._id;
 
-	const mapToArray = Array.from((listForum.get(user._id) || new Map()).values());
+	useEffect(() => {
+		const fetchDataUser = async () => {
+			let user = await getAccount({ userTag });
+			fetchData(1, user?._id);
+			setUser(user);
+		};
+		fetchDataUser();
+	}, [navigationState.key]);
 
 	const handleLoadMore = async () => {
 		if (hasMore) {
-			await fetchData(page);
+			await fetchData(page, user?._id);
 		}
 	};
+
+	const fetchData = async (currentPage: number, accountId: string | undefined) => {
+		if (!accountId) return;
+		try {
+			getList({ page: currentPage, accountId });
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const mapToArray = Array.from(listForum.get(user?._id || '')?.values() || []);
 	async function goToDiscussion() {
 		let userInfo = await createDiscussion({
 			account: { _id: user?._id!, name: user?.name! },
@@ -63,21 +79,17 @@ const OtherProfile = ({ route }: { route: any }) => {
 		//@ts-ignore
 		navigation.navigate('Discussion', { data: userInfo });
 	}
-	const fetchData = async (page: number) => {
-		try {
-			getList({ page, accountId: user._id });
-		} catch (error) {
-			console.error(error);
-		} finally {
-		}
-	};
 	const HeaderComponent = () => {
 		return (
 			<>
 				<View style={{ flex: 1 }}>
 					<View style={{ flex: 1, alignItems: 'center' }}>
 						<ImageBackground
-							source={require('../../assets/images/profileBanner.jpg')}
+							source={
+								!!user?.profile?.banner[0]?.url
+									? { uri: HOST + user?.profile?.banner[0]?.url }
+									: require('../../assets/images/profileBanner.jpg')
+							}
 							style={{
 								height: verticalScale(200),
 								width: '100%',
@@ -136,15 +148,15 @@ const OtherProfile = ({ route }: { route: any }) => {
 									zIndex: 5,
 								}}
 							>
-								<ImageProfile size={LARGE_PIC_USER - 5} image={user.profile?.imgProfile[0]?.url} />
+								<ImageProfile size={LARGE_PIC_USER - 5} image={user?.profile?.imgProfile[0]?.url} />
 								<TextSemiBold>{user?.name} </TextSemiBold>
 								<TextThinItalic>
-									padiezd {user.address?.room} - Etage {user.address?.etage}{' '}
+									padiezd {user?.address?.room} - Etage {user?.address?.etage}{' '}
 								</TextThinItalic>
 							</View>
 						</ImageBackground>
 						<View style={{ height: verticalScale(90) }} />
-						{user._id !== accountId && (
+						{user?._id !== accountId && (
 							<TouchableOpacity
 								onPress={() => {
 									goToDiscussion();
@@ -196,10 +208,6 @@ const OtherProfile = ({ route }: { route: any }) => {
 									<TextMedium>recuperation des post...</TextMedium>
 								</View>
 							) : (
-								// <Image
-								// 	source={require('../../assets/images/postNotFound.png')}
-								// 	style={{ width: '100%', height: verticalScale(300) }}
-								// />
 								<View
 									style={{
 										flex: 1,
@@ -225,7 +233,9 @@ const OtherProfile = ({ route }: { route: any }) => {
 				}
 				contentContainerStyle={{ paddingHorizontal: horizontalScale(3) }}
 				ListHeaderComponent={HeaderComponent}
-				refreshControl={<RefreshControl refreshing={loading} onRefresh={() => fetchData(1)} />}
+				refreshControl={
+					<RefreshControl refreshing={loading} onRefresh={() => fetchData(1, user?._id)} />
+				}
 				onEndReached={() => handleLoadMore()}
 				renderItem={(item) =>
 					renderItem({
@@ -242,7 +252,6 @@ const OtherProfile = ({ route }: { route: any }) => {
 };
 
 const renderItem = ({ item }: { item: PostInterface }) => {
-	console.log('🚀 ~ renderItem ~ item:', item);
 	switch (item.type) {
 		case PostType.TEXT:
 			return <PostText key={item._id} dataPost={item} />;
@@ -255,9 +264,13 @@ const renderItem = ({ item }: { item: PostInterface }) => {
 		// case PostType.GROUP_JOIN:
 		//   return <PostJoined dataPost={item} />;
 		default:
-			return <></>;
+			return (
+				<TextMedium style={{ fontSize: moderateScale(25), textAlign: 'center' }}>
+					pas encore gerer
+				</TextMedium>
+			);
 	}
 };
 
-export default OtherProfile;
+export default ProfileByTag;
 const keyExtractor = (_item: ByAccountResult, index: number) => index.toString();

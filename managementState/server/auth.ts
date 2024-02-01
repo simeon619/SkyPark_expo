@@ -13,44 +13,110 @@ import {
 	QuarterInterface,
 	UserInterface,
 } from './Descriptions';
+import { useTypeUser } from '../client/auth';
+import { showToast } from '../../Utilis/functions/utlisSquery';
 
 // import { QueryKeys } from '../../types/serverType';
 
 type authState = {
-	account: AccountInterface | undefined;
-	user: UserInterface | undefined;
-	profile: ProfileInterface | undefined;
-	address: AddressInterface | undefined;
-	favorites: FavoritesInterface | undefined;
-	entreprise: EntrepriseInterface | undefined;
-	quarter: QuarterInterface | undefined;
-	padiezd: PadiezdInterface | undefined;
-	building: BuildingInterface | undefined;
+	account: AccountInterface | null;
+	user: UserInterface | null;
+	profile: ProfileInterface | null;
+	address: AddressInterface | null;
+	favorites: FavoritesInterface | null;
+	entreprise: EntrepriseInterface | null;
+	quarter: QuarterInterface | null;
+	padiezd: PadiezdInterface | null;
+	building: BuildingInterface | null;
 	isAuth: boolean;
 	loading: boolean;
-	error: string | undefined;
+	error: string | null;
 };
 type authAction = {
 	fetchLogin: (Login: { email: string; password: string }) => Promise<void>;
 	fetchDisconnect: () => Promise<void>;
 	fetchRegister: (Register: { email: string; password: string; code: string }) => Promise<void>;
+	setEvent: () => Promise<void>;
 };
 type StateSchema = authAction & authState;
 export const useAuthStore = create<StateSchema, any>(
 	persist(
-		(set) => ({
-			account: undefined,
-			user: undefined,
-			profile: undefined,
-			address: undefined,
-			building: undefined,
-			favorites: undefined,
-			entreprise: undefined,
-			quarter: undefined,
-			padiezd: undefined,
+		(set, get) => ({
+			account: null,
+			user: null,
+			profile: null,
+			address: null,
+			building: null,
+			favorites: null,
+			entreprise: null,
+			quarter: null,
+			padiezd: null,
 			isAuth: false,
 			loading: false,
-			error: undefined,
+			error: null,
+
+			setEvent: async () => {
+				const profileId = get().profile?._id!;
+				console.log('🚀 ~ setEvent: ~ profileId:', profileId);
+				const profile = await SQuery.newInstance('profile', { id: profileId });
+				profile?.when(
+					'refresh',
+					(obj) => {
+						//@ts-ignore
+						set((state) => {
+							return {
+								profile: {
+									...state.profile,
+									...obj,
+								},
+							};
+						});
+					},
+					profile.$id
+				);
+
+				//account
+				const accountId = get().account?._id!;
+
+				const account = await SQuery.newInstance('account', { id: accountId });
+				account?.when(
+					'refresh',
+					(obj) => {
+						console.log('🚀 ~ account?.when ~ obj:', obj);
+						//@ts-ignore
+						set((state) => {
+							return {
+								account: {
+									...state.account,
+									...obj,
+								},
+							};
+						});
+					},
+					account.$id
+				);
+
+				//address
+
+				const addressId = get().address?._id!;
+
+				const address = await SQuery.newInstance('address', { id: addressId });
+				address?.when(
+					'refresh',
+					(obj) => {
+						//@ts-ignore
+						set((state) => {
+							return {
+								address: {
+									...state.address,
+									...obj,
+								},
+							};
+						});
+					},
+					address.$id
+				);
+			},
 			fetchDisconnect: async () => {
 				set(() => ({
 					loading: true,
@@ -59,18 +125,18 @@ export const useAuthStore = create<StateSchema, any>(
 				await SQuery.service('server', 'disconnection', {});
 
 				set(() => ({
-					account: undefined,
-					user: undefined,
-					profile: undefined,
-					padiezd: undefined,
-					quarter: undefined,
-					address: undefined,
-					building: undefined,
-					favorites: undefined,
-					entreprise: undefined,
+					account: null,
+					user: null,
+					profile: null,
+					padiezd: null,
+					quarter: null,
+					address: null,
+					building: null,
+					favorites: null,
+					entreprise: null,
 					isAuth: false,
 					loading: false,
-					error: undefined,
+					error: null,
 				}));
 			},
 
@@ -93,6 +159,7 @@ export const useAuthStore = create<StateSchema, any>(
 		}
 	)
 );
+const typeUser = { 1: 'user', 2: 'supervisor' } as const;
 
 const handleAuthAction = async (
 	set: (
@@ -110,31 +177,34 @@ const handleAuthAction = async (
 	set((state) => ({
 		...state,
 		loading: true,
-		error: undefined,
+		error: null,
 	}));
 
 	try {
-		const res = await SQuery.service('login', 'user', AuthData);
+		console.log('SIGNAL', typeUser[useTypeUser.getState().value]);
+		const res = await SQuery.service('login', typeUser[useTypeUser.getState().value], AuthData);
 		if (!res.response || !res?.response?.signup.id) {
 			set(() => ({
-				account: undefined,
-				user: undefined,
-				profile: undefined,
-				padiezd: undefined,
-				quarter: undefined,
-				address: undefined,
-				building: undefined,
-				favorites: undefined,
-				entreprise: undefined,
+				account: null,
+				user: null,
+				profile: null,
+				padiezd: null,
+				quarter: null,
+				address: null,
+				building: null,
+				favorites: null,
+				entreprise: null,
 				isAuth: false,
 				loading: false,
-				error: undefined,
+				error: null,
 			}));
-
-			throw new Error(JSON.stringify(res));
+			showToast(JSON.stringify(res));
+			return;
 		}
 
-		const user = await SQuery.newInstance('user', { id: res?.response?.signup.id });
+		const user = await SQuery.newInstance(typeUser[useTypeUser.getState().value], {
+			id: res?.response?.signup.id,
+		});
 
 		const account = await SQuery.newInstance('account', { id: res?.response?.login.id });
 
@@ -144,37 +214,142 @@ const handleAuthAction = async (
 		let profile = await account.profile;
 		let address = await account.address;
 		let favorites = await account.favorites;
-		let client = account.$cache.status;
+		let padiezd = null;
+		let building = null;
+		let quarter = null;
+		let entreprise = null;
+		// let entreprise = await user.entreprise;
 
-		let entreprise = await user.entreprise;
+		if (account.$cache.status === 'property') {
+			padiezd = await user?.extractor<'padiezd'>('../');
+			building = await user?.extractor<'building'>('../../');
+			quarter = await building?.extractor<'quarter'>('../');
+			entreprise = await quarter?.extractor<'entreprise'>('../');
+		} else {
+			quarter = await user.extractor<'quarter'>('../');
+			entreprise = await quarter?.extractor<'entreprise'>('../');
+		}
 
-		let padiezd = await user?.extractor<'padiezd'>('../');
-		let building = await user?.extractor<'building'>('../../');
-		let quarter = await user?.extractor<'quarter'>('../../../');
-
-		// quarter.
-
-		SQuery.bind(
-			{ account, user, profile, address, favorites, entreprise, quarter, padiezd, building },
-			set
+		profile?.when(
+			'refresh',
+			(obj) => {
+				//@ts-ignore
+				set((state) => {
+					return {
+						profile: {
+							...state.profile,
+							...obj,
+						},
+					};
+				});
+			},
+			profile.$id
 		);
 
-		let cache = SQuery.cacheFrom({
-			account,
-			user,
-			profile,
-			address,
-			favorites,
-			entreprise,
-			quarter,
-			padiezd,
-			building,
+		address?.when(
+			'refresh',
+			(obj) => {
+				//@ts-ignore
+				set((state) => {
+					return {
+						address: {
+							...state.address,
+							...obj,
+						},
+					};
+				});
+			},
+			address.$id
+		);
+
+		favorites?.when(
+			'refresh',
+			(obj) => {
+				//@ts-ignore
+				set((state) => {
+					return {
+						favorites: {
+							...state.favorites,
+							...obj,
+						},
+					};
+				});
+			},
+			favorites.$id
+		);
+		entreprise?.when('refresh', (obj) => {
+			//@ts-ignore
+			set((state) => {
+				return {
+					entreprise: {
+						...state.entreprise,
+						...obj,
+					},
+				};
+			});
 		});
+
+		quarter?.when(
+			'refresh',
+			(obj) => {
+				//@ts-ignore
+				set((state) => {
+					return {
+						quarter: {
+							...state.quarter,
+							...obj,
+						},
+					};
+				});
+			},
+			quarter.$id
+		);
+
+		padiezd?.when(
+			'refresh',
+			//@ts-ignore
+			(obj) => {
+				//@ts-ignore
+				set((state) => {
+					return {
+						padiezd: {
+							...state.padiezd,
+							...obj,
+						},
+					};
+				});
+			},
+			padiezd.$id
+		);
+
+		building?.when(
+			'refresh',
+			(obj) => {
+				//@ts-ignore
+				set((state) => {
+					return {
+						building: {
+							...state.building,
+							...obj,
+						},
+					};
+				});
+			},
+			building.$id
+		);
 
 		// createTable(db);
 
 		set(() => ({
-			...cache,
+			profile: profile?.$cache,
+			address: address?.$cache,
+			account: account.$cache,
+			building: building?.$cache,
+			entreprise: entreprise?.$cache,
+			quarter: quarter?.$cache,
+			padiezd: padiezd?.$cache,
+			favorites: favorites?.$cache,
+			user: user.$cache,
 			isAuth: true,
 			loading: false,
 		}));

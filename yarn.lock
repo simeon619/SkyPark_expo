@@ -11330,6 +11330,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-toast-notifications@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "react-native-toast-notifications@npm:3.4.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 1e60ca9155bd19a2c47670a80f60438dbd88be2a4193d6dedce04f3179a529b5fdc85c4b5283926d383f8641d757ac302b96d1a1eb2760a6424e4b433582ad79
+  languageName: node
+  linkType: hard
+
 "react-native-toggle-element@npm:^2.0.1":
   version: 2.0.1
   resolution: "react-native-toggle-element@npm:2.0.1"
@@ -12217,6 +12227,7 @@ __metadata:
     react-native-skeleton-placeholder: "npm:^5.2.4"
     react-native-svg: "npm:13.9.0"
     react-native-tab-view: "npm:^3.5.1"
+    react-native-toast-notifications: "npm:^3.4.0"
     react-native-toggle-element: "npm:^2.0.1"
     react-native-web: "npm:~0.19.6"
     react-test-renderer: "npm:18.2.0"

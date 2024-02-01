@@ -80,7 +80,7 @@ export const Controller = {
 				},
 			},
 		},
-		manager: {
+		supervisor: {
 			send: {
 				email: '',
 				password: '',
@@ -91,23 +91,7 @@ export const Controller = {
 					id: '',
 				},
 				signup: {
-					modelPath: 'manager' as const,
-					id: '',
-				},
-			},
-		},
-		admin: {
-			send: {
-				email: '',
-				password: '',
-			},
-			receive: {
-				login: {
-					modelPath: 'account' as const,
-					id: '',
-				},
-				signup: {
-					modelPath: 'admin' as const,
+					modelPath: 'supervisor' as const,
 					id: '',
 				},
 			},
@@ -528,6 +512,10 @@ export const Descriptions = {
 			type: String,
 			ref: 'historique' as const,
 		},
+		notification: {
+			type: String,
+			ref: 'notification' as const,
+		},
 		_id: {
 			type: String,
 		},
@@ -646,7 +634,7 @@ export const Descriptions = {
 			strictAlien: true as const,
 		},
 		room: {
-			type: String,
+			type: Number,
 			required: true as const,
 		},
 		padiezd: {
@@ -1099,6 +1087,28 @@ export const Descriptions = {
 			type: Number,
 		},
 	},
+	notification: {
+		elements: [
+			{
+				type: {
+					triggerAccountId: '',
+					targetPostId: '',
+					mode: '', // like , shrared, comment,
+					value: '', //bool   accountId  commentId
+					checked: false,
+				},
+			},
+		],
+		_id: {
+			type: String,
+		},
+		__createdAt: {
+			type: Number,
+		},
+		__updatedAt: {
+			type: Number,
+		},
+	},
 } satisfies DescriptionsType;
 
 type CacheType = {
@@ -1135,6 +1145,7 @@ export const CacheValues = {
 		status: '',
 		password: '',
 		historique: '',
+		notification: '',
 		telephone: '',
 		address: '',
 		favorites: '',
@@ -1221,6 +1232,13 @@ export const CacheValues = {
 		__updatedAt: 0,
 		__parentList: [],
 	} as HistoriqueInterface,
+	notification: {
+		elements: [],
+		_id: '',
+		__createdAt: 0,
+		__updatedAt: 0,
+		__parentList: [],
+	} as NotificationInterface,
 	message: {
 		_id: '',
 		account: '',
@@ -1495,6 +1513,23 @@ export interface HistoriqueInterface {
 		id: string;
 	}[];
 }
+
+export interface NotificationInterface {
+	elements: {
+		triggerAccountId: string;
+		targetPostId: string;
+		mode: 'like' | 'shared' | 'create'; // like , shrared, comment,
+		value: string | boolean; //bool   accountId  commentId
+		checked: boolean;
+	}[];
+	_id: string;
+	__createdAt: number;
+	__updatedAt: number;
+	__parentList: {
+		modelPath: string;
+		id: string;
+	}[];
+}
 export interface DiscussionInterface {
 	_id: string;
 	members: string[];
@@ -1650,6 +1685,7 @@ export interface AccountInterface {
 	status: string;
 	password: string;
 	historique: string;
+	notification: string;
 	telephone: string;
 	address: string;
 	favorites: string;

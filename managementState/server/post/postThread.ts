@@ -53,7 +53,6 @@ export const useThreadPostStore = create<quarterPostSchema, any>((set) => ({
 			};
 		});
 		const Thread = (await getThread(typePost))?.thread;
-		console.log('🚀 ~ getListPost: ~ Thread:', Thread, { typePost });
 
 		if (!Thread) return;
 
@@ -109,7 +108,7 @@ export const useThreadPostStore = create<quarterPostSchema, any>((set) => ({
 		const posts = await Thread?.update({
 			paging: {
 				page,
-				limit: 3,
+				limit: 10,
 				sort: {
 					__createdAt: -1,
 				},
@@ -205,7 +204,6 @@ const getThread = async (typePost: TypePostSchema) => {
 		return { thread, typeCheck: 'listPostSupervisor', typeLoad: 'loadindGetDataSupervisor' };
 	} else {
 		const buildingId = useAuthStore.getState().building?._id;
-		console.log('🚀 ~ getThread ~ buildingId:', buildingId);
 		if (!buildingId) return;
 		const building = await SQuery.newInstance('building', { id: buildingId });
 		const thread = await building?.[typePost];

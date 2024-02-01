@@ -26,25 +26,22 @@ import ImageRatio from '../ImgRatio';
 import { TextLight, TextRegular } from '../StyledText';
 import { ScrollView, View } from '../Themed';
 import InputWithTag from '../InputWithTag';
+import { useInputPost } from '../../managementState/client/postInput';
+import { showToast } from '../../Utilis/functions/utlisSquery';
 
-const ForumForm = ({
-	text,
-	setText,
-}: {
-	text: string;
-	setText: React.Dispatch<React.SetStateAction<string>>;
-}) => {
+const ForumForm = () => {
 	const colorScheme = useColorScheme();
 	const navigation = useNavigation();
 	interface ImageItem {
 		uri: string;
 	}
+	const { setText, text } = useInputPost();
 
 	const [contenu, setContenu] = useState<string>('');
 	const [images, setImages] = useState<ImageItem[]>();
 	const [prepareImage, setPrepareImage] = useState<FileType[]>();
 	const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
-	const { width, height } = useWindowDimensions();
+	const { width } = useWindowDimensions();
 	const { IconName } = useTypeForm((state) => state);
 	const { publishPost } = useThreadPostStore((state) => state);
 
@@ -60,7 +57,7 @@ const ForumForm = ({
 	const pickGallery = async () => {
 		try {
 			const result = await ImagePicker.launchImageLibraryAsync({
-				mediaTypes: ImagePicker.MediaTypeOptions.All,
+				mediaTypes: ImagePicker.MediaTypeOptions.Images,
 				quality: 1,
 				base64: true,
 				selectionLimit: 4,
@@ -118,15 +115,18 @@ const ForumForm = ({
 			return prevPrepareImage?.filter((image) => image?.uri !== uri);
 		});
 	}
-	const showToast = () => {
-		ToastAndroid.show('Titre obligatoire', ToastAndroid.LONG);
-	};
 
 	async function handlePost() {
 		if (!text) {
-			showToast();
+			showToast('Veuillez renseigner le titre de votre Sujet');
 			return;
 		}
+
+		if (text.length <= 2) {
+			showToast('Le titre de votre Sujet doit contenir au moins 3 caractères');
+			return;
+		}
+
 		let type = prepareImage?.length === 0 ? '1' : '2';
 		publishPost(
 			{ accountId: account?._id, type: type, files: prepareImage, value: contenu, theme: text },
@@ -239,13 +239,7 @@ const ForumForm = ({
 						paddingHorizontal: horizontalScale(10),
 					}}
 				>
-					<InputWithTag
-						key={2}
-						offset={195}
-						sizeInputWidth={0.8}
-						text={contenu}
-						setText={setContenu}
-					/>
+					<InputWithTag offset={195} sizeInputWidth={0.8} setText={setContenu} text={contenu} />
 				</View>
 
 				<TouchableOpacity

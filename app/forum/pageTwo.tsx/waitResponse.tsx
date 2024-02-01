@@ -1,12 +1,20 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { useListWaitForum } from '../../../managementState/server/forum';
+import ForumIndex from '../../../components/post/ForumIndex';
 
 const WaitResponse = () => {
-  return (
-    <View>
-      <Text>waitResponse</Text>
-    </View>
-  );
+	const { getList, listAllForum, hasMoreAll, pageAll, loadingAll } = useListWaitForum();
+
+	return (
+		<ForumIndex
+			getList={getList}
+			// @ts-ignore
+			listForum={listAllForum}
+			hasMore={hasMoreAll}
+			pageNext={pageAll}
+			loading={loadingAll}
+		/>
+	);
 };
 
 export default WaitResponse;

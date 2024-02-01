@@ -15,14 +15,23 @@ import Colors from '../../constants/Colors';
 import { FileType } from '../../lib/SQueryClient';
 import useToggleStore, { useTypeForm } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
-import { TypePostSchema, useThreadPostStore } from '../../managementState/server/post/postThread';
 import ImageRatio from '../ImgRatio';
 import { TextLight, TextRegular } from '../StyledText';
 import { ScrollView, View } from '../Themed';
 import { useInputPost } from '../../managementState/client/postInput';
+import { useListPostActivity } from '../../managementState/server/activityUser/groupActivity';
+import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { showToast } from '../../Utilis/functions/utlisSquery';
 
-const DefaultForm = () => {
+const DefaultFormActivity = ({
+	activityId,
+	showModal,
+	modalRef,
+}: {
+	activityId: string;
+	showModal: React.Dispatch<React.SetStateAction<number>>;
+	modalRef: React.RefObject<BottomSheetMethods>;
+}) => {
 	const colorScheme = useColorScheme();
 	const navigation = useNavigation();
 	const { text, setText } = useInputPost();
@@ -32,7 +41,7 @@ const DefaultForm = () => {
 	}
 	const [images, setImages] = useState<ImageItem[]>();
 	const [prepareImage, setPrepareImage] = useState<FileType[]>();
-	const { primaryColour, primaryColourLight, name } = useToggleStore((state) => state);
+	const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
 	const { width } = useWindowDimensions();
 	const { IconName } = useTypeForm((state) => state);
 	const hideForm = useAnimatedStyle(() => {
@@ -42,7 +51,7 @@ const DefaultForm = () => {
 		};
 	}, [IconName]);
 
-	const publishPost = useThreadPostStore((state) => state.publishPost);
+	const publishPost = useListPostActivity((state) => state.publishPost);
 	const account = useAuthStore((state) => state.account);
 	const data = [
 		{ label: 'Post---Neighborhodd', value: '2' },
@@ -51,13 +60,6 @@ const DefaultForm = () => {
 	const [value, setValue] = useState<string>();
 	const [isFocus, setIsFocus] = useState(false);
 
-	const whoPublish = (): TypePostSchema => {
-		if (account?.status === 'property') {
-			return name == 'Building' ? 'threadBuilding' : 'Thread';
-		} else {
-			return 'supervisorThread';
-		}
-	};
 	const pickGallery = async () => {
 		try {
 			const result = await ImagePicker.launchImageLibraryAsync({
@@ -128,15 +130,15 @@ const DefaultForm = () => {
 			showToast("Vous n'avez pas saisi de texte");
 			return;
 		}
-		whoPublish();
-		publishPost(
-			{ accountId: account?._id, type: type, files: prepareImage, value: text },
-			whoPublish()
-		);
+		publishPost({
+			activityId,
+			data: { accountId: account?._id, type: type, files: prepareImage, value: text },
+		});
 		setPrepareImage([]);
 		setImages([]);
 		setText('');
-		navigation.goBack();
+		showModal(-1);
+		modalRef.current?.close();
 	}
 
 	return (
@@ -311,7 +313,10 @@ const DefaultForm = () => {
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={{ paddingVertical: verticalScale(10), marginHorizontal: horizontalScale(10) }}
-					onPress={() => {}}
+					onPress={() => {
+						showModal(-1);
+						modalRef.current?.close();
+					}}
 				>
 					<TextRegular
 						style={{
@@ -328,4 +333,4 @@ const DefaultForm = () => {
 	);
 };
 
-export default DefaultForm;
+export default DefaultFormActivity;

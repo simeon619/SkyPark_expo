@@ -69,6 +69,7 @@
     "react-native-skeleton-placeholder": "^5.2.4",
     "react-native-svg": "13.9.0",
     "react-native-tab-view": "^3.5.1",
+    "react-native-toast-notifications": "^3.4.0",
     "react-native-toggle-element": "^2.0.1",
     "react-native-web": "~0.19.6",
     "sim-bottom-tab": "^0.0.1",

@@ -30,7 +30,7 @@ const InputWithTag = ({
 	sizeInputWidth,
 }: {
 	text: string;
-	setText: React.Dispatch<React.SetStateAction<string>>;
+	setText: (value: string) => void;
 	offset: number;
 	sizeInputWidth: NumberBetweenZeroAndOne;
 }) => {
@@ -38,7 +38,6 @@ const InputWithTag = ({
 	const [heightInput, setHeightInput] = useState(40);
 	const refInput = useRef<TextInput>(null);
 	const [correspondance, setCorrespondance] = useState('');
-	const [mention, setMention] = useState('');
 	const { IconName } = useTypeForm((state) => state);
 	const { primaryColourLight } = useToggleStore((state) => state);
 	const { listAccount, getListAccount } = useListUserStore();
@@ -70,17 +69,19 @@ const InputWithTag = ({
 			}), // size.value > 0 ? 1 : 0,
 		};
 	});
-	useMemo(() => {
-		const regexDernierMotArobase = /@\w+\b/g;
+
+	const replaceWithMention = (mention: string) => {
+		const regexDernierMotArobase = /@\w+\b/gim;
 		const motMatches = text.match(regexDernierMotArobase);
 		if (motMatches) {
 			const lastWord = motMatches.pop()!;
-			const newtext = text.replace(lastWord, mention + ' ');
+			const regex = new RegExp(`(${lastWord})(?!.*\\1)`, 'si');
+			const newtext = text.replace(regex, mention + ' ');
 			setText(newtext);
 		}
-	}, [mention]);
+	};
 	useEffect(() => {
-		const regex = /\s@[\w-]*\S$/i;
+		const regex = /\s@[\w-]*\S$/gi;
 		if (!startAnimation) {
 			return;
 		}
@@ -106,9 +107,8 @@ const InputWithTag = ({
 	}, []);
 
 	const onTextChange = (value: string) => {
-		setText(() => {
-			return value.startsWith('@') ? ' ' + value.trimStart() : value;
-		});
+		let ph = value.startsWith('@') ? ' ' + value.trimStart() : value;
+		setText(ph);
 	};
 
 	return (
@@ -159,7 +159,7 @@ const InputWithTag = ({
 						return (
 							<TouchableOpacity
 								key={i}
-								onPress={() => setMention(`@${acc?.account.userTarg}`)}
+								onPress={() => replaceWithMention(`@${acc?.account.userTarg}`)}
 								style={{
 									flexDirection: 'row',
 									alignItems: 'center',

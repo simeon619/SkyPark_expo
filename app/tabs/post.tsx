@@ -17,15 +17,15 @@ import ActionButtonForm from '../../components/utilis/ActionButtonForm';
 import ForumForm from '../../components/form/forumForm';
 
 import InputWithTag from '../../components/InputWithTag';
+import { useInputPost } from '../../managementState/client/postInput';
 
 const PostTabScreen = () => {
 	const colorScheme = useColorScheme();
 
 	const { blurSurvey } = useBlurSurvey((state) => state);
+	const { setText, text } = useInputPost();
 
-	const [text, setText] = useState('');
-
-	const { profile } = useAuthStore((state) => state);
+	const profile = useAuthStore((state) => state.profile);
 	return (
 		<SafeAreaView
 			style={{
@@ -55,17 +55,18 @@ const PostTabScreen = () => {
 					}}
 				>
 					<TouchableOpacity
+						onPress={() => {}}
 						style={{
 							alignSelf: 'center',
 						}}
 					>
 						<ImageProfile image={profile?.imgProfile[0]?.url} size={SMALL_PIC_USER + 10} />
 					</TouchableOpacity>
-					<InputWithTag key={1} offset={65} text={text} sizeInputWidth={0.7} setText={setText} />
+					<InputWithTag offset={65} sizeInputWidth={0.7} setText={setText} text={text} />
 				</View>
-				<DefaultForm text={text} setText={setText} />
-				<SurveyForm text={text} setText={setText} />
-				<ForumForm text={text} setText={setText} />
+				<DefaultForm />
+				<SurveyForm />
+				<ForumForm />
 			</View>
 		</SafeAreaView>
 	);

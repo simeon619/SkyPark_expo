@@ -8,7 +8,7 @@ import {
 	TouchableOpacity,
 	View as ViewNatif,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+
 //@ts-ignore
 import InsetShadow from 'react-native-inset-shadow';
 import { MagicModalPortal, magicModal } from 'react-native-magic-modal';
@@ -20,18 +20,27 @@ import useToggleStore, {
 	useTypeForm,
 } from '../../managementState/client/preference';
 import { useAuthStore } from '../../managementState/server/auth';
-import { TypePostSchema, useThreadPostStore } from '../../managementState/server/post/postThread';
 import { TextLight, TextRegular } from '../StyledText';
 import { View } from '../Themed';
 import { useInputPost } from '../../managementState/client/postInput';
+import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { useListPostActivity } from '../../managementState/server/activityUser/groupActivity';
 import { showToast } from '../../Utilis/functions/utlisSquery';
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
-const SurveyForm = () => {
-	const { primaryColour, primaryColourLight, name } = useToggleStore((state) => state);
+const SurveyFormActivity = ({
+	activityId,
+	showModal,
+	modalRef,
+}: {
+	activityId: string;
+	showModal: React.Dispatch<React.SetStateAction<number>>;
+	modalRef: React.RefObject<BottomSheetMethods>;
+}) => {
+	const { primaryColour, primaryColourLight } = useToggleStore((state) => state);
 	const { setBlurSurvey } = useBlurSurvey((state) => state);
 	const { IconName } = useTypeForm((state) => state);
-	//@ts-ignore
-	const { publishPost } = useThreadPostStore((state) => state);
+	const publishPost = useListPostActivity((state) => state.publishPost);
 	const { account } = useAuthStore((state) => state);
 	const { text, setText } = useInputPost();
 
@@ -41,25 +50,11 @@ const SurveyForm = () => {
 			opacity: withTiming(IconName === 'Vote' ? 1 : 0),
 		};
 	}, [IconName]);
+	console.log('🚀 ~ IconName:', IconName);
 
 	const { daysSurvey, setDaysSurvey } = useDaysSurvey();
-	// const timeoutRef = useRef<NodeJS.Timeout>();
 	const [options, setOptions] = useState<string[]>(['', '']);
 	const nbrOptions = 5;
-	// useEffect(() => {
-	//   if (options.length === 0) {
-	//     timeoutRef.current = setTimeout(() => {
-	//       setOptions(['', '']);
-	//     });
-	//   }
-
-	//   return () => {
-	//     if (timeoutRef.current) {
-	//       clearTimeout(timeoutRef.current);
-	//     }
-	//   };
-	// }, [options]);
-	const navigation = useNavigation();
 
 	const handleOptionChange = (index: number, value: string) => {
 		const newOptions = [...options];
@@ -81,20 +76,12 @@ const SurveyForm = () => {
 		const newOptions = options.filter((_, i) => i !== index);
 		setOptions(newOptions);
 	};
-	const whoPublish = (): TypePostSchema => {
-		if (account?.status === 'property') {
-			return name == 'Building' ? 'threadBuilding' : 'Thread';
-		} else {
-			return 'supervisorThread';
-		}
-	};
 
 	const handleSubmit = () => {
 		if (!text) {
 			showToast("Vous n'avez pas saisi de question");
 			return;
 		}
-
 		for (let index = 0; index < options.length; index++) {
 			const option = options[index];
 			if (option.length <= 1) {
@@ -107,8 +94,9 @@ const SurveyForm = () => {
 				label: option,
 			};
 		});
-		publishPost(
-			{
+		publishPost({
+			activityId,
+			data: {
 				accountId: account?._id,
 				type: '3',
 				value: text,
@@ -117,10 +105,10 @@ const SurveyForm = () => {
 					options: labels,
 				},
 			},
-			whoPublish()
-		);
+		});
 		setText('');
-		navigation.goBack();
+		showModal(-1);
+		modalRef.current?.close();
 	};
 
 	const TimePickerSurvey = () => {
@@ -215,7 +203,7 @@ const SurveyForm = () => {
 								) : (
 									<View style={{ padding: 0 }} />
 								)}
-								<TextInput
+								<BottomSheetTextInput
 									key={index}
 									autoFocus={index >= 2 ? true : false}
 									maxLength={150}
@@ -324,7 +312,12 @@ const SurveyForm = () => {
 							Valider
 						</TextRegular>
 					</TouchableOpacity>
-					<TouchableOpacity onPress={() => {}}>
+					<TouchableOpacity
+						onPress={() => {
+							showModal(-1);
+							modalRef.current?.close();
+						}}
+					>
 						<TextRegular style={{ color: 'grey', fontSize: moderateScale(15) }}>
 							Annuler
 						</TextRegular>
@@ -336,4 +329,4 @@ const SurveyForm = () => {
 	);
 };
 
-export default SurveyForm;
+export default SurveyFormActivity;
